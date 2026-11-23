@@ -92,7 +92,7 @@ const MIGRATIONS = [
   },
 ];
 
-async function runMigrations({ log = console.log } = {}) {
+async function runMigrations({ log = (m) => require('./logger').logger.info(m) } = {}) {
   for (const m of MIGRATIONS) {
     const n = await m.up();
     if (n) log(`✓ Migration ${m.name}: ${n} bản ghi`);

@@ -1,4 +1,5 @@
 // Ghi nhật ký bảo mật. Không bao giờ làm hỏng request chính và không bao giờ ghi bí mật.
+const { logger } = require('../logger');
 const { AuditLog } = require('../models');
 const { maskEmail } = require('../utils/mask');
 
@@ -40,9 +41,10 @@ async function audit(req, action, { actor, target, meta } = {}) {
       ip: String(req.ip || '').slice(0, 64),
       userAgent: String(req.get?.('user-agent') || '').slice(0, 200),
       meta: cleanMeta(meta),
+      requestId: req.id ? String(req.id).slice(0, 64) : undefined, // nối với log truy cập
     });
   } catch (e) {
-    console.error('[audit] không ghi được nhật ký:', action, e.message);
+    logger.error({ err: e, action }, 'Không ghi được nhật ký bảo mật');
   }
 }
 

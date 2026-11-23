@@ -321,7 +321,11 @@ function loadTexts() {
 /** Xóa sạch mọi bản ghi demo; tính lại điểm đánh giá khóa học. Trả về số bản ghi đã xóa theo model. */
 async function unseedDemo() {
   const counts = {};
-  for (const name of DEMO_MODELS) counts[name] = (await M[name].deleteMany({ isDemo: true })).deletedCount;
+  for (const name of DEMO_MODELS) {
+    // Nhật ký bảo mật chặn xóa qua Mongoose (chỉ ghi thêm) → xóa bản ghi DEMO bằng driver, có chủ đích
+    const target = name === 'AuditLog' ? M.AuditLog.collection : M[name];
+    counts[name] = (await target.deleteMany({ isDemo: true })).deletedCount;
+  }
   await refreshRatings();
   return counts;
 }

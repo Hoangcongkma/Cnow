@@ -1,4 +1,5 @@
 // Tạo thông báo cho người dùng. Không bao giờ làm hỏng thao tác chính nếu ghi thông báo lỗi.
+const { logger } = require('../logger');
 const { Notification, Enrollment } = require('../models');
 
 const short = (s, n) => (String(s).length > n ? String(s).slice(0, n - 1) + '…' : String(s));
@@ -13,7 +14,7 @@ async function notify(userIds, { type, text, link }) {
     );
     return ids.length;
   } catch (e) {
-    console.error('[notify] không tạo được thông báo:', type, e.message);
+    logger.error({ err: e, type }, 'Không tạo được thông báo');
     return 0;
   }
 }

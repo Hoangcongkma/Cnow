@@ -127,7 +127,7 @@ router.post('/pay', paymentLimiter, validate(S.pay.create), async (req, res) => 
     await order.save();
     res.redirect(303, pp.approveUrl); // chuyển sang PayPal
   } catch (err) {
-    console.error('[paypal:create]', err.message);
+    req.log.error({ err }, 'paypal:create thất bại');
     await Order.updateOne({ _id: order._id }, { status: 'FAILED', failureReason: 'create_failed' });
     await coupons.release(order);
     res.status(502).render('pay/result', {
@@ -167,7 +167,7 @@ router.get('/pay/success', validate(S.pay.paypalReturn), async (req, res) => {
     await grant(order);
     res.render('pay/result', { title: 'Thanh toán thành công', ok: true, course: order.course, order });
   } catch (err) {
-    console.error('[paypal:capture]', err.message);
+    req.log.error({ err }, 'paypal:capture thất bại');
     await Order.updateOne({ _id: order._id, status: 'CREATED' }, { status: 'FAILED', failureReason: 'capture_failed' });
     await coupons.release(order);
     res.render('pay/result', {

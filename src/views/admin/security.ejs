@@ -1,0 +1,88 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="section-head">
+      <h1>Giám sát bảo mật</h1>
+      <a class="btn btn-ghost btn-sm" href="/admin/audit">Xem nhật ký đầy đủ →</a>
+    </div>
+    <p class="muted small">24 giờ gần nhất (từ <%= s.since.toLocaleString('vi-VN') %>). Số liệu tổng hợp từ nhật ký bảo mật – nhật ký chỉ ghi thêm, không sửa / xóa được.</p>
+
+    <div class="kpis">
+      <div class="kpi"><span>Lần xác thực thất bại</span><b><%= s.failures %></b></div>
+      <div class="kpi"><span>Bị chặn vì sai nhiều</span><b><%= (s.counts['login.rate_limited'] || 0) + (s.counts.ADMIN_PIN_LOCKED || 0) %></b></div>
+      <div class="kpi"><span>Đang bị khóa (tài khoản / IP)</span><b><%= s.locks.length %></b></div>
+      <div class="kpi"><span>Tài khoản bị khóa (vi phạm)</span><b><%= s.lockedCount %></b></div>
+    </div>
+
+    <h2>IP có hoạt động thất bại</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>IP</th><th>Lần thất bại</th><th>Số tài khoản bị thử</th><th>Gần nhất</th><th>Đánh giá</th></tr></thead>
+        <tbody>
+          <% if (!s.topIps.length) { %><tr><td colspan="5" class="muted">Không có.</td></tr><% } %>
+          <% s.topIps.forEach(x => { %>
+            <tr>
+              <td><code><%= x.ip %></code> <a class="small" href="/admin/audit?ip=<%= encodeURIComponent(x.ip) %>">nhật ký</a></td>
+              <td><%= x.fails %></td>
+              <td><%= x.accounts %></td>
+              <td><%= x.last.toLocaleString('vi-VN') %></td>
+              <td><% if (x.suspicious) { %><span class="status st-FAILED">Đáng ngờ</span><% } else { %><span class="muted small">Bình thường</span><% } %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="charts">
+      <div class="chart-card">
+        <h2>Tài khoản bị nhập sai nhiều nhất</h2>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Tên đăng nhập / email</th><th>Lần sai</th><th>Số IP</th></tr></thead>
+            <tbody>
+              <% if (!s.targets.length) { %><tr><td colspan="3" class="muted">Không có.</td></tr><% } %>
+              <% s.targets.forEach(x => { %><tr><td><%= x.login %></td><td><%= x.fails %></td><td><%= x.ips %></td></tr><% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h2>Đang bị khóa đăng nhập</h2>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Loại</th><th>Đối tượng</th><th>Lần sai</th><th>Mở khóa lúc</th></tr></thead>
+            <tbody>
+              <% if (!s.locks.length) { %><tr><td colspan="4" class="muted">Không có.</td></tr><% } %>
+              <% s.locks.forEach(l => { %><tr><td><%= l.kind %></td><td><code><%= l.key %></code></td><td><%= l.fails %></td><td><%= l.until.toLocaleString('vi-VN') %></td></tr><% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <h2>Thất bại theo giờ</h2>
+    <% const max = Math.max(1, ...s.hourly.map(h => h.n)); %>
+    <ul class="hour-bars">
+      <% s.hourly.forEach(h => { %><li><span class="small mono"><%= h._id %></span><progress max="<%= max %>" value="<%= h.n %>" aria-label="<%= h._id %>: <%= h.n %> lần"></progress><span class="small"><%= h.n %></span></li><% }) %>
+      <% if (!s.hourly.length) { %><li class="muted small">Không có lần thất bại nào.</li><% } %>
+    </ul>
+
+    <h2>Sự kiện bảo mật khác (24 giờ)</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Sự kiện</th><th>Số lần</th></tr></thead>
+        <tbody>
+          <% Object.entries(labels).forEach(([k, v]) => { %><tr><td><a href="/admin/audit?action=<%= encodeURIComponent(k) %>"><%= v %></a></td><td><%= s.counts[k] || 0 %></td></tr><% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Tài khoản bị khóa gần đây</h2>
+    <ul>
+      <% s.lockedUsers.forEach(u => { %><li><%= u.name %><%- include('../partials/demo-label', { u }) %> <span class="muted small">@<%= u.username %> · <%= u.updatedAt.toLocaleString('vi-VN') %></span></li><% }) %>
+      <% if (!s.lockedUsers.length) { %><li class="muted small">Không có.</li><% } %>
+    </ul>
+  </div>
+</section>
+<%- include('../partials/footer') %>

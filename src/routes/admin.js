@@ -23,12 +23,18 @@ const { parseQuizForm } = require('../services/quiz');
 const { audit } = require('../services/audit');
 const { notifyNewLessons, notify } = require('../services/notify');
 const listing = require('../services/listing');
+const { securitySummary } = require('../services/security-monitor');
 const exportLimiter = require('../security/rate-limit').limits.export();
 // Quay lại đúng trang danh sách (giữ bộ lọc) sau khi thao tác – chỉ chấp nhận đường dẫn nội bộ /admin/…
 const safeBack = (v, dflt) => safeRedirect(v, dflt, '/admin/');
 const { safeRedirect } = require('../utils/security');
 const orderLabels = require('../services/order-labels');
 const { sendCsv } = require('../services/csv');
+/** Xuất CSV + ghi nhật ký bảo mật (ai xuất, loại dữ liệu, số dòng) – xuất dữ liệu cá nhân hàng loạt phải để lại dấu vết. */
+async function auditedCsv(req, res, filename, headers, rows) {
+  await audit(req, 'export.csv', { meta: { format: String(filename).replace(/-\d{4}-\d{2}-\d{2}$/, ''), rows: rows.length } });
+  sendCsv(res, filename, headers, rows);
+}
 const { summarize } = require('../services/progress');
 
 const canEdit = (user, course) => user.role === 'admin' || String(course.author) === String(user.id);
@@ -447,7 +453,8 @@ router.post('/courses/:id/delete', validate(S.admin.courseAction), async (req, r
   if (await Enrollment.exists({ course: id })) {
     req.session.flash = { type: 'warn', text: 'Khóa học đã có học viên – hãy ẩn (bỏ “Xuất bản”) thay vì xóa.' };
   } else {
-    await Course.deleteOne({ _id: id }).catch(() => null);
+    const removed = await Course.findOneAndDelete({ _id: id }).catch(() => null);
+    if (removed) await audit(req, 'course.delete', { target: removed.author, meta: { courseId: id, courseTitle: removed.title } });
     await Comment.deleteMany({ course: id }).catch(() => null);
     await CourseComment.deleteMany({ course: id }).catch(() => null);
     await Post.deleteMany({ course: id }).catch(() => null);
@@ -636,7 +643,8 @@ router.get('/export/users.csv', exportLimiter, validate(S.admin.users), async (r
     .limit(50000)
     .select('name username email role locked mfaEnabled isDemo createdAt')
     .lean();
-  sendCsv(
+  await auditedCsv(
+    req,
     res,
     `cnow-thanh-vien-${stamp()}`,
     ['Họ tên', 'Tên đăng nhập', 'Email', 'Vai trò', 'Trạng thái', '2FA', 'Ngày tạo', 'Dữ liệu mẫu'],
@@ -681,7 +689,8 @@ const stamp = () => ymd(new Date());
 router.get('/export/orders.csv', exportLimiter, validate(S.admin.orders), async (req, res) => {
   const { filter, sort } = await ordersQuery(req); // cùng bộ lọc với trang /admin/orders
   const orders = await Order.find(filter).sort(sort).limit(50000).populate('user', 'name username email').populate('course', 'title');
-  sendCsv(
+  await auditedCsv(
+    req,
     res,
     `cnow-don-hang-${stamp()}`,
     [
@@ -738,7 +747,8 @@ router.get('/export/learners.csv', exportLimiter, validate(S.admin.learners), as
       const s = summarize(e.course, pmap.get(`${e.user._id}:${e.course._id}`));
       return [e.user.name, e.user.username, e.user.email, e.course.title, vnTime(e.createdAt), s.pct, `${s.completed}/${s.total}`];
     });
-  sendCsv(
+  await auditedCsv(
+    req,
     res,
     `cnow-nguoi-hoc-${stamp()}`,
     ['Học viên', 'Tên đăng nhập', 'Email', 'Khóa học', 'Ngày ghi danh', 'Tiến độ (%)', 'Bài đã học'],
@@ -790,7 +800,8 @@ router.get('/export/revenue.csv', exportLimiter, validate(S.admin.revenueCsv), a
     rows.reduce((t, r) => t + r[4], 0),
     Math.round(rows.reduce((t, r) => t + r[5], 0) * 100) / 100,
   ]);
-  sendCsv(
+  await auditedCsv(
+    req,
     res,
     `cnow-doanh-thu-${ymd(from)}-${ymd(new Date(+to - 1))}`,
     ['Khóa học', 'Tác giả', 'Giá (USD)', 'Ghi danh mới', 'Đơn thành công', 'Doanh thu (USD)'],
@@ -957,7 +968,9 @@ router.get('/qa', validate(S.admin.moderation), async (req, res) => {
 });
 
 router.post('/qa/:id', validate(S.admin.moderate), async (req, res) => {
-  await Post.updateOne({ _id: req.params.id }, { hidden: req.body.hidden === '1' }).catch(() => null);
+  const post = await Post.findOneAndUpdate({ _id: req.params.id }, { hidden: req.body.hidden === '1' }).catch(() => null);
+  if (post)
+    await audit(req, 'content.moderate', { target: post.user, meta: { reason: req.body.hidden === '1' ? 'hide_post' : 'show_post' } });
   res.redirect(safeBack(req.body.back, '/admin/qa'));
 });
 
@@ -976,8 +989,31 @@ router.get('/comments', validate(S.admin.moderation), async (req, res) => {
 });
 
 router.post('/comments/:id', validate(S.admin.moderate), async (req, res) => {
-  await CourseComment.updateOne({ _id: req.params.id }, { hidden: req.body.hidden === '1' }).catch(() => null);
+  const cm = await CourseComment.findOneAndUpdate({ _id: req.params.id }, { hidden: req.body.hidden === '1' }).catch(() => null);
+  if (cm)
+    await audit(req, 'content.moderate', { target: cm.user, meta: { reason: req.body.hidden === '1' ? 'hide_comment' : 'show_comment' } });
   res.redirect(safeBack(req.body.back, '/admin/comments'));
+});
+
+// ---------- Giám sát bảo mật 24 giờ (admin) ----------
+router.get('/security', validate(S.none), async (req, res) => {
+  const s = await securitySummary();
+  const labels = Object.fromEntries(
+    [
+      'login.success',
+      'login.new_ip',
+      'session.revoke',
+      'session.expired',
+      'password.change',
+      'user.role_change',
+      'user.lock',
+      'order.refund',
+      'export.csv',
+      'data.export',
+      'account.delete',
+    ].map((k) => [k, AUDIT_ACTIONS[k]]),
+  );
+  res.set('Cache-Control', 'no-store').render('admin/security', { title: 'Giám sát bảo mật', s, labels });
 });
 
 function humanize(err) {

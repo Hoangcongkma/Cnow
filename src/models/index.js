@@ -332,6 +332,8 @@ const AUDIT_ACTIONS = {
   'order.refund': 'Hoàn tiền',
   'course.approve': 'Duyệt khóa học',
   'course.reject': 'Từ chối khóa học',
+  'course.delete': 'Xóa khóa học',
+  'content.moderate': 'Ẩn / hiện nội dung (kiểm duyệt)',
   'coupon.create': 'Tạo mã giảm giá',
   'coupon.update': 'Bật/tắt mã giảm giá',
   'coupon.delete': 'Xóa mã giảm giá',
@@ -344,6 +346,7 @@ const auditLogSchema = new Schema(
     ip: { type: String, maxlength: 64 },
     userAgent: { type: String, maxlength: 200 },
     meta: { type: Schema.Types.Mixed }, // chỉ các khóa trong whitelist của services/audit.js
+    requestId: { type: String, maxlength: 64 }, // = X-Request-Id của request gây ra sự kiện
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
@@ -351,6 +354,19 @@ auditLogSchema.index({ createdAt: -1 });
 auditLogSchema.index({ action: 1, createdAt: -1 });
 auditLogSchema.index({ actor: 1, createdAt: -1 });
 auditLogSchema.index({ target: 1, createdAt: -1 });
+// Nhật ký bảo mật CHỈ GHI THÊM: mọi thao tác sửa/xóa qua Mongoose đều bị từ chối (không route/giao diện nào sửa được).
+// Bảo trì có chủ đích (vd. xóa dữ liệu demo) phải dùng thẳng collection driver và ghi rõ lý do trong script.
+const auditImmutable = () => {
+  throw new Error('Nhật ký bảo mật không được sửa hoặc xóa');
+};
+auditLogSchema.pre(
+  ['updateOne', 'updateMany', 'findOneAndUpdate', 'replaceOne', 'findOneAndReplace', 'deleteOne', 'deleteMany', 'findOneAndDelete'],
+  auditImmutable,
+);
+auditLogSchema.pre('save', function auditNoEdit() {
+  if (!this.isNew) auditImmutable();
+});
+auditLogSchema.pre('deleteOne', { document: true, query: false }, auditImmutable);
 
 // ---------- Bình luận khóa học (CŨ – chỉ giữ để migration sang Hỏi – Đáp, không còn dùng) ----------
 const commentSchema = new Schema(

@@ -4,7 +4,8 @@ const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const helmet = require('helmet');
-const morgan = require('morgan');
+const pinoHttp = require('pino-http');
+const { logger, httpSerializers } = require('./logger');
 const mongoose = require('mongoose');
 const config = require('./config');
 const { loadUser } = require('./middlewares/auth');
@@ -21,6 +22,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.disable('x-powered-by');
 app.locals.asset = asset; // có sẵn cả khi lỗi xảy ra trước middleware gán res.locals
 app.locals.cspNonce = ''; // dự phòng khi trang lỗi render trước middleware tạo nonce
+app.locals.requestId = '';
 app.locals.demoMode = config.demo; // dải thông báo "website demo" trên mọi trang (kể cả trang lỗi)
 if (config.trustProxy) app.set('trust proxy', 1); // Heroku/Render/Nginx đứng trước
 
@@ -67,17 +69,29 @@ app.use((req, res, next) => {
   );
   next();
 });
-// Log truy cập gọn, không chứa bí mật: production chỉ ghi đường dẫn (bỏ toàn bộ chuỗi truy vấn), không ghi
-// cookie/referrer/user-agent; dev bỏ query của URL thanh toán. Không log /healthz (nền tảng gọi liên tục).
-morgan.token('safe-url', (req) => (config.isProd || req.originalUrl.startsWith('/pay/') ? req.originalUrl.split('?')[0] : req.originalUrl));
+// Log truy cập có cấu trúc (pino) + requestId cho mỗi request (header X-Request-Id, hiện trên trang lỗi, ghi vào audit log).
+// Chỉ ghi phương thức, đường dẫn (không query), mã trạng thái, thời gian; không cookie/body/header nhạy cảm. Bỏ qua /healthz.
+const REQUEST_ID = /^[A-Za-z0-9._-]{8,64}$/;
 app.use(
-  morgan(
-    config.isProd
-      ? ':remote-addr :method :safe-url :status :res[content-length] - :response-time ms'
-      : ':method :safe-url :status :response-time ms - :res[content-length]',
-    { skip: (req) => req.path === '/healthz' },
-  ),
+  pinoHttp({
+    logger,
+    serializers: httpSerializers, // chỉ id, phương thức, đường dẫn (không query/header), IP, mã trạng thái
+    genReqId: (req, res) => {
+      const incoming = req.headers['x-request-id'];
+      const id = typeof incoming === 'string' && REQUEST_ID.test(incoming) ? incoming : crypto.randomUUID();
+      res.setHeader('X-Request-Id', id);
+      return id;
+    },
+    autoLogging: { ignore: (req) => req.url === '/healthz' },
+    customLogLevel: (req, res, err) => (err || res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info'),
+    customSuccessMessage: (req, res) => `${req.method} ${String(req.originalUrl || req.url).split('?')[0]} ${res.statusCode}`,
+    customErrorMessage: (req, res) => `${req.method} ${String(req.originalUrl || req.url).split('?')[0]} ${res.statusCode}`,
+  }),
 );
+app.use((req, res, next) => {
+  res.locals.requestId = req.id;
+  next();
+});
 app.use(require('./routes/health')); // GET /healthz – trước phiên và giới hạn tần suất
 // Request xử lý quá 25 giây (vd. CSDL treo) → trả 503 thay vì giữ kết nối mãi
 app.use((req, res, next) => {
@@ -197,7 +211,7 @@ const CLIENT_ERRORS = {
 app.use((err, req, res, next) => {
   const known = CLIENT_ERRORS[err.type] || (err instanceof URIError ? [400, 'Đường dẫn không hợp lệ.'] : null);
   const status = known ? known[0] : 500;
-  if (status >= 500) console.error(err);
+  if (status >= 500) (req.log || logger).error({ err }, 'Lỗi xử lý request');
   if (res.headersSent) return res.end();
   res.status(status);
   // Lỗi xảy ra trước khi có phiên/CSRF (vd. body hỏng) → chưa đủ biến để render layout → trả văn bản thuần

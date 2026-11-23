@@ -2696,3 +2696,20 @@ body {
 .prose-page h2 {
   margin-top: 28px;
 }
+
+/* Giám sát bảo mật: số lần thất bại theo giờ */
+.hour-bars {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.hour-bars li {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr 2.5rem;
+  gap: 8px;
+  align-items: center;
+}
+.hour-bars progress {
+  width: 100%;
+}
