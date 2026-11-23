@@ -6,7 +6,9 @@
 // Kiểm tra nghiệp vụ (tên đăng nhập hợp lệ, mật khẩu đủ mạnh…) vẫn nằm trong route để trả thông báo thân thiện.
 const { z } = require('zod');
 
+/** Chuỗi tối đa `max` ký tự. */
 const str = (max) => z.string().max(max);
+/** Chuỗi tùy chọn tối đa `max` ký tự. */
 const optStr = (max) => str(max).optional();
 const oid = z.string().regex(/^[a-f0-9]{24}$/i);
 const slug = z.string().regex(/^[a-z0-9-]{1,120}$/);
@@ -15,6 +17,7 @@ const flag = z.enum(['0', '1']).optional();
 const list = (max, items = 50) => z.union([str(max), z.array(str(max)).max(items)]).optional();
 /** Tham số query dễ dãi: sai thì coi như không có. */
 const q = (schema) => schema.optional().catch(undefined);
+/** Tham số query dạng chuỗi tối đa `max` ký tự (dễ dãi: sai thì bỏ qua). */
 const qs = (max) => q(str(max));
 
 /** Gán đè thuộc tính chỉ đọc của Express 5 (req.query là getter). */

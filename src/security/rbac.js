@@ -145,4 +145,4 @@ function authorize(req, res, next) {
   return res.status(403).render('error', { title: 'Không có quyền truy cập', message: 'Tài khoản của bạn không có quyền vào trang này.' });
 }
 
-module.exports = { RULES, LEVELS, ruleFor, roleOf, authorize };
+module.exports = { RULES, LEVELS, ruleFor, authorize };

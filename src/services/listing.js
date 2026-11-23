@@ -3,10 +3,13 @@
 const { User } = require('../models');
 
 const PER_PAGE = 25;
+/** Một giá trị query dạng chuỗi (mảng → phần tử đầu, thiếu → ""). */
 const one = (v) => String(Array.isArray(v) ? v[0] : (v ?? '')).trim();
-const { escapeRegex: escapeRx, searchRegex } = require('../utils/security');
+const { searchRegex } = require('../utils/security');
 
+/** Regex tìm kiếm không phân biệt hoa thường, đã escape (tối đa 80 ký tự). */
 const textRx = (s) => searchRegex(s, 80);
+/** Giá trị query thuộc whitelist `allowed`, nếu không trả về `dflt`. */
 const pick = (v, allowed, dflt = '') => (allowed.includes(one(v)) ? one(v) : dflt);
 
 /** id người dùng khớp tên / email / tên đăng nhập (tìm kiếm ở trang đơn hàng, người học). */
@@ -44,4 +47,4 @@ const queryString =
     return s ? `?${s}` : '?';
   };
 
-module.exports = { PER_PAGE, one, escapeRx, textRx, pick, userIdsMatching, paginate, queryString };
+module.exports = { PER_PAGE, one, textRx, pick, userIdsMatching, paginate, queryString };

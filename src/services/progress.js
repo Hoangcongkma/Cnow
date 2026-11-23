@@ -1,4 +1,7 @@
-// Tính tiến độ học từ Progress (chỉ đếm bài còn tồn tại trong khóa học hiện tại)
+/**
+ * Tính tiến độ học từ Progress (chỉ đếm bài còn tồn tại trong khóa học hiện tại).
+ * @returns {{ done: Set<string>, completed: number, total: number, pct: number, resume: number, finished: boolean }}
+ */
 function summarize(course, progress) {
   const lessons = course.lessons;
   const done = new Set((progress?.completedLessons || []).map(String));

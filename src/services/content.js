@@ -15,6 +15,7 @@ const ALLOWED_LINK = [
   /^https:\/\/(www\.)?php\.net\//,
 ];
 
+/** Slug các khóa học có thư mục bài trong content/ (chỉ tên dạng a-z0-9-, nên _checks bị bỏ qua). */
 const listCourses = (root = ROOT) =>
   fs.existsSync(root)
     ? fs
@@ -24,6 +25,7 @@ const listCourses = (root = ROOT) =>
         .sort()
     : [];
 
+/** Tên các file bài (NN-ten-bai.md) của một khóa, theo thứ tự. */
 const listLessonFiles = (slug, root = ROOT) =>
   fs
     .readdirSync(path.join(root, slug))
@@ -62,7 +64,7 @@ function codeBlocks(body) {
   return blocks;
 }
 
-// Liên kết trong phần văn bản (bỏ qua URL nằm trong khối code / code trong dòng, ví dụ http://localhost:3000)
+/** Liên kết trong phần văn bản (bỏ qua URL nằm trong khối code / code trong dòng, ví dụ http://localhost:3000). */
 const links = (body) =>
   [
     ...String(body)
@@ -71,14 +73,8 @@ const links = (body) =>
       .matchAll(/https?:\/\/[^\s)<>"'`]+/g),
   ].map((x) => x[0].replace(/[.,;:]+$/, ''));
 
-/** Đọc + kiểm tra một bài. Trả về { lesson, errors, warnings, meta }. */
-function loadLessonFile(file) {
-  const src = fs.readFileSync(file, 'utf8');
-  const { data, body } = parseFrontmatter(src);
-  const errors = [];
-  const warnings = [];
-  const name = path.basename(file);
-  if (!FILE_RE.test(name)) errors.push('tên file phải dạng 01-ten-bai.md');
+/** Kiểm tra frontmatter (title, minutes, preview, objectives, quiz). */
+function checkFrontmatter(data, errors) {
   if (!data.title || typeof data.title !== 'string') errors.push('thiếu title');
   if (!(Number(data.minutes) > 0)) errors.push('minutes phải là số > 0');
   if (typeof data.preview !== 'boolean') errors.push('preview phải là true/false');
@@ -92,6 +88,11 @@ function loadLessonFile(file) {
     if (!(Number.isInteger(q?.answer) && q.answer >= 0 && q.answer <= 3)) errors.push(`quiz câu ${i + 1}: answer phải là 0–3`);
     if (!q?.explain) errors.push(`quiz câu ${i + 1}: thiếu explain`);
   });
+  return { objectives, quiz };
+}
+
+/** Kiểm tra thân bài: các mục bắt buộc, lời giải ẩn, liên kết chính thức. */
+function checkBody(body, errors) {
   const headings = String(body)
     .split('\n')
     .filter((line) => line.startsWith('## '));
@@ -99,6 +100,21 @@ function loadLessonFile(file) {
     if (!headings.some((line) => line.toLowerCase().includes(h.toLowerCase()))) errors.push(`thiếu mục "## ${h}"`);
   if (!/<details>/.test(body)) errors.push('bài tập cần lời giải ẩn trong <details>');
   for (const l of links(body)) if (!ALLOWED_LINK.some((re) => re.test(l))) errors.push(`liên kết không thuộc tài liệu chính thức: ${l}`);
+}
+
+/**
+ * Đọc + kiểm tra một bài trong content/.
+ * @param {string} file đường dẫn file .md
+ * @returns {{ lesson: object, errors: string[], warnings: string[], meta: object }}
+ */
+function loadLessonFile(file) {
+  const { data, body } = parseFrontmatter(fs.readFileSync(file, 'utf8'));
+  const errors = [];
+  const warnings = [];
+  const name = path.basename(file);
+  if (!FILE_RE.test(name)) errors.push('tên file phải dạng 01-ten-bai.md');
+  const { objectives, quiz } = checkFrontmatter(data, errors);
+  checkBody(body, errors);
   const words = wordCount(body);
   if (words < 800 || words > 1500) warnings.push(`độ dài ${words} từ (yêu cầu 800–1500)`);
 
@@ -125,4 +141,4 @@ function loadLessonFile(file) {
   };
 }
 
-module.exports = { ROOT, ALLOWED_LINK, listCourses, listLessonFiles, loadLessonFile, wordCount, codeBlocks, links };
+module.exports = { ROOT, listCourses, listLessonFiles, loadLessonFile, links };

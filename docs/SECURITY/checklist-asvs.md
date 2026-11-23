@@ -14,7 +14,7 @@ Cột "Bằng chứng" trỏ tới code / test.
 | 1.2.1 | Thành phần dùng tài khoản riêng, quyền tối thiểu | ⚠️ | User MongoDB riêng cho app (README › Deploy); chưa tách user chỉ-insert cho audit log |
 | 1.4.1 | Kiểm soát truy cập ở phía máy chủ, tập trung | ✅ | `src/security/rbac.js`, `test/rbac.test.js` |
 | 1.5.1 | Định nghĩa rõ ràng việc kiểm tra đầu vào | ✅ | `src/validators/schemas.js` (zod cho mọi route) |
-| 1.6.1 | Quản lý khóa mật mã có chính sách | ✅ | `SESSION_SECRET`, `MFA_KEY` qua biến môi trường, `config.js` kiểm tra độ dài |
+| 1.6.1 | Quản lý khóa mật mã có chính sách | ✅ | `SESSION_SECRET`, `MFA_KEY` qua biến môi trường; `config.js` kiểm tra bằng zod khi khởi động (độ dài, định dạng), lỗi không in giá trị |
 | 1.14.6 | Không dùng công nghệ phía client không an toàn | ✅ | Không Flash/ActiveX; JS tự host, CSP `'self'` + nonce |
 | **V2 Xác thực** | | | |
 | 2.1.1 | Mật khẩu ≥ 12 ký tự (L1: ≥ 12) | ⚠️ | Tối thiểu **10** ký tự + chặn 1000 mật khẩu phổ biến (`services/password.js`) – thấp hơn khuyến nghị 12 của ASVS |

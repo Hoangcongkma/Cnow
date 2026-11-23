@@ -34,12 +34,6 @@ async function loadUser(req, res, next) {
 }
 
 /** Chưa đăng nhập → nhớ trang đang mở (chỉ đường dẫn nội bộ) rồi chuyển tới /login. */
-function requireLogin(req, res, next) {
-  if (req.user) return next();
-  req.session.returnTo = safeRedirect(req.originalUrl, '/');
-  res.redirect('/login');
-}
-
 const regenerate = (req) => new Promise((resolve, reject) => req.session.regenerate((err) => (err ? reject(err) : resolve())));
 
 /**
@@ -70,4 +64,4 @@ async function renewSession(req, user) {
   await require('../models').UserSession.updateOne({ sid: oldSid }, { $set: { sid: req.sessionID } });
 }
 
-module.exports = { loadUser, requireLogin, startSession, renewSession };
+module.exports = { loadUser, startSession, renewSession };

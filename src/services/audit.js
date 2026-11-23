@@ -48,4 +48,4 @@ async function audit(req, action, { actor, target, meta } = {}) {
   }
 }
 
-module.exports = { audit, cleanMeta, META_KEYS };
+module.exports = { audit };

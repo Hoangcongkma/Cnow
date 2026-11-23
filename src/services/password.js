@@ -47,4 +47,4 @@ function checkPassword(password, { username = '', email = '' } = {}) {
   return errors;
 }
 
-module.exports = { checkPassword, isCommon, MIN_LENGTH };
+module.exports = { checkPassword };

@@ -2,6 +2,7 @@
 const { trusted } = require('mongoose');
 const { Coupon, Order } = require('../models');
 
+/** Chuẩn hóa mã giảm giá người dùng nhập (bỏ khoảng trắng, viết hoa, tối đa 32 ký tự). */
 const normalize = (code) =>
   String(code ?? '')
     .trim()
@@ -65,4 +66,32 @@ async function release(order) {
   if (r.modifiedCount) await Coupon.updateOne({ _id: order.coupon, usedCount: trusted({ $gt: 0 }) }, { $inc: { usedCount: -1 } });
 }
 
-module.exports = { normalize, priceWith, findValid, reserve, release };
+/**
+ * Form tạo mã giảm giá (quản trị) → { form, errors }. Chỉ nhận các trường được phép, kiểm tra giá trị hợp lệ.
+ * @param {object} body req.body đã qua zod
+ */
+function parseCouponForm(body) {
+  const one = (v) => (Array.isArray(v) ? v[0] : v);
+  const many = (v) => (Array.isArray(v) ? v : v ? [v] : []).map(String).filter((x) => /^[0-9a-f]{24}$/.test(x));
+  const form = {
+    code: String(one(body.code) || '')
+      .trim()
+      .toUpperCase(),
+    type: one(body.type) === 'amount' ? 'amount' : 'percent',
+    value: Number(one(body.value)),
+    expiresAt: one(body.expiresAt) ? new Date(`${one(body.expiresAt)}T23:59:59+07:00`) : undefined,
+    maxUses: one(body.maxUses) ? Math.floor(Number(one(body.maxUses))) : undefined,
+    courses: many(body.courses),
+    note: String(one(body.note) || '').slice(0, 200),
+  };
+  const errors = [];
+  if (!/^[A-Z0-9_-]{3,32}$/.test(form.code)) errors.push('Mã 3–32 ký tự: chữ, số, gạch ngang, gạch dưới.');
+  if (!(form.value > 0) || (form.type === 'percent' && form.value > 100)) {
+    errors.push('Giá trị giảm không hợp lệ (phần trăm 1–100, hoặc số tiền > 0).');
+  }
+  if (form.expiresAt && Number.isNaN(+form.expiresAt)) errors.push('Ngày hết hạn không hợp lệ.');
+  if (form.maxUses !== undefined && !(form.maxUses >= 1)) errors.push('Số lượt tối thiểu là 1.');
+  return { form, errors };
+}
+
+module.exports = { normalize, priceWith, findValid, reserve, release, parseCouponForm };

@@ -22,8 +22,80 @@ function classList() {
   };
 }
 
+/** Phương thức dùng chung của mọi phần tử giả lập. */
+const NodeProto = {
+  addEventListener(t, fn) {
+    (this.handlers[t] ||= []).push(fn);
+  },
+  removeEventListener(t, fn) {
+    this.handlers[t] = (this.handlers[t] || []).filter((f) => f !== fn);
+  },
+  dispatchEvent(e) {
+    for (const fn of this.handlers[e.type] || []) fn.call(this, e);
+    return true;
+  },
+  click() {
+    this.dispatchEvent(makeEvent('click', this));
+  },
+  appendChild(c) {
+    this.children.push(c);
+    c.parentNode = this;
+    return c;
+  },
+  append(...c) {
+    c.forEach((x) => (typeof x === 'object' ? this.appendChild(x) : (this.textContent += String(x))));
+  },
+  prepend(...c) {
+    this.children.unshift(...c.filter((x) => typeof x === 'object'));
+  },
+  remove() {
+    if (this.parentNode) this.parentNode.children = this.parentNode.children.filter((x) => x !== this);
+  },
+  replaceChildren(...c) {
+    this.children = [];
+    this.append(...c);
+  },
+  setAttribute(k, v) {
+    this.attributes[k] = String(v);
+    if (k === 'id') this.id = String(v);
+  },
+  getAttribute(k) {
+    return k in this.attributes ? this.attributes[k] : null;
+  },
+  removeAttribute(k) {
+    delete this.attributes[k];
+  },
+  hasAttribute(k) {
+    return k in this.attributes;
+  },
+  closest() {
+    return this.parentNode || this;
+  },
+  matches() {
+    return true;
+  },
+  contains(x) {
+    return x === this || this.children.includes(x);
+  },
+  querySelector(s) {
+    return find(`${this.key} ${s}`);
+  },
+  querySelectorAll(s) {
+    return list(`${this.key} ${s}`);
+  },
+  focus() {},
+  blur() {},
+  reset() {},
+  submit() {
+    this.dispatchEvent(makeEvent('submit', this));
+  },
+  insertAdjacentHTML(pos, html) {
+    this.innerHTML += html;
+  },
+};
+
 function el(tag = 'div', key = '') {
-  const node = {
+  const node = Object.assign(Object.create(NodeProto), {
     tagName: String(tag).toUpperCase(),
     key,
     id: '',
@@ -45,75 +117,7 @@ function el(tag = 'div', key = '') {
     parentNode: null,
     classList: classList(),
     handlers: {},
-    addEventListener(t, fn) {
-      (this.handlers[t] ||= []).push(fn);
-    },
-    removeEventListener(t, fn) {
-      this.handlers[t] = (this.handlers[t] || []).filter((f) => f !== fn);
-    },
-    dispatchEvent(e) {
-      for (const fn of this.handlers[e.type] || []) fn.call(this, e);
-      return true;
-    },
-    click() {
-      this.dispatchEvent(makeEvent('click', this));
-    },
-    appendChild(c) {
-      this.children.push(c);
-      c.parentNode = this;
-      return c;
-    },
-    append(...c) {
-      c.forEach((x) => (typeof x === 'object' ? this.appendChild(x) : (this.textContent += String(x))));
-    },
-    prepend(...c) {
-      this.children.unshift(...c.filter((x) => typeof x === 'object'));
-    },
-    remove() {
-      if (this.parentNode) this.parentNode.children = this.parentNode.children.filter((x) => x !== this);
-    },
-    replaceChildren(...c) {
-      this.children = [];
-      this.append(...c);
-    },
-    setAttribute(k, v) {
-      this.attributes[k] = String(v);
-      if (k === 'id') this.id = String(v);
-    },
-    getAttribute(k) {
-      return k in this.attributes ? this.attributes[k] : null;
-    },
-    removeAttribute(k) {
-      delete this.attributes[k];
-    },
-    hasAttribute(k) {
-      return k in this.attributes;
-    },
-    closest() {
-      return this.parentNode || this;
-    },
-    matches() {
-      return true;
-    },
-    contains(x) {
-      return x === this || this.children.includes(x);
-    },
-    querySelector(s) {
-      return find(`${key} ${s}`);
-    },
-    querySelectorAll(s) {
-      return list(`${key} ${s}`);
-    },
-    focus() {},
-    blur() {},
-    reset() {},
-    submit() {
-      this.dispatchEvent(makeEvent('submit', this));
-    },
-    insertAdjacentHTML(pos, html) {
-      this.innerHTML += html;
-    },
-  };
+  });
   all.push(node);
   return node;
 }

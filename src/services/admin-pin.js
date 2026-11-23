@@ -23,6 +23,7 @@ function checkPinRules(pin) {
   return errors;
 }
 
+/** Băm mã quản trị (bcrypt). @param {string} pin @returns {Promise<string>} */
 const hashPin = (pin) => bcrypt.hash(String(pin), COST);
 
 /**
@@ -54,20 +55,25 @@ async function afterFailure(userId, now = new Date()) {
   return r.modifiedCount === 1;
 }
 
+/** Xóa bộ đếm sai + khóa tạm của mã quản trị (sau khi nhập đúng). */
 const clearFailures = (userId) => User.updateOne({ _id: userId }, { $unset: { adminPinFails: '', adminPinLockedUntil: '' } });
 
+/**
+ * So mã quản trị với hash lưu trong CSDL (không giới hạn lượt – gọi reserveAttempt trước).
+ * @returns {Promise<boolean>} false nếu sai hoặc chưa đặt mã
+ */
 async function verifyPin(userId, pin) {
   const u = await User.findById(userId).select('+adminPinHash');
   if (!u || !u.adminPinHash) return false;
   return bcrypt.compare(String(pin || ''), u.adminPinHash);
 }
 
+/** Tài khoản đã đặt mã quản trị chưa (`npm run set:admin-pin`). */
 const hasPin = async (userId) => Boolean(await User.exists({ _id: userId, adminPinHash: trusted({ $type: 'string' }) }));
 
 module.exports = {
   MAX_FAILS,
   WINDOW_MS,
-  LOCK_MS,
   checkPinRules,
   hashPin,
   reserveAttempt,

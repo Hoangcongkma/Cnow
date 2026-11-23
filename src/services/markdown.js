@@ -128,6 +128,7 @@ function renderDoc(src) {
   return { html, toc };
 }
 
+/** Markdown → HTML an toàn (marked → highlight.js → sanitize-html); in bằng <%- %> được. @param {string} src */
 function renderMarkdown(src) {
   return renderDoc(src).html;
 }
@@ -141,4 +142,4 @@ function parseFrontmatter(src) {
   return { data: YAML.parse(m[1]) || {}, body: m[2] };
 }
 
-module.exports = { renderMarkdown, renderDoc, parseFrontmatter, slugify };
+module.exports = { renderMarkdown, renderDoc, parseFrontmatter };

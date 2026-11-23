@@ -6,8 +6,7 @@
 const pino = require('pino');
 const { maskEmail } = require('./utils/mask');
 
-const env = process.env.NODE_ENV || 'development';
-const level = process.env.LOG_LEVEL || { production: 'info', test: 'silent' }[env] || 'debug';
+const { logLevel: level, env } = require('./config');
 
 const REDACT = [
   'req.headers.cookie',
@@ -79,4 +78,4 @@ const httpSerializers = {
 
 const logger = createLogger();
 
-module.exports = { logger, createLogger, httpSerializers, REDACT };
+module.exports = { logger, createLogger, httpSerializers };

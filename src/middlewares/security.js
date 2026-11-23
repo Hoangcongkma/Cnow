@@ -24,7 +24,7 @@ const reject = (res) =>
     message: 'Phiên làm việc đã hết hạn hoặc yêu cầu không hợp lệ. Vui lòng tải lại trang và thử lại.',
   });
 
-// CSRF: token đồng bộ lưu trong phiên, kiểm tra cho mọi request thay đổi dữ liệu
+/** CSRF: token đồng bộ lưu trong phiên, kiểm tra cho mọi request thay đổi dữ liệu (body `_csrf` hoặc header x-csrf-token). */
 function csrf(req, res, next) {
   // Ảnh đại diện không có form → không tạo phiên chỉ để chứa token
   if (req.method === 'GET' && req.path.startsWith('/avatars/')) return next();
@@ -45,4 +45,4 @@ function verifyCsrf(req, res, next) {
   next();
 }
 
-module.exports = { registerLimiter, globalLimiter, csrf, verifyCsrf, ANON_SESSION_MS };
+module.exports = { registerLimiter, globalLimiter, csrf, verifyCsrf };

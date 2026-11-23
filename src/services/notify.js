@@ -4,6 +4,12 @@ const { Notification, Enrollment } = require('../models');
 
 const short = (s, n) => (String(s).length > n ? String(s).slice(0, n - 1) + '…' : String(s));
 
+/**
+ * Gửi thông báo trong ứng dụng cho một hoặc nhiều người dùng (bỏ trùng). Lỗi ghi CSDL không làm hỏng thao tác chính.
+ * @param {string|string[]} userIds
+ * @param {{ type: string, text: string, link?: string }} n
+ * @returns {Promise<number>} số thông báo đã tạo
+ */
 async function notify(userIds, { type, text, link }) {
   const ids = [...new Set((Array.isArray(userIds) ? userIds : [userIds]).map(String))];
   if (!ids.length) return 0;

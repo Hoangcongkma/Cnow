@@ -17,7 +17,7 @@ Tài liệu vận hành đầy đủ: chạy trên máy, soạn bài học, than
 
 ## Chạy trên máy (VS Code)
 
-1. Cài **Node.js 20+** và **MongoDB** – hoặc tạo cụm miễn phí trên MongoDB Atlas.
+1. Cài **Node.js 22+** và **MongoDB** – hoặc tạo cụm miễn phí trên MongoDB Atlas.
 2. Mở thư mục `cnow` bằng VS Code: **File → Open Folder…**
 3. Mở terminal trong VS Code (**Ctrl+`**) và chạy:
    ```bash
@@ -277,28 +277,42 @@ npm run unseed:demo   # xóa SẠCH mọi bản ghi demo, in số lượng đã 
 ## Kiểm thử và chất lượng code
 
 ```bash
-npm test          # 29 kiểm thử: đăng ký/đăng nhập, rate limit, CSRF, phân quyền, thanh toán (PayPal giả lập)
-npm run lint      # ESLint + Prettier --check
-npm run format    # tự định dạng code
+npm test               # 151 kiểm thử: xác thực, phiên, phân quyền mọi route × vai trò, kiểm tra đầu vào, thanh toán, dữ liệu cá nhân…
+npm run test:coverage  # như trên + báo cáo độ phủ (CI yêu cầu ≥ 80% số dòng)
+npm run lint           # ESLint (kèm eslint-plugin-security, eslint-plugin-n) + Prettier --check, không cho phép cảnh báo
+npm run lint:secrets   # secretlint: chặn lỡ commit khóa bí mật (cũng chạy trong pre-commit)
+npm run format         # tự định dạng code
 ```
 
 - Test dùng MongoDB trong bộ nhớ (`mongodb-memory-server`, lần đầu tự tải binary MongoDB), không đụng tới dữ liệu thật và không đọc `.env`.
 - PayPal được giả lập bằng cách thay `fetch`, kiểm tra cả trường hợp số tiền/loại tiền/trạng thái không khớp thì **không** mở khóa học.
-- GitHub Actions (`.github/workflows/test.yml`) chạy lint + test trên Node 20 và 22 mỗi lần push.
+- GitHub Actions: `ci.yml` (lint + test + độ phủ + `npm audit` trên Node 22 và 24), `codeql.yml` (phân tích tĩnh), `zap.yml` (OWASP ZAP baseline với server chạy thật).
 
 ## Cấu trúc thư mục
 
+Quy ước: **route mỏng** (kiểm tra đầu vào bằng schema → gọi service → render/redirect), nghiệp vụ nằm trong **services/**, truy cập dữ liệu qua **models/**. Hàm giữ dưới 50 dòng; service và middleware công khai có JSDoc.
+
 ```
 src/
-  server.js              kết nối MongoDB, khởi động server
-  app.js                 Express, Helmet/CSP, session, CSRF
-  config.js              đọc .env
-  models/index.js        User, Course, Order, Enrollment, Comment
-  services/paypal.js     PayPal Orders API v2: createOrder, captureOrder
-  middlewares/           auth (đăng nhập, phân quyền), security (rate limit, CSRF)
-  routes/                auth, courses, pay, admin
+  server.js              kết nối MongoDB rồi mới nạp app, tạo index, chạy migration
+  app.js                 Express: Helmet/CSP nonce, log, rate limit, session, CSRF, RBAC, xử lý lỗi tập trung
+  config.js              đọc + kiểm tra biến môi trường bằng zod (sai → dừng khi khởi động, không in giá trị)
+  logger.js              pino: JSON, requestId, ẩn bí mật, che email
+  realtime.js            Socket.IO: phòng chat khóa học
+  migrations.js          migration idempotent
+  models/index.js        mọi model Mongoose (sanitizeFilter, nhật ký bảo mật chỉ ghi thêm)
+  middlewares/           auth (loadUser, startSession, renewSession), security (CSRF, giới hạn đăng ký/toàn cục)
+  security/              rbac.js (bảng phân quyền tập trung), rate-limit.js (lưu MongoDB)
+  validators/            validate() + schemas.js (schema zod cho từng route)
+  utils/                 security.js (safeRedirect, escapeRegex), mask.js (che email)
+  services/              nghiệp vụ: checkout, refund, course-editor, reporting, admin-queries, privacy,
+                         sessions, login-guard, mfa, admin-pin, coupon, quiz, invoice, markdown, content…
+  routes/                auth, courses, qa, reviews, comments, pay, profile, mfa, admin-pin, pages, seo, health
+  routes/admin/          dashboard, courses, lessons, people, orders, exports, coupons, audit, moderation
   views/                 giao diện EJS
-public/                  CSS, JS, hình ảnh
-scripts/seed.js          dữ liệu mẫu
-scripts/import-videos.js nhập khóa miễn phí từ data/free-videos.json (YouTube oEmbed)
+public/                  CSS, JS (không inline), thư viện tự host (vendor/)
+content/                 bài học văn bản (Markdown)
+scripts/                 seed, seed-demo, import-content, check-content, backup/restore, set-admin-pin…
+docs/SECURITY/           mô hình mối đe dọa, RBAC, danh mục dữ liệu, sao lưu, đối chiếu ASVS
+test/                    node:test + supertest, mỗi file một CSDL trong bộ nhớ
 ```

@@ -39,7 +39,7 @@ function loadConfig(env) {
 test('config: NODE_ENV lạ → không khởi động', () => {
   const r = loadConfig({ NODE_ENV: 'staging' });
   assert.equal(r.ok, false);
-  assert.match(r.error, /NODE_ENV="staging" không hợp lệ/);
+  assert.match(r.error, /- NODE_ENV: chỉ chấp nhận development, test hoặc production/);
 });
 
 test('config: server công khai (BASE_URL không phải localhost) thiếu SESSION_SECRET → không khởi động', () => {
@@ -64,7 +64,7 @@ test('config: production + PAYMENT_MODE=demo chạy được KHÔNG cần biến
 });
 
 test('config: PAYMENT_MODE lạ / DEMO_USD_VND sai → không khởi động; PAYMENT_MODE=paypal ở production cần khóa + PAYPAL_MODE', () => {
-  assert.match(loadConfig({ PAYMENT_MODE: 'free' }).error, /PAYMENT_MODE="free" không hợp lệ/);
+  assert.match(loadConfig({ PAYMENT_MODE: 'free' }).error, /- PAYMENT_MODE: chỉ chấp nhận demo hoặc paypal/);
   assert.match(loadConfig({ DEMO_USD_VND: '26.5' }).error, /DEMO_USD_VND/);
   const prod = {
     NODE_ENV: 'production',

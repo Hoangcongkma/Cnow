@@ -1,7 +1,6 @@
 // Luồng thanh toán: đăng nhập -> chọn khóa học -> thanh toán -> xác nhận -> mở khóa học
 // PAYMENT_MODE=demo (mặc định): cổng MÔ PHỎNG PayPal / VNPay / MoMo – không trừ tiền thật, mọi đơn ghi rõ DEMO.
 // PAYMENT_MODE=paypal: PayPal Orders API v2 thật (giữ nguyên, chỉ dùng khi có khóa API).
-const { trusted } = require('mongoose');
 const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const router = require('express').Router();
@@ -9,136 +8,23 @@ const paymentLimiter = require('../security/rate-limit').limits.payment();
 const crypto = require('crypto');
 const config = require('../config');
 const paypal = require('../services/paypal');
-const { Course, Order, Enrollment, Coupon } = require('../models');
-const { notify } = require('../services/notify');
+const { Order } = require('../models');
 const coupons = require('../services/coupon');
-const money = require('../services/money');
+const { grant, startCheckout } = require('../services/checkout');
 const { GATEWAYS, billable } = require('../services/order-labels');
 const { buildInvoice, invoiceNumber } = require('../services/invoice');
-
-async function grant(order) {
-  // upsert: an toàn khi người dùng tải lại trang success nhiều lần
-  const r = await Enrollment.updateOne(
-    { user: order.user, course: order.course },
-    { $setOnInsert: { user: order.user, course: order.course, order: order._id } },
-    { upsert: true },
-  );
-  // Thông báo thanh toán thành công – chỉ lần đầu mở quyền học (không lặp khi tải lại trang) và chỉ với đơn có trả tiền
-  if (r.upsertedCount && order.provider !== 'free') {
-    const course = await Course.findById(order.course).select('title slug');
-    await notify(order.user, {
-      type: 'payment',
-      text: `Thanh toán thành công $${order.amount}${order.provider === 'demo' ? ' (demo)' : ''} cho khóa học “${course ? course.title : ''}”. Chúc bạn học tốt!`,
-      link: course ? `/learn/${course.slug}` : '/my-courses',
-    });
-  }
-}
 
 const notFoundOrder = (res) =>
   res.status(404).render('error', { title: 'Không tìm thấy đơn hàng', message: 'Đơn hàng không tồn tại hoặc không thuộc về bạn.' });
 
+// Mua khóa học: toàn bộ nghiệp vụ trong services/checkout.js; route chỉ chuyển "hành động" thành response
 router.post('/pay', paymentLimiter, validate(S.pay.create), async (req, res) => {
-  const course = await Course.findOne({ _id: req.body.courseId, published: true }).catch(() => null);
-  if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
-  if (await Enrollment.exists({ user: req.user.id, course: course.id })) return res.redirect(`/learn/${course.slug}`);
-
-  // Khóa học miễn phí: ghi danh ngay
-  if (course.price === 0) {
-    const order = await Order.create({ user: req.user.id, course: course.id, amount: '0.00', provider: 'free', status: 'COMPLETED' });
-    await grant(order);
-    return res.redirect(`/learn/${course.slug}`);
-  }
-
-  // Đơn cũ chưa thanh toán xong của chính người này cho khóa này (vd. đóng tab thanh toán) → hủy và trả lượt mã giảm giá
-  for (const old of await Order.find({ user: req.user.id, course: course.id, status: 'CREATED' })) {
-    await Order.updateOne({ _id: old._id, status: 'CREATED' }, { status: 'CANCELLED', failureReason: 'replaced' });
-    await coupons.release(old);
-  }
-
-  // Mã giảm giá (nếu có): kiểm tra và tính lại giá HOÀN TOÀN ở server, không tin số tiền/giảm giá từ form
-  const back = `/courses/${course.slug}`;
-  const { coupon, error: couponError } = await coupons.findValid(req.body.coupon, course, req.user);
-  if (couponError) {
-    req.session.flash = { type: 'warn', text: couponError };
-    return res.redirect(back);
-  }
-  const price = coupons.priceWith(course, coupon);
-  const couponFields = coupon
-    ? { coupon: coupon._id, couponCode: coupon.code, originalAmount: price.original, discount: price.discount }
-    : {};
-  // Giữ 1 lượt dùng mã (nguyên tử); hết lượt do người khác vừa dùng → báo lại
-  if (coupon && !(await coupons.reserve(coupon))) {
-    req.session.flash = { type: 'warn', text: 'Mã giảm giá vừa hết lượt sử dụng.' };
-    return res.redirect(back);
-  }
-
-  // Giảm 100% → ghi danh ngay như khóa miễn phí
-  if (coupon && price.finalCents === 0) {
-    const order = await Order.create({
-      user: req.user.id,
-      course: course.id,
-      amount: '0.00',
-      provider: 'free',
-      status: 'COMPLETED',
-      ...couponFields,
-    });
-    await grant(order);
-    req.session.flash = { type: 'success', text: `Đã áp dụng mã ${coupon.code}: khóa học miễn phí cho bạn!` };
-    return res.redirect(`/learn/${course.slug}`);
-  }
-
-  const amount = price.final; // giá lấy từ CSDL (đã trừ mã giảm giá tính ở server)
-
-  // ---------- Cổng DEMO: tạo đơn rồi chuyển tới trang chọn phương thức ----------
-  if (config.demo) {
-    const order = await Order.create({
-      user: req.user.id,
-      course: course.id,
-      amount,
-      amountVnd: money.toVnd(amount),
-      provider: 'demo',
-      providerOrderId: 'DEMO-ORD-' + crypto.randomBytes(8).toString('hex').toUpperCase(),
-      ...couponFields,
-    });
-    return res.redirect(303, `/pay/demo/${order.providerOrderId}`);
-  }
-
-  // PAYMENT_MODE=paypal nhưng thiếu khóa API → từ chối, KHÔNG mở khóa
-  if (!config.paypal.configured) {
-    if (coupon) await Coupon.updateOne({ _id: coupon._id, usedCount: trusted({ $gt: 0 }) }, { $inc: { usedCount: -1 } });
-    return res.status(503).render('pay/result', {
-      title: 'Chưa thể thanh toán',
-      ok: false,
-      course,
-      message: 'Cổng thanh toán đang tạm ngừng. Vui lòng thử lại sau.',
-    });
-  }
-
-  const order = await Order.create({ user: req.user.id, course: course.id, amount, provider: 'paypal', ...couponFields });
-  try {
-    const pp = await paypal.createOrder({
-      referenceId: order.id,
-      amount,
-      description: `Cnow – ${course.title}`,
-      returnUrl: `${config.baseUrl}/pay/success`,
-      cancelUrl: `${config.baseUrl}/pay/cancel`,
-    });
-    order.providerOrderId = pp.id;
-    await order.save();
-    res.redirect(303, pp.approveUrl); // chuyển sang PayPal
-  } catch (err) {
-    req.log.error({ err }, 'paypal:create thất bại');
-    await Order.updateOne({ _id: order._id }, { status: 'FAILED', failureReason: 'create_failed' });
-    await coupons.release(order);
-    res.status(502).render('pay/result', {
-      title: 'Thanh toán thất bại',
-      ok: false,
-      course,
-      message: 'Không kết nối được PayPal. Vui lòng thử lại sau.',
-    });
-  }
+  const r = await startCheckout({ user: req.user, courseId: req.body.courseId, couponCode: req.body.coupon, log: req.log });
+  if (r.notFound) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
+  if (r.flash) req.session.flash = r.flash;
+  if (r.render) return res.status(r.status).render(r.render, r.data);
+  return r.status ? res.redirect(r.status, r.redirect) : res.redirect(r.redirect);
 });
-
 // ---------- PayPal thật (PAYMENT_MODE=paypal) ----------
 // PayPal chuyển về: /pay/success?token=<PayPal order id>&PayerID=...
 router.get('/pay/success', validate(S.pay.paypalReturn), async (req, res) => {
@@ -315,4 +201,3 @@ router.get('/orders', validate(S.none), async (req, res) => {
 });
 
 module.exports = router;
-module.exports.grant = grant;

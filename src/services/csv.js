@@ -26,4 +26,15 @@ function sendCsv(res, name, headers, rows) {
   res.send(toCsv(headers, rows));
 }
 
-module.exports = { cell, toCsv, sendCsv };
+/**
+ * Xuất CSV + ghi nhật ký bảo mật (ai xuất, loại dữ liệu, số dòng): xuất dữ liệu cá nhân hàng loạt phải để lại dấu vết.
+ * @param {import('express').Request} req
+ */
+async function sendAuditedCsv(req, res, name, headers, rows) {
+  await require('./audit').audit(req, 'export.csv', {
+    meta: { format: String(name).replace(/-\d{4}-\d{2}-\d{2}$/, ''), rows: rows.length },
+  });
+  sendCsv(res, name, headers, rows);
+}
+
+module.exports = { sendAuditedCsv };

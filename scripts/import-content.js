@@ -21,20 +21,11 @@ const norm = (s) =>
     .toLowerCase()
     .replace(/\s+/g, ' ');
 
-async function importCourse(slug, { log = console.log } = {}) {
-  const course = await Course.findOne({ slug });
-  if (!course) {
-    log(`⚠ Bỏ qua "${slug}": chưa có khóa học với slug này (chạy npm run seed hoặc tạo trong trang quản trị).`);
-    return null;
-  }
-  const files = listLessonFiles(slug);
-  const loaded = files.map((f) => loadLessonFile(path.join(ROOT, slug, f)));
-  const bad = loaded.filter((x) => x.errors.length);
-  if (bad.length) {
-    for (const b of bad) log(`✗ ${slug}/${b.meta.file}: ${b.errors.join('; ')}`);
-    log(`✗ Không nhập "${slug}" vì có bài chưa hợp lệ.`);
-    return null;
-  }
+/**
+ * Gom bài đã đọc thành chương theo frontmatter `section`; bài/chương cũ CÙNG TIÊU ĐỀ giữ nguyên _id.
+ * @returns {{ sections: object[], kept: number, dropped: number }}
+ */
+function buildSections(course, loaded) {
   const oldByTitle = new Map(course.lessons.map((l) => [norm(l.title), l]));
   const oldSections = new Map(course.sections.map((s) => [norm(s.title), s]));
   const sections = [];
@@ -55,17 +46,31 @@ async function importCourse(slug, { log = console.log } = {}) {
     }
     sec.lessons.push({
       ...(old ? { _id: old._id } : {}),
-      title: l.title,
-      minutes: l.minutes,
-      preview: l.preview,
-      materials: l.materials,
-      quiz: l.quiz,
-      youtubeId: undefined,
-      sourceName: undefined,
-      sourceUrl: undefined,
-      license: undefined,
+      ...{ title: l.title, minutes: l.minutes, preview: l.preview, materials: l.materials, quiz: l.quiz },
+      ...{ youtubeId: undefined, sourceName: undefined, sourceUrl: undefined, license: undefined },
     });
   }
+  return { sections, kept, dropped: oldByTitle.size };
+}
+
+/**
+ * Nhập mọi bài trong content/<slug>/ vào khóa học cùng slug (an toàn khi chạy lại). Có bài lỗi → không nhập gì.
+ * @returns {Promise<object|null>} khóa học đã lưu, hoặc null nếu bỏ qua / lỗi
+ */
+async function importCourse(slug, { log = console.log } = {}) {
+  const course = await Course.findOne({ slug });
+  if (!course) {
+    log(`⚠ Bỏ qua "${slug}": chưa có khóa học với slug này (chạy npm run seed hoặc tạo trong trang quản trị).`);
+    return null;
+  }
+  const loaded = listLessonFiles(slug).map((f) => loadLessonFile(path.join(ROOT, slug, f)));
+  const bad = loaded.filter((x) => x.errors.length);
+  if (bad.length) {
+    for (const b of bad) log(`✗ ${slug}/${b.meta.file}: ${b.errors.join('; ')}`);
+    log(`✗ Không nhập "${slug}" vì có bài chưa hợp lệ.`);
+    return null;
+  }
+  const { sections, kept, dropped } = buildSections(course, loaded);
   const oldIds = new Set(course.lessons.map((l) => String(l._id)));
   course.sections = sections;
   await course.save();
@@ -75,7 +80,7 @@ async function importCourse(slug, { log = console.log } = {}) {
     course.lessons.filter((l) => !oldIds.has(String(l._id))),
   );
   const total = sections.reduce((t, s) => t + s.lessons.length, 0);
-  log(`✓ ${course.title}: ${total} bài (giữ _id ${kept} bài cũ, bỏ ${oldByTitle.size} bài cũ không còn trong content/)`);
+  log(`✓ ${course.title}: ${total} bài (giữ _id ${kept} bài cũ, bỏ ${dropped} bài cũ không còn trong content/)`);
   return course;
 }
 

@@ -11,7 +11,7 @@ const PRIVATE = ['/admin', '/learn', '/profile', '/my-courses', '/wishlist', '/o
 router.get('/robots.txt', validate(S.none), (req, res) => {
   res.type('text/plain').set('Cache-Control', 'public, max-age=3600');
   const lines = ['User-agent: *'];
-  if (process.env.DEMO_NOINDEX === 'true') lines.push('Disallow: /');
+  if (config.noindex) lines.push('Disallow: /');
   else lines.push(...PRIVATE.map((p) => `Disallow: ${p}`), 'Allow: /');
   lines.push('', `Sitemap: ${config.baseUrl}/sitemap.xml`);
   res.send(lines.join('\n') + '\n');
@@ -42,38 +42,17 @@ router.get('/sitemap.xml', validate(S.none), async (req, res) => {
 // RFC 9116 – nơi nhà nghiên cứu bảo mật báo lỗ hổng. Contact lấy từ SECURITY_CONTACT (mailto: hoặc https:),
 // chưa cấu hình thì trỏ tới trang giới thiệu dự án. Expires luôn còn hạn 180 ngày kể từ lúc tải.
 router.get('/.well-known/security.txt', validate(S.none), (req, res) => {
-  const contact = process.env.SECURITY_CONTACT || `${config.baseUrl}/gioi-thieu`;
   const expires = new Date(Date.now() + 180 * 24 * 3600 * 1000).toISOString().replace(/\.\d{3}Z$/, '.000Z');
-  res
-    .type('text/plain')
-    .send(
-      [
-        `Contact: ${contact}`,
-        `Expires: ${expires}`,
-        'Preferred-Languages: vi, en',
-        `Canonical: ${config.baseUrl}/.well-known/security.txt`,
-        `Policy: ${config.baseUrl}/chinh-sach-bao-mat`,
-        '',
-      ].join('\n'),
-    );
+  const lines = [
+    `Contact: ${config.securityContact}`,
+    `Expires: ${expires}`,
+    'Preferred-Languages: vi, en',
+    `Canonical: ${config.baseUrl}/.well-known/security.txt`,
+    `Policy: ${config.baseUrl}/chinh-sach-bao-mat`,
+    '',
+  ];
+  res.type('text/plain').send(lines.join('\n'));
 });
+
 module.exports = router;
-// RFC 9116 – nơi nhà nghiên cứu bảo mật báo lỗ hổng. Contact lấy từ SECURITY_CONTACT (mailto: hoặc https:),
-// chưa cấu hình thì trỏ tới trang giới thiệu dự án. Expires luôn còn hạn 180 ngày kể từ lúc tải.
-router.get('/.well-known/security.txt', validate(S.none), (req, res) => {
-  const contact = process.env.SECURITY_CONTACT || `${config.baseUrl}/gioi-thieu`;
-  const expires = new Date(Date.now() + 180 * 24 * 3600 * 1000).toISOString().replace(/\.\d{3}Z$/, '.000Z');
-  res
-    .type('text/plain')
-    .send(
-      [
-        `Contact: ${contact}`,
-        `Expires: ${expires}`,
-        'Preferred-Languages: vi, en',
-        `Canonical: ${config.baseUrl}/.well-known/security.txt`,
-        `Policy: ${config.baseUrl}/chinh-sach-bao-mat`,
-        '',
-      ].join('\n'),
-    );
-});
 module.exports.PRIVATE = PRIVATE;

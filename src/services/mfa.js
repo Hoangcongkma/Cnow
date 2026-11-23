@@ -11,18 +11,17 @@ const ISSUER = 'Cnow';
 const RECOVERY_COUNT = 8;
 const ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789'; // bỏ ký tự dễ nhầm (0/o, 1/l/i)
 
-// Khóa mã hóa: MFA_KEY nếu có, nếu không suy ra từ SESSION_SECRET (đổi SESSION_SECRET thì người dùng phải thiết lập lại 2FA)
-const key = crypto
-  .createHash('sha256')
-  .update(`cnow-mfa:${process.env.MFA_KEY || config.sessionSecret}`)
-  .digest();
+// Khóa mã hóa: config.mfaKey = MFA_KEY nếu có, nếu không là SESSION_SECRET (đổi khóa thì người dùng phải thiết lập lại 2FA)
+const key = crypto.createHash('sha256').update(`cnow-mfa:${config.mfaKey}`).digest();
 
+/** Mã hóa bí mật TOTP (AES-256-GCM) → "v1:iv:tag:data" (base64) để lưu CSDL. */
 function encrypt(plain) {
   const iv = crypto.randomBytes(12);
   const c = crypto.createCipheriv('aes-256-gcm', key, iv);
   const data = Buffer.concat([c.update(plain, 'utf8'), c.final()]);
   return ['v1', iv.toString('base64'), c.getAuthTag().toString('base64'), data.toString('base64')].join(':');
 }
+/** Giải mã chuỗi do encrypt() tạo; sai khóa / bị sửa → ném lỗi (GCM xác thực). */
 function decrypt(blob) {
   const [v, iv, tag, data] = String(blob || '').split(':');
   if (v !== 'v1') throw new Error('Định dạng bí mật 2FA không hợp lệ');
@@ -31,8 +30,10 @@ function decrypt(blob) {
   return Buffer.concat([d.update(Buffer.from(data, 'base64')), d.final()]).toString('utf8');
 }
 
+/** Bí mật TOTP mới (base32) cho bước thiết lập 2FA. */
 const newSecret = () => generateSecret();
 
+/** URI otpauth:// + ảnh QR (data URL) để quét bằng ứng dụng xác thực. */
 async function qrFor(user, secret) {
   const uri = generateURI({ issuer: ISSUER, label: user.email || user.username, secret });
   return { uri, dataUrl: await QRCode.toDataURL(uri, { margin: 1, width: 220, errorCorrectionLevel: 'M' }) };
@@ -84,6 +85,7 @@ function useRecoveryCode(user, code) {
   return true;
 }
 
+/** Số mã khôi phục chưa dùng của người dùng. */
 const recoveryLeft = (user) => (user.mfaRecovery || []).filter((r) => !r.usedAt).length;
 
-module.exports = { encrypt, decrypt, newSecret, qrFor, checkTotp, newRecoveryCodes, useRecoveryCode, recoveryLeft, RECOVERY_COUNT };
+module.exports = { encrypt, decrypt, newSecret, qrFor, checkTotp, newRecoveryCodes, useRecoveryCode, recoveryLeft };

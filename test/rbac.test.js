@@ -28,11 +28,13 @@ after(teardown);
 function declaredRoutes() {
   const dir = path.join(__dirname, '..', 'src', 'routes');
   const out = [];
-  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.js'))) {
+  const files = fs.readdirSync(dir, { recursive: true }).filter((x) => String(x).endsWith('.js'));
+  for (const f of files) {
     const src = fs.readFileSync(path.join(dir, f), 'utf8');
+    const admin = /^admin[\\/]/.test(String(f)); // routes/admin/* gắn dưới /admin
     for (const m of src.matchAll(/router\.(get|post)\(\s*'([^']+)'/g)) {
-      const p = f === 'admin.js' ? `/admin${m[2] === '/' ? '' : m[2]}` : m[2];
-      out.push([m[1].toUpperCase(), p, f]);
+      const p = admin ? `/admin${m[2] === '/' ? '' : m[2]}` : m[2];
+      out.push([m[1].toUpperCase(), p, String(f)]);
     }
   }
   return out;

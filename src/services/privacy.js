@@ -7,77 +7,82 @@ const { removeAvatar } = require('./avatar');
 
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o[k] !== undefined).map((k) => [k, o[k]]));
 
+/** Đọc mọi bản ghi gắn với người dùng (song song). */
+async function loadUserData(userId) {
+  const byUser = { user: userId };
+  const withCourse = (M) => M.find(byUser).populate('course', 'title slug').lean();
+  const [enrollments, progress, orders, reviews, posts, comments] = await Promise.all(
+    [M.Enrollment, M.Progress, M.Order, M.Review, M.Post, M.CourseComment].map(withCourse),
+  );
+  const [notes, certificates, notifications, chat, sessions, security] = await Promise.all([
+    M.Note.find(byUser).lean(),
+    M.Certificate.find(byUser).lean(),
+    M.Notification.find(byUser).lean(),
+    M.ChatMessage.find(byUser).lean(),
+    M.UserSession.find(byUser).lean(), // không có sid (select: false)
+    M.AuditLog.find({ $or: [{ actor: userId }, { target: userId }] })
+      .sort({ createdAt: -1 })
+      .limit(1000)
+      .lean(),
+  ]);
+  return { enrollments, progress, orders, reviews, posts, comments, notes, certificates, notifications, chat, sessions, security };
+}
+
+const course = (c) => (c ? { title: c.title, slug: c.slug } : null);
+const ORDER_FIELDS = [
+  'amount',
+  'currency',
+  'amountVnd',
+  'provider',
+  'gateway',
+  'status',
+  'couponCode',
+  'discount',
+  'captureId',
+  'createdAt',
+  'refundedAt',
+];
+
+/** Chuyển dữ liệu thô thành bản xuất dễ đọc, chỉ gồm trường cần thiết. */
+function shapeExport(u, d) {
+  return {
+    exportedAt: new Date().toISOString(),
+    note: 'Dữ liệu cá nhân của bạn trên Cnow (định dạng JSON). Không bao gồm mật khẩu, khóa xác thực hai lớp và mã quản trị.',
+    profile: pick(u, ['username', 'name', 'email', 'role', 'bio', 'locked', 'mfaEnabled', 'createdAt', 'updatedAt', 'passwordChangedAt']),
+    wishlist: u.wishlist || [],
+    enrollments: d.enrollments.map((e) => ({ course: course(e.course), enrolledAt: e.createdAt })),
+    progress: d.progress.map((p) => ({
+      course: course(p.course),
+      completedLessons: p.completedLessons.length,
+      quizResults: p.quizResults.map((r) => pick(r, ['correct', 'total', 'pct', 'passed', 'at'])),
+      updatedAt: p.updatedAt,
+    })),
+    orders: d.orders.map((o) => ({ course: course(o.course), ...pick(o, ORDER_FIELDS) })),
+    reviews: d.reviews.map((r) => ({ course: course(r.course), rating: r.rating, content: r.content, updatedAt: r.updatedAt })),
+    questionsAndAnswers: d.posts.map((p) => ({
+      course: course(p.course),
+      content: p.content,
+      isAnswer: Boolean(p.parent),
+      createdAt: p.createdAt,
+    })),
+    comments: d.comments.map((c) => ({ course: course(c.course), content: c.content, hidden: c.hidden, createdAt: c.createdAt })),
+    notes: d.notes.map((n) => pick(n, ['text', 'seconds', 'createdAt'])),
+    certificates: d.certificates.map((c) => pick(c, ['courseTitle', 'name', 'code', 'issuedAt'])),
+    notifications: d.notifications.map((n) => pick(n, ['type', 'text', 'read', 'createdAt'])),
+    chatMessages: d.chat.map((c) => pick(c, ['text', 'deleted', 'createdAt'])),
+    activeSessions: d.sessions.map((s) => pick(s, ['ip', 'userAgent', 'createdAt', 'lastSeen'])),
+    securityLog: d.security.map((a) => pick(a, ['action', 'ip', 'userAgent', 'createdAt'])),
+  };
+}
+
 /**
  * Gom toàn bộ dữ liệu cá nhân của một người dùng thành 1 object (không có bí mật: mật khẩu băm, khóa 2FA, mã quản trị…).
  * @param {import('mongoose').Types.ObjectId} userId
  */
 async function exportData(userId) {
   const u = await M.User.findById(userId).lean();
-  const byUser = { user: userId };
-  const [enrollments, progress, orders, reviews, posts, comments, notes, certificates, notifications, chat, sessions, security] =
-    await Promise.all([
-      M.Enrollment.find(byUser).populate('course', 'title slug').lean(),
-      M.Progress.find(byUser).populate('course', 'title slug').lean(),
-      M.Order.find(byUser).populate('course', 'title slug').lean(),
-      M.Review.find(byUser).populate('course', 'title slug').lean(),
-      M.Post.find(byUser).populate('course', 'title slug').lean(),
-      M.CourseComment.find(byUser).populate('course', 'title slug').lean(),
-      M.Note.find(byUser).lean(),
-      M.Certificate.find(byUser).lean(),
-      M.Notification.find(byUser).lean(),
-      M.ChatMessage.find(byUser).lean(),
-      M.UserSession.find(byUser).lean(), // không có sid (select: false)
-      M.AuditLog.find({ $or: [{ actor: userId }, { target: userId }] })
-        .sort({ createdAt: -1 })
-        .limit(1000)
-        .lean(),
-    ]);
-  const course = (c) => (c ? { title: c.title, slug: c.slug } : null);
-  return {
-    exportedAt: new Date().toISOString(),
-    note: 'Dữ liệu cá nhân của bạn trên Cnow (định dạng JSON). Không bao gồm mật khẩu, khóa xác thực hai lớp và mã quản trị.',
-    profile: pick(u, ['username', 'name', 'email', 'role', 'bio', 'locked', 'mfaEnabled', 'createdAt', 'updatedAt', 'passwordChangedAt']),
-    wishlist: u.wishlist || [],
-    enrollments: enrollments.map((e) => ({ course: course(e.course), enrolledAt: e.createdAt })),
-    progress: progress.map((p) => ({
-      course: course(p.course),
-      completedLessons: p.completedLessons.length,
-      quizResults: p.quizResults.map((r) => pick(r, ['correct', 'total', 'pct', 'passed', 'at'])),
-      updatedAt: p.updatedAt,
-    })),
-    orders: orders.map((o) => ({
-      course: course(o.course),
-      ...pick(o, [
-        'amount',
-        'currency',
-        'amountVnd',
-        'provider',
-        'gateway',
-        'status',
-        'couponCode',
-        'discount',
-        'captureId',
-        'createdAt',
-        'refundedAt',
-      ]),
-    })),
-    reviews: reviews.map((r) => ({ course: course(r.course), rating: r.rating, content: r.content, updatedAt: r.updatedAt })),
-    questionsAndAnswers: posts.map((p) => ({
-      course: course(p.course),
-      content: p.content,
-      isAnswer: Boolean(p.parent),
-      createdAt: p.createdAt,
-    })),
-    comments: comments.map((c) => ({ course: course(c.course), content: c.content, hidden: c.hidden, createdAt: c.createdAt })),
-    notes: notes.map((n) => pick(n, ['text', 'seconds', 'createdAt'])),
-    certificates: certificates.map((c) => pick(c, ['courseTitle', 'name', 'code', 'issuedAt'])),
-    notifications: notifications.map((n) => pick(n, ['type', 'text', 'read', 'createdAt'])),
-    chatMessages: chat.map((c) => pick(c, ['text', 'deleted', 'createdAt'])),
-    activeSessions: sessions.map((s) => pick(s, ['ip', 'userAgent', 'createdAt', 'lastSeen'])),
-    securityLog: security.map((a) => pick(a, ['action', 'ip', 'userAgent', 'createdAt'])),
-  };
+  return shapeExport(u, await loadUserData(userId));
 }
-
 /**
  * Xóa tài khoản: ẩn danh hóa hồ sơ, xóa dữ liệu học tập riêng tư, hủy mọi phiên.
  * Giữ lại (đã ẩn danh): đơn hàng (thống kê doanh thu), câu hỏi/trả lời, bình luận, tin nhắn chat (hiện "Người dùng đã xóa"),

@@ -140,6 +140,28 @@ router.get('/courses/:slug', validate(S.courses.detail), async (req, res) => {
 
 const notFound = (res) => res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
 
+/**
+ * Trắc nghiệm gửi xuống trình duyệt: chỉ câu hỏi + phương án; đáp án/giải thích chỉ có sau khi đã nộp
+ * (và không bấm "Làm lại"). Hết lượt làm lại → vẫn ở chế độ xem kết quả, kèm thời điểm được làm tiếp.
+ */
+function quizView(lesson, progress, retry) {
+  if (!lesson?.quiz?.length) return null;
+  const result = resultFor(progress, lesson._id);
+  const attempts = attemptsInfo(progress, lesson._id);
+  const review = result && (!retry || !attempts.left) && result.answers.length === lesson.quiz.length;
+  return {
+    result,
+    review,
+    attempts: { ...attempts, max: MAX_ATTEMPTS, waitMinutes: attempts.retryAt ? minutesUntil(attempts.retryAt) : 0 },
+    passRatio: PASS_RATIO,
+    items: lesson.quiz.map((q, i) => ({
+      question: q.question,
+      options: q.options,
+      ...(review ? { answer: q.answer, explain: q.explain, chosen: result.answers[i] } : {}),
+    })),
+  };
+}
+
 // Học khóa học: chỉ người đã ghi danh (hoặc bài học thử)
 router.get('/learn/:slug', validate(S.courses.learn), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
@@ -158,25 +180,7 @@ router.get('/learn/:slug', validate(S.courses.learn), async (req, res) => {
   if (full && lesson && String(progress?.lastLesson) !== String(lesson._id)) {
     await Progress.updateOne({ user: req.user.id, course: course.id }, { $set: { lastLesson: lesson._id } }, { upsert: true });
   }
-  // Trắc nghiệm: chỉ gửi câu hỏi + phương án; đáp án/giải thích chỉ có sau khi đã nộp (và không bấm "Làm lại")
-  let quiz = null;
-  if (full && lesson?.quiz?.length) {
-    const result = resultFor(progress, lesson._id);
-    const attempts = attemptsInfo(progress, lesson._id);
-    // Hết lượt làm lại → vẫn ở chế độ xem kết quả, kèm thời điểm được làm tiếp
-    const review = result && (req.query.retry === undefined || !attempts.left) && result.answers.length === lesson.quiz.length;
-    quiz = {
-      result,
-      review,
-      attempts: { ...attempts, max: MAX_ATTEMPTS, waitMinutes: attempts.retryAt ? minutesUntil(attempts.retryAt) : 0 },
-      passRatio: PASS_RATIO,
-      items: lesson.quiz.map((q, i) => ({
-        question: q.question,
-        options: q.options,
-        ...(review ? { answer: q.answer, explain: q.explain, chosen: result.answers[i] } : {}),
-      })),
-    };
-  }
+  const quiz = full ? quizView(lesson, progress, req.query.retry !== undefined) : null;
   const notes =
     full && lesson ? await Note.find({ user: req.user.id, course: course.id, lesson: lesson._id }).sort({ seconds: 1, createdAt: 1 }) : [];
   const thread = lesson ? await loadThread(course, lesson, req.user) : [];

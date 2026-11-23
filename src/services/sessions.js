@@ -115,4 +115,4 @@ async function revokeOthers(req, userId) {
 /** Xóa bản ghi phiên khi đăng xuất. */
 const forgetSession = (sid) => UserSession.deleteOne({ sid }).catch(() => {});
 
-module.exports = { IDLE_MS, ABSOLUTE_MS, onLogin, checkExpiry, listSessions, revokeSession, revokeOthers, forgetSession, ipHash };
+module.exports = { onLogin, checkExpiry, listSessions, revokeSession, revokeOthers, forgetSession };

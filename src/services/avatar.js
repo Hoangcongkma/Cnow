@@ -58,6 +58,7 @@ async function saveAvatar(buf, userId) {
   return name;
 }
 
+/** Xóa ảnh đại diện khỏi GridFS theo tên file (tên không hợp lệ → bỏ qua). */
 async function removeAvatar(name) {
   if (!NAME_RE.test(String(name || ''))) return;
   const b = bucket();
@@ -70,6 +71,7 @@ async function findAvatar(name) {
   return (await bucket().find({ filename: name }).limit(1).toArray())[0] || null;
 }
 
+/** Luồng đọc ảnh đại diện từ GridFS (file lấy từ findAvatar). */
 const openAvatar = (file) => bucket().openDownloadStream(file._id);
 
-module.exports = { BUCKET, MAX_BYTES, NAME_RE, sniff, processAvatar, putFile, saveAvatar, removeAvatar, findAvatar, openAvatar };
+module.exports = { BUCKET, MAX_BYTES, NAME_RE, putFile, saveAvatar, removeAvatar, findAvatar, openAvatar };

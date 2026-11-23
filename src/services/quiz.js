@@ -52,6 +52,7 @@ function parseQuizForm(body) {
   return { quiz, errors };
 }
 
+/** Kết quả trắc nghiệm đã lưu của một bài (hoặc null). */
 const resultFor = (progress, lessonId) => (progress?.quizResults || []).find((r) => String(r.lesson) === String(lessonId)) || null;
 
 // Giới hạn làm lại: tối đa 3 lần nộp / 1 giờ cho mỗi bài (chống nộp dồn để dò đáp án)
@@ -99,11 +100,11 @@ async function takeAttempt(Progress, userId, courseId, lessonId, now = new Date(
   return r.modifiedCount === 1;
 }
 
+/** Số phút (làm tròn lên, tối thiểu 1) tới thời điểm d. */
 const minutesUntil = (d, now = Date.now()) => Math.max(1, Math.ceil((d.getTime() - now) / 60000));
 
 module.exports = {
   PASS_RATIO,
-  MAX_QUESTIONS,
   MAX_ATTEMPTS,
   grade,
   parseQuizForm,

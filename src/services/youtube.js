@@ -43,4 +43,4 @@ async function oembed(id, timeoutMs = 10000) {
   return { title: String(data.title).trim(), sourceName: String(data.author_name).trim().slice(0, 120), sourceUrl: watchUrl };
 }
 
-module.exports = { ID_RE, videoId, oembed };
+module.exports = { videoId, oembed };

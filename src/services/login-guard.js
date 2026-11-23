@@ -72,6 +72,7 @@ async function activeLocks(now = new Date()) {
     .lean();
 }
 
+/** Số phút (làm tròn lên, tối thiểu 1) để hiển thị thời gian còn bị khóa. */
 const minutes = (ms) => Math.max(1, Math.ceil(ms / 60000));
 
-module.exports = { LoginThrottle, lockedFor, recordFailure, recordSuccess, activeLocks, lockMs, minutes, ACCOUNT_THRESHOLD, IP_THRESHOLD };
+module.exports = { lockedFor, recordFailure, recordSuccess, activeLocks, lockMs, minutes };

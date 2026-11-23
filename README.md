@@ -70,35 +70,44 @@ Trên điện thoại (chế độ tối):
 
 | Thành phần | Công nghệ |
 | --- | --- |
-| Máy chủ | Node.js 20+, Express 5, EJS |
+| Máy chủ | Node.js 22+, Express 5, EJS, zod (kiểm tra đầu vào và cấu hình) |
 | Cơ sở dữ liệu | MongoDB (Mongoose 8), phiên lưu bằng connect-mongo, ảnh trong GridFS |
 | Thời gian thực | Socket.IO (chỉ WebSocket, xác thực bằng phiên, kiểm tra Origin) |
 | Bài học | Markdown → marked → highlight.js → sanitize-html |
-| Bảo mật | Helmet (CSP), bcrypt, otplib (TOTP), express-rate-limit, sharp |
+| Bảo mật | Helmet (CSP nonce), bcrypt, otplib (TOTP), express-rate-limit (lưu MongoDB), sharp |
 | Hóa đơn | pdfkit + font DejaVu Sans (đủ tiếng Việt) |
 | Biểu đồ | Chart.js (tự host, không dùng CDN) |
-| Kiểm thử | node:test, supertest, mongodb-memory-server; ESLint + Prettier; GitHub Actions |
+| Nhật ký | pino + pino-http (JSON, requestId, ẩn bí mật) |
+| Kiểm thử | node:test (độ phủ tích hợp), supertest, mongodb-memory-server; ESLint (security, n) + Prettier; GitHub Actions, CodeQL, ZAP |
 | Triển khai | Render (Blueprint `render.yaml`) + MongoDB Atlas |
 
 ## Kiến trúc
 
-```mermaid
-flowchart LR
-  B["Trình duyệt<br/>(HTML + JS, CSP 'self')"] -- HTTPS --> E
-  B -- WebSocket --> IO
-  subgraph S["Máy chủ Node.js"]
-    E["Express 5<br/>Helmet · CSRF · rate limit"] --> R["Routes<br/>khóa học · học · hỏi đáp · thanh toán · quản trị"]
-    R --> SV["Services<br/>markdown · quiz · coupon · invoice · mfa · admin PIN"]
-    IO["Socket.IO<br/>phòng chat khóa học"]
-    E --> SESS["express-session"]
-    IO -. dùng chung phiên .-> SESS
-  end
-  SV --> DB[("MongoDB<br/>dữ liệu · phiên · GridFS ảnh")]
-  SESS --> DB
-  R -- PAYMENT_MODE=demo --> DEMO["Cổng thanh toán mô phỏng<br/>PayPal / VNPay / MoMo"]
-  R -. PAYMENT_MODE=paypal .-> PP["PayPal Orders API v2"]
-```
+Mã nguồn chia lớp: **route mỏng** (nhận request đã kiểm tra, gọi service, render) → **service** (nghiệp vụ) → **model** (Mongoose). Mọi request đi qua cùng một chuỗi middleware bảo mật trước khi tới route.
 
+```mermaid
+flowchart TB
+  B["Trình duyệt<br/>HTML + JS tự host · CSP nonce"] -- HTTPS --> MW
+  B -- WebSocket --> IO
+  subgraph S["Máy chủ Node.js (Express 5)"]
+    direction TB
+    MW["middlewares/ · security/<br/>Helmet (CSP, HSTS…) · requestId + pino · rate limit (MongoDB)<br/>session · loadUser · CSRF · authorize (RBAC)"]
+    V["validators/<br/>zod: params · query · body"]
+    R["routes/<br/>courses · learn · qa · pay · profile · admin/*"]
+    SV["services/<br/>checkout · refund · course-editor · reporting · privacy<br/>sessions · login-guard · mfa · admin-pin · invoice · markdown…"]
+    U["utils/<br/>safeRedirect · escapeRegex · maskEmail"]
+    IO["realtime.js<br/>Socket.IO: chat khóa học"]
+    CFG["config.js<br/>biến môi trường kiểm tra bằng zod khi khởi động"]
+    MW --> V --> R --> SV
+    R -.-> U
+    SV -.-> U
+    IO -. dùng chung phiên .-> MW
+  end
+  SV --> M["models/<br/>Mongoose: sanitizeFilter + strictQuery"]
+  M --> DB[("MongoDB<br/>dữ liệu · phiên · rate limit · GridFS ảnh<br/>nhật ký bảo mật chỉ ghi thêm")]
+  SV -- PAYMENT_MODE=demo --> DEMO["Cổng thanh toán mô phỏng<br/>PayPal / VNPay / MoMo"]
+  SV -. PAYMENT_MODE=paypal .-> PP["PayPal Orders API v2"]
+```
 Luồng mua khóa học (bản demo):
 
 ```mermaid
@@ -117,7 +126,7 @@ sequenceDiagram
 
 ## Chạy trên máy
 
-Cần Node.js 20+ và MongoDB (cài trên máy hoặc dùng Atlas).
+Cần Node.js 22+ và MongoDB (cài trên máy hoặc dùng Atlas).
 
 ```bash
 git clone <repo> cnow && cd cnow
@@ -130,7 +139,8 @@ npm run dev                   # http://localhost:3000
 
 Tùy chọn:
 - `npm run seed:demo`: tạo dữ liệu mẫu (500 học viên, ~1.650 đơn hàng, hỏi – đáp, đánh giá…). Mọi nội dung mẫu đều có nhãn **“Dữ liệu mẫu”**; xóa bằng `npm run unseed:demo`.
-- `npm run lint && npm test`: kiểm tra code và chạy toàn bộ kiểm thử.
+- `npm run lint && npm test`: kiểm tra code và chạy toàn bộ kiểm thử (`npm run test:coverage` để xem độ phủ).
+- `npm run backup` / `npm run restore`: sao lưu / khôi phục CSDL (xem [docs/SECURITY/backup.md](docs/SECURITY/backup.md)).
 
 ## Deploy
 
@@ -144,6 +154,22 @@ Bản demo chạy trên **Render + MongoDB Atlas** với `NODE_ENV=production` v
 
 Hướng dẫn từng bước, bảng biến môi trường và cách cập nhật: [docs/HUONG-DAN.md › Deploy](docs/HUONG-DAN.md#deploy-render--mongodb-atlas-bản-demo).
 
+## Bảo mật
+
+Bản kỷ niệm được rà soát theo OWASP ASVS 4.0.3 mức 2 (63 mục đạt, 5 mục đạt một phần, 4 mục không áp dụng). Tóm tắt:
+
+| Lớp | Biện pháp |
+| --- | --- |
+| Đầu vào | Mọi route có schema zod (params sai → 404, body sai → 400, trường lạ bị bỏ); Mongoose `sanitizeFilter` chặn NoSQL injection; chuyển hướng chỉ trong site (`safeRedirect`) |
+| Xác thực | Mật khẩu ≥ 10 ký tự, chặn 1.000 mật khẩu phổ biến, bcrypt; khóa lũy tiến theo tài khoản + IP; TOTP tùy chọn; admin bắt buộc mã quản trị bước 2 |
+| Phiên | Cookie `__Host-` (HttpOnly, Secure, SameSite), tạo lại khi đăng nhập, hết hạn 30 phút không hoạt động / 7 ngày tuyệt đối; trang “Phiên đăng nhập” để thu hồi; báo khi đăng nhập từ IP mới |
+| Phân quyền | Một bảng RBAC tập trung (`src/security/rbac.js`), kiểm thử tự động mọi route × 4 vai trò; CTV chỉ sửa khóa của mình |
+| Trình duyệt | CSP nonce + `strict-dynamic`, không inline script/style; HSTS, `frame-ancestors 'none'`, COOP/CORP, Permissions-Policy; CSRF cho mọi form |
+| Dữ liệu cá nhân | Tự tải dữ liệu (JSON), tự xóa tài khoản (ẩn danh hóa), che email trong log, trang `/chinh-sach-bao-mat`, script sao lưu/khôi phục |
+| Giám sát | Log JSON có `requestId` (pino, ẩn bí mật); nhật ký bảo mật chỉ ghi thêm; trang `/admin/security` |
+| Chuỗi cung ứng | `npm audit`, CodeQL, OWASP ZAP baseline, Dependabot, secretlint + pre-commit, CI yêu cầu độ phủ ≥ 80% |
+
+Báo lỗ hổng: xem [SECURITY.md](SECURITY.md). Chi tiết (mô hình mối đe dọa, phân quyền, danh mục dữ liệu, sao lưu, đối chiếu ASVS): [docs/SECURITY/](docs/SECURITY/README.md).
 ## Ghi chú về thanh toán
 
 - Mặc định `PAYMENT_MODE=demo`. Ba cổng mô phỏng có 3 nút *Thanh toán thành công / thất bại / Hủy giao dịch*. Máy chủ vẫn kiểm tra đầy đủ như với cổng thật: đơn thuộc đúng người, số tiền khớp, không xử lý hai lần.
@@ -154,6 +180,7 @@ Hướng dẫn từng bước, bảng biến môi trường và cách cập nh�
 ## Tài liệu
 
 - [docs/HUONG-DAN.md](docs/HUONG-DAN.md): hướng dẫn chi tiết (cấu hình, soạn bài học, mã quản trị, 2FA, chat, dữ liệu demo, kiểm thử, cấu trúc thư mục).
+- [docs/SECURITY/](docs/SECURITY/README.md) và [SECURITY.md](SECURITY.md): tài liệu bảo mật, chính sách báo lỗ hổng.
 - Trang `/gioi-thieu` trên website: thông tin dự án và tác giả.
 
 ## Giấy phép

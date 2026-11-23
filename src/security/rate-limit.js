@@ -2,6 +2,7 @@
 // và dùng chung được khi chạy nhiều tiến trình. Đăng nhập dùng khóa lũy tiến riêng (services/login-guard.js).
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
+const config = require('../config');
 
 /** Store cho express-rate-limit (v7) dựa trên MongoDB. */
 class MongoRateStore {
@@ -91,7 +92,7 @@ const limits = {
   global: () =>
     rateLimit({
       windowMs: MIN,
-      limit: Number(process.env.GLOBAL_RATE_LIMIT) || 600,
+      limit: config.globalRateLimit,
       standardHeaders: 'draft-7',
       legacyHeaders: false,
       store: new MongoRateStore('global'),
@@ -116,4 +117,4 @@ const limits = {
   mfa: () => limiter({ name: 'mfa', windowMs: 15 * MIN, limit: 30, message: 'Bạn nhập mã quá nhiều lần. Vui lòng thử lại sau.' }),
 };
 
-module.exports = { MongoRateStore, limiter, limits, tooMany, MIN, HOUR };
+module.exports = { MongoRateStore, limiter, limits };

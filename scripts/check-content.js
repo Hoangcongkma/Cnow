@@ -148,81 +148,89 @@ async function checkLink(url) {
   return linkCache.get(url);
 }
 
-async function checkCourse(slug) {
-  const dir = path.join(CHECKS, slug);
-  fs.rmSync(dir, { recursive: true, force: true });
-  fs.mkdirSync(dir, { recursive: true });
-  const rows = [];
-  let failed = 0;
-  for (const f of listLessonFiles(slug)) {
-    const { errors, warnings, meta, lesson } = loadLessonFile(path.join(ROOT, slug, f));
-    let ran = 0;
-    let skipped = 0;
-    let parsed = 0;
-    for (const [k, b] of meta.blocks.entries()) {
-      if (b.lang === 'css' || b.lang === 'html' || b.lang === 'php') {
-        const e = b.lang === 'css' ? checkCss(b.code) : b.lang === 'php' ? checkPhp(b.code) : checkHtml(b.code);
-        parsed++;
-        if (b.flags.has('error')) {
-          if (!e) errors.push(`khối ${b.lang} error #${k + 1}: ví dụ lỗi nhưng không phát hiện lỗi cú pháp`);
-        } else if (e) errors.push(`khối ${b.lang} #${k + 1}: lỗi cú pháp – ${e}`);
-        continue;
-      }
-      if (!RUNNABLE.has(b.lang)) continue;
-      if (b.flags.has('norun')) {
-        skipped++;
-        continue;
-      }
-      const named = [...b.flags].find((x) => x.startsWith('file='))?.slice(5);
-      if (named && !/^[a-z0-9-]+\.(js|mjs|cjs)$/.test(named)) {
-        errors.push(`khối code #${k + 1}: tên file không hợp lệ ${named}`);
-        continue;
-      }
-      const ext = b.flags.has('esm') ? 'mjs' : 'js';
-      const base = named || `${f.replace(/\.md$/, '')}-${String(k + 1).padStart(2, '0')}.${ext}`;
-      const file = path.join(dir, base);
-      const pre = b.flags.has('dom')
-        ? `const __dom = require(${JSON.stringify(
-            path
-              .relative(dir, STUB)
-              .replace(/\\/g, '/')
-              .replace(/^(?!\.)/, './'),
-          )});\n`
-        : '';
-      const post = b.flags.has('dom') ? '\n;__dom.fireAll();\n' : '\n';
-      fs.writeFileSync(file, `// Chạy thử từ ${slug}/${f} – khối code #${k + 1} (${b.info})\n${pre}${b.code}${post}`);
-      const env = {};
-      if (b.flags.has('server')) env.PORT = String(++port);
-      if (b.flags.has('db')) env.MONGODB_URI = CHECK_DB;
-      const r = await run(file, { env, server: b.flags.has('server'), timeout: b.flags.has('db') ? 15000 : 8000 });
-      ran++;
-      const where = `khối code #${k + 1} (${b.info})`;
-      const firstErr = (r.err.split('\n').find((l) => /Error|error/.test(l)) || r.err.split('\n')[0] || '').trim();
-      if (b.flags.has('error')) {
-        if (r.code === 0) errors.push(`${where}: mong đợi ném lỗi nhưng chạy thành công`);
-      } else if (b.flags.has('server')) {
-        if (!(r.httpStatus >= 200 && r.httpStatus < 500)) errors.push(`${where}: server không phản hồi GET / (${r.code} ${firstErr})`);
-      } else if (r.code !== 0) {
-        errors.push(`${where}: ${r.code === 'TIMEOUT' ? 'quá thời gian' : `lỗi – ${firstErr}`}`);
-      }
-      if (b.output !== undefined && !b.flags.has('error') && normOut(r.out) !== normOut(b.output)) {
-        errors.push(
-          `${where}: kết quả in ra không khớp khối "text output".\n      mong đợi: ${JSON.stringify(normOut(b.output))}\n      thực tế:  ${JSON.stringify(normOut(r.out))}`,
-        );
-      }
-      fs.writeFileSync(
-        file.replace(/\.[cm]?js$/, '.out.txt'),
-        `exit: ${r.code}${r.httpStatus ? ` · GET / → ${r.httpStatus}` : ''}\n--- stdout ---\n${r.out}\n--- stderr ---\n${r.err}`,
-      );
-    }
-    for (const l of [...new Set(meta.links)]) {
-      const e = await checkLink(l);
-      if (e) errors.push(`liên kết lỗi (${e}): ${l}`);
-    }
-    rows.push({ file: f, title: lesson.title, words: meta.words, ran, skipped, parsed, quiz: lesson.quiz.length, errors, warnings });
-    if (errors.length) failed++;
+/** Khối CSS/HTML/PHP: chỉ kiểm tra cú pháp (khối `error` thì phải phát hiện lỗi). */
+function checkSyntaxBlock(b, k, errors) {
+  const e = b.lang === 'css' ? checkCss(b.code) : b.lang === 'php' ? checkPhp(b.code) : checkHtml(b.code);
+  if (b.flags.has('error')) {
+    if (!e) errors.push(`khối ${b.lang} error #${k + 1}: ví dụ lỗi nhưng không phát hiện lỗi cú pháp`);
+  } else if (e) errors.push(`khối ${b.lang} #${k + 1}: lỗi cú pháp – ${e}`);
+}
+
+/** Ghi khối code ra file chạy thử (khối `dom` được bọc DOM giả lập). Trả về đường dẫn file. */
+function writeBlockFile(ctx, b, k, named) {
+  const ext = b.flags.has('esm') ? 'mjs' : 'js';
+  const base = named || `${ctx.file.replace(/\.md$/, '')}-${String(k + 1).padStart(2, '0')}.${ext}`;
+  const file = path.join(ctx.dir, base);
+  const stub = path
+    .relative(ctx.dir, STUB)
+    .replace(/\\/g, '/')
+    .replace(/^(?!\.)/, './');
+  const pre = b.flags.has('dom') ? `const __dom = require(${JSON.stringify(stub)});\n` : '';
+  const post = b.flags.has('dom') ? '\n;__dom.fireAll();\n' : '\n';
+  fs.writeFileSync(file, `// Chạy thử từ ${ctx.slug}/${ctx.file} – khối code #${k + 1} (${b.info})\n${pre}${b.code}${post}`);
+  return file;
+}
+
+/** So kết quả chạy với mong đợi của khối (error / server / bình thường + khối "text output"). */
+function judgeRun(b, r, where, errors) {
+  const firstErr = (r.err.split('\n').find((l) => /Error|error/.test(l)) || r.err.split('\n')[0] || '').trim();
+  if (b.flags.has('error')) {
+    if (r.code === 0) errors.push(`${where}: mong đợi ném lỗi nhưng chạy thành công`);
+  } else if (b.flags.has('server')) {
+    if (!(r.httpStatus >= 200 && r.httpStatus < 500)) errors.push(`${where}: server không phản hồi GET / (${r.code} ${firstErr})`);
+  } else if (r.code !== 0) {
+    errors.push(`${where}: ${r.code === 'TIMEOUT' ? 'quá thời gian' : `lỗi – ${firstErr}`}`);
   }
-  const table = [
+  if (b.output !== undefined && !b.flags.has('error') && normOut(r.out) !== normOut(b.output)) {
+    errors.push(
+      `${where}: kết quả in ra không khớp khối "text output".\n      mong đợi: ${JSON.stringify(normOut(b.output))}\n      thực tế:  ${JSON.stringify(normOut(r.out))}`,
+    );
+  }
+}
+
+/** Chạy thử 1 khối JS (node), ghi kết quả vào content/_checks/. Trả về 'ran' | 'skipped' | null. */
+async function runBlock(ctx, b, k, errors) {
+  if (b.flags.has('norun')) return 'skipped';
+  const named = [...b.flags].find((x) => x.startsWith('file='))?.slice(5);
+  if (named && !/^[a-z0-9-]+\.(js|mjs|cjs)$/.test(named)) {
+    errors.push(`khối code #${k + 1}: tên file không hợp lệ ${named}`);
+    return null;
+  }
+  const file = writeBlockFile(ctx, b, k, named);
+  const env = {};
+  if (b.flags.has('server')) env.PORT = String(++port);
+  if (b.flags.has('db')) env.MONGODB_URI = CHECK_DB;
+  const r = await run(file, { env, server: b.flags.has('server'), timeout: b.flags.has('db') ? 15000 : 8000 });
+  judgeRun(b, r, `khối code #${k + 1} (${b.info})`, errors);
+  fs.writeFileSync(
+    file.replace(/\.[cm]?js$/, '.out.txt'),
+    `exit: ${r.code}${r.httpStatus ? ` · GET / → ${r.httpStatus}` : ''}\n--- stdout ---\n${r.out}\n--- stderr ---\n${r.err}`,
+  );
+  return 'ran';
+}
+
+/** Kiểm tra 1 bài: frontmatter + cấu trúc, chạy mọi khối code, kiểm tra liên kết còn sống. */
+async function checkLesson(slug, dir, f) {
+  const { errors, warnings, meta, lesson } = loadLessonFile(path.join(ROOT, slug, f));
+  const n = { ran: 0, skipped: 0, parsed: 0 };
+  for (const [k, b] of meta.blocks.entries()) {
+    if (b.lang === 'css' || b.lang === 'html' || b.lang === 'php') {
+      checkSyntaxBlock(b, k, errors);
+      n.parsed++;
+    } else if (RUNNABLE.has(b.lang)) {
+      const r = await runBlock({ slug, dir, file: f }, b, k, errors);
+      if (r) n[r]++;
+    }
+  }
+  for (const l of [...new Set(meta.links)]) {
+    const e = await checkLink(l);
+    if (e) errors.push(`liên kết lỗi (${e}): ${l}`);
+  }
+  return { file: f, title: lesson.title, words: meta.words, ...n, quiz: lesson.quiz.length, errors, warnings };
+}
+
+function reportTable(rows) {
+  return [
     '| Bài | Số từ | Code JS/Node đã chạy thử | HTML/CSS/PHP đã kiểm tra cú pháp | Câu quiz | Ghi chú |',
     '|---|---:|---:|---:|---:|---|',
     ...rows.map(
@@ -230,11 +238,21 @@ async function checkCourse(slug) {
         `| ${r.title} | ${r.words} | ${r.ran}${r.skipped ? ` (+${r.skipped} không chạy)` : ''} | ${r.parsed} | ${r.quiz} | ${r.errors.length ? `❌ ${r.errors.length} lỗi` : '✅'}${r.warnings.length ? ` ⚠ ${r.warnings.join('; ')}` : ''} |`,
     ),
   ];
+}
+
+/** Kiểm tra mọi bài của 1 khóa, ghi content/_checks/<slug>/REPORT.md. Trả về số bài lỗi. */
+async function checkCourse(slug) {
+  const dir = path.join(CHECKS, slug);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+  const rows = [];
+  for (const f of listLessonFiles(slug)) rows.push(await checkLesson(slug, dir, f));
+  const table = reportTable(rows);
   fs.writeFileSync(path.join(dir, 'REPORT.md'), `# Kiểm tra nội dung: ${slug}\n\n${table.join('\n')}\n`);
   console.log(`\n=== ${slug} ===\n${table.join('\n')}`);
   for (const r of rows) for (const e of r.errors) console.log(`  ✗ ${r.file}: ${e}`);
   for (const r of rows) for (const w of r.warnings) console.log(`  ⚠ ${r.file}: ${w}`);
-  return failed;
+  return rows.filter((r) => r.errors.length).length;
 }
 
 (async () => {

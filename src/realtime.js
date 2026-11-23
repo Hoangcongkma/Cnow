@@ -52,6 +52,63 @@ async function currentUser(socket) {
   return user;
 }
 
+/** Vào phòng của một khóa học: kiểm tra ghi danh / giảng viên, trả lịch sử (HISTORY tin gần nhất) và quyền xóa tin. */
+async function onJoin(socket, slug, ack) {
+  if (typeof ack !== 'function') return;
+  const user = await currentUser(socket);
+  if (!user) return ack({ error: 'Phiên đăng nhập đã hết hạn.' });
+  const course = await Course.findOne({ slug: String(slug || '').slice(0, 100), published: true }).select('title slug author');
+  if (!course) return ack({ error: 'Khóa học không tồn tại.' });
+  const teacher = isInstructor(user, course);
+  if (!teacher && !(await Enrollment.exists({ user: user._id, course: course._id }))) {
+    return ack({ error: 'Chỉ học viên đã ghi danh và giảng viên mới vào được phòng chat.' });
+  }
+  for (const r of socket.rooms) if (r.startsWith('course:')) socket.leave(r);
+  const room = `course:${course.id}`;
+  socket.join(room);
+  Object.assign(socket.data, { courseId: course.id, room });
+  const msgs = await ChatMessage.find({ course: course._id }).sort({ createdAt: -1 }).limit(HISTORY).populate('user', 'name role isDemo');
+  ack({ ok: true, canModerate: teacher, me: String(user._id), messages: msgs.reverse().map((m) => shape(m, m.user)) });
+}
+
+/** Gửi tin: làm sạch, giới hạn độ dài + tần suất, lưu, chỉ giữ KEEP tin gần nhất của khóa, phát cho cả phòng. */
+async function onMessage(io, socket, text, ack) {
+  const reply = typeof ack === 'function' ? ack : () => {};
+  const user = await currentUser(socket);
+  if (!user || !socket.data.room) return reply({ error: 'Bạn chưa vào phòng chat.' });
+  const body = clean(text);
+  if (!body || body.length > MAX_LEN) return reply({ error: `Tin nhắn dài 1–${MAX_LEN} ký tự.` });
+  if (!allowed(String(user._id))) return reply({ error: 'Bạn gửi quá nhanh (tối đa 5 tin/10 giây).' });
+  const msg = await ChatMessage.create({ course: socket.data.courseId, user: user._id, text: body });
+  const cutoff = await ChatMessage.find({ course: socket.data.courseId })
+    .sort({ createdAt: -1 })
+    .skip(KEEP - 1)
+    .limit(1)
+    .select('createdAt');
+  if (cutoff[0]) await ChatMessage.deleteMany({ course: socket.data.courseId, createdAt: trusted({ $lt: cutoff[0].createdAt }) });
+  io.to(socket.data.room).emit('message', shape(msg, user));
+  reply({ ok: true });
+}
+
+/** Xóa tin (chỉ giảng viên của khóa hoặc admin): đánh dấu deleted, báo cả phòng. */
+async function onDelete(io, socket, id, ack) {
+  const reply = typeof ack === 'function' ? ack : () => {};
+  const user = await currentUser(socket);
+  if (!user || !socket.data.courseId) return reply({ error: 'Bạn chưa vào phòng chat.' });
+  const course = await Course.findById(socket.data.courseId).select('author');
+  if (!course || !isInstructor(user, course)) return reply({ error: 'Chỉ giảng viên hoặc quản trị viên mới xóa được tin nhắn.' });
+  const r = await ChatMessage.updateOne({ _id: String(id), course: course._id }, { $set: { deleted: true } }).catch(() => null);
+  if (!r || !r.matchedCount) return reply({ error: 'Không tìm thấy tin nhắn.' });
+  io.to(socket.data.room).emit('deleted', String(id));
+  reply({ ok: true });
+}
+
+/**
+ * Gắn Socket.IO vào HTTP server: chỉ WebSocket, chỉ Origin của website, xác thực bằng chính phiên đăng nhập,
+ * gói tối đa 4 KB.
+ * @param {import('http').Server} server
+ * @param {import('express').Express} app (lấy sessionMiddleware dùng chung)
+ */
 function attachRealtime(server, app) {
   const origin = new URL(config.baseUrl).origin;
   const io = new Server(server, {
@@ -63,69 +120,18 @@ function attachRealtime(server, app) {
     allowRequest: (req, cb) => cb(null, req.headers.origin === origin),
   });
   io.engine.use(app.get('sessionMiddleware'));
-
   io.use(async (socket, next) => {
     const user = await currentUser(socket);
     if (!user) return next(new Error('unauthorized'));
     socket.data.userId = String(user._id);
     next();
   });
-
   io.on('connection', (socket) => {
-    // Vào phòng của một khóa học: trả về lịch sử (100 tin gần nhất) và quyền xóa tin
-    socket.on('join', async (slug, ack) => {
-      if (typeof ack !== 'function') return;
-      const user = await currentUser(socket);
-      if (!user) return ack({ error: 'Phiên đăng nhập đã hết hạn.' });
-      const course = await Course.findOne({ slug: String(slug || '').slice(0, 100), published: true }).select('title slug author');
-      if (!course) return ack({ error: 'Khóa học không tồn tại.' });
-      const teacher = isInstructor(user, course);
-      if (!teacher && !(await Enrollment.exists({ user: user._id, course: course._id }))) {
-        return ack({ error: 'Chỉ học viên đã ghi danh và giảng viên mới vào được phòng chat.' });
-      }
-      for (const r of socket.rooms) if (r.startsWith('course:')) socket.leave(r);
-      const room = `course:${course.id}`;
-      socket.join(room);
-      Object.assign(socket.data, { courseId: course.id, room });
-      const msgs = await ChatMessage.find({ course: course._id })
-        .sort({ createdAt: -1 })
-        .limit(HISTORY)
-        .populate('user', 'name role isDemo');
-      ack({ ok: true, canModerate: teacher, me: String(user._id), messages: msgs.reverse().map((m) => shape(m, m.user)) });
-    });
-
-    socket.on('message', async (text, ack) => {
-      const reply = typeof ack === 'function' ? ack : () => {};
-      const user = await currentUser(socket);
-      if (!user || !socket.data.room) return reply({ error: 'Bạn chưa vào phòng chat.' });
-      const body = clean(text);
-      if (!body || body.length > MAX_LEN) return reply({ error: `Tin nhắn dài 1–${MAX_LEN} ký tự.` });
-      if (!allowed(String(user._id))) return reply({ error: 'Bạn gửi quá nhanh (tối đa 5 tin/10 giây).' });
-      const msg = await ChatMessage.create({ course: socket.data.courseId, user: user._id, text: body });
-      // Chỉ giữ 200 tin gần nhất của khóa học
-      const cutoff = await ChatMessage.find({ course: socket.data.courseId })
-        .sort({ createdAt: -1 })
-        .skip(KEEP - 1)
-        .limit(1)
-        .select('createdAt');
-      if (cutoff[0]) await ChatMessage.deleteMany({ course: socket.data.courseId, createdAt: trusted({ $lt: cutoff[0].createdAt }) });
-      io.to(socket.data.room).emit('message', shape(msg, user));
-      reply({ ok: true });
-    });
-
-    socket.on('delete', async (id, ack) => {
-      const reply = typeof ack === 'function' ? ack : () => {};
-      const user = await currentUser(socket);
-      if (!user || !socket.data.courseId) return reply({ error: 'Bạn chưa vào phòng chat.' });
-      const course = await Course.findById(socket.data.courseId).select('author');
-      if (!course || !isInstructor(user, course)) return reply({ error: 'Chỉ giảng viên hoặc quản trị viên mới xóa được tin nhắn.' });
-      const r = await ChatMessage.updateOne({ _id: String(id), course: course._id }, { $set: { deleted: true } }).catch(() => null);
-      if (!r || !r.matchedCount) return reply({ error: 'Không tìm thấy tin nhắn.' });
-      io.to(socket.data.room).emit('deleted', String(id));
-      reply({ ok: true });
-    });
+    socket.on('join', (slug, ack) => onJoin(socket, slug, ack));
+    socket.on('message', (text, ack) => onMessage(io, socket, text, ack));
+    socket.on('delete', (id, ack) => onDelete(io, socket, id, ack));
   });
   return io;
 }
 
-module.exports = { attachRealtime, KEEP, RATE, MAX_LEN };
+module.exports = { attachRealtime, MAX_LEN };

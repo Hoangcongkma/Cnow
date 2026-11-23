@@ -17,6 +17,7 @@ const DEMO_NOTE = 'DEMO – không phải giao dịch thật';
 /** Đơn của cổng mô phỏng (demo hiện tại hoặc PayPal mô phỏng đời cũ) */
 const isDemo = (o) => o && (o.provider === 'demo' || o.provider === 'mock');
 
+/** Tên phương thức thanh toán hiển thị cho một đơn (cổng demo ghi rõ "mô phỏng"). */
 function methodLabel(o) {
   if (o.provider === 'paypal') return 'PayPal';
   if (o.provider === 'mock') return 'PayPal (mô phỏng)';

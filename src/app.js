@@ -103,7 +103,7 @@ app.use((req, res, next) => {
   next();
 });
 // Bản demo công khai: yêu cầu công cụ tìm kiếm không lập chỉ mục (kèm meta robots + robots.txt "Disallow: /")
-if (process.env.DEMO_NOINDEX === 'true') {
+if (config.noindex) {
   app.use((req, res, next) => {
     res.set('X-Robots-Tag', 'noindex, nofollow');
     next();
@@ -158,7 +158,7 @@ app.use((req, res, next) => {
   res.locals.asset = asset;
   // SEO: mặc định; từng trang có thể ghi đè description, ogImage… khi render
   res.locals.canonical = config.baseUrl + (req.path === '/' ? '/' : req.path);
-  res.locals.noindex = process.env.DEMO_NOINDEX === 'true' || PRIVATE.some((p) => req.path === p || req.path.startsWith(p + '/'));
+  res.locals.noindex = config.noindex || PRIVATE.some((p) => req.path === p || req.path.startsWith(p + '/'));
   res.locals.stars = (n) => {
     const r = Math.round(Number(n) || 0);
     return '★'.repeat(r) + '☆'.repeat(5 - r);

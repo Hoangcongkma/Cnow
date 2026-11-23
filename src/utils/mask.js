@@ -5,6 +5,4 @@ const EMAIL_RE = /([A-Za-z0-9._%+-])[A-Za-z0-9._%+-]*@([A-Za-z0-9.-]+\.[A-Za-z]{
 const maskEmail = (s) => String(s ?? '').replace(EMAIL_RE, '$1***@$2');
 
 /** Che mọi email xuất hiện trong chuỗi bất kỳ (dùng cho thông điệp log). */
-const maskPII = (s) => maskEmail(s);
-
-module.exports = { maskEmail, maskPII };
+module.exports = { maskEmail };
