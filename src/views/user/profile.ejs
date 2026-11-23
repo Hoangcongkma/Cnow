@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+<section class="wrap section profile">
+  <h1>Hồ sơ của tôi</h1>
+  <p class="card-pad mfa-banner">
+    🔐 Xác thực hai lớp: <% if (me.mfaEnabled) { %><span class="status st-COMPLETED">Đang bật</span><% } else { %><span class="status st-CANCELLED">Chưa bật</span><% } %>
+    <a class="btn btn-ghost btn-sm" href="/profile/2fa"><%= me.mfaEnabled ? 'Quản lý' : 'Bật ngay' %></a>
+  </p>
+  <div class="profile-grid">
+    <form class="card-pad avatar-form" method="post" action="/profile/avatar" enctype="multipart/form-data" aria-labelledby="av-h">
+      <h2 id="av-h">Ảnh đại diện</h2>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="avatar-row">
+        <%- include('../partials/avatar', { u: me, cls: 'avatar-xl' }) %>
+        <div>
+          <label>Chọn ảnh (JPEG, PNG, WebP · tối đa 2MB)<input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" required></label>
+          <p class="small muted">Ảnh được cắt vuông 256×256 và xóa thông tin EXIF.</p>
+          <button class="btn btn-sm">Tải ảnh lên</button>
+        </div>
+      </div>
+    </form>
+    <% if (me.avatar) { %>
+      <form class="card-pad" method="post" action="/profile/avatar" enctype="multipart/form-data" data-confirm="Xóa ảnh đại diện?">
+        <h2>Xóa ảnh đại diện</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="remove" value="1">
+        <button class="btn btn-ghost btn-sm">Xóa ảnh, dùng chữ cái đầu tên</button>
+      </form>
+    <% } %>
+    <form class="card-pad" method="post" action="/profile" aria-labelledby="info-h">
+      <h2 id="info-h">Thông tin cá nhân</h2>
+      <% if (errors.length) { %><div class="flash flash-error"><%= errors.join(' ') %></div><% } %>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Họ tên<input name="name" value="<%= form ? form.name : me.name %>" required minlength="2" maxlength="80" autocomplete="name"></label>
+      <label>Giới thiệu bản thân<textarea name="bio" rows="4" maxlength="500" placeholder="Bạn đang học gì, mục tiêu của bạn…"><%= form ? form.bio : (me.bio || '') %></textarea></label>
+      <p class="small muted">Tên đăng nhập: <b>@<%= me.username %></b> · Email: <b><%= me.email %></b></p>
+      <button class="btn btn-sm">Lưu thông tin</button>
+    </form>
+
+    <form class="card-pad" method="post" action="/profile/password" id="password" aria-labelledby="pw-h">
+      <h2 id="pw-h">Đổi mật khẩu</h2>
+      <% if (pwErrors.length) { %><div class="flash flash-error"><ul><% pwErrors.forEach(e => { %><li><%= e %></li><% }) %></ul></div><% } %>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Mật khẩu hiện tại<span class="pw"><input type="password" name="current" required autocomplete="current-password"><button type="button" class="pw-toggle" aria-label="Hiện mật khẩu">👁</button></span></label>
+      <label>Mật khẩu mới<span class="pw"><input type="password" name="password" required minlength="8" maxlength="72" autocomplete="new-password" aria-describedby="pw-hint"><button type="button" class="pw-toggle" aria-label="Hiện mật khẩu">👁</button></span></label>
+      <p id="pw-hint" class="small muted">8–72 ký tự, có cả chữ và số, không chứa tên đăng nhập/email.</p>
+      <label>Nhập lại mật khẩu mới<input type="password" name="confirm" required autocomplete="new-password"></label>
+      <p class="small muted">Sau khi đổi, mọi phiên đăng nhập trên thiết bị khác sẽ bị đăng xuất.</p>
+      <button class="btn btn-sm">Đổi mật khẩu</button>
+    </form>
+  </div>
+</section>
+<%- include('../partials/footer') %>

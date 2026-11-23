@@ -1,0 +1,24 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <div class="auth-card demo-pay">
+    <p class="demo-warn" role="note">MÔI TRƯỜNG DEMO – KHÔNG TRỪ TIỀN THẬT</p>
+    <h1><span aria-hidden="true"><%= gateway.icon %></span> <%= gateway.label %></h1>
+    <table class="kv">
+      <tr><th>Người bán</th><td>Cnow (website demo đồ án)</td></tr>
+      <tr><th>Nội dung</th><td><%= order.course.title %></td></tr>
+      <tr><th>Số tiền</th><td><b><%= expect.currency === 'USD' ? usd(expect.amount) + ' USD' : fmtVnd(expect.amount) %></b></td></tr>
+      <tr><th>Mã đơn</th><td><code><%= order.providerOrderId %></code></td></tr>
+    </table>
+    <p class="small muted">Chọn kết quả bạn muốn mô phỏng. Không có bước nhập thẻ, mật khẩu hay OTP.</p>
+    <form method="post" action="/pay/demo/<%= order.providerOrderId %>/<%= gw %>" class="demo-actions" data-once>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="amount" value="<%= expect.amount %>">
+      <input type="hidden" name="currency" value="<%= expect.currency %>">
+      <button class="btn btn-block" name="action" value="success">✓ Thanh toán thành công</button>
+      <button class="btn btn-danger btn-block" name="action" value="fail">✕ Thanh toán thất bại</button>
+      <button class="btn btn-ghost btn-block" name="action" value="cancel">Hủy giao dịch</button>
+    </form>
+    <p class="small center"><a href="/pay/demo/<%= order.providerOrderId %>">← Chọn phương thức khác</a></p>
+  </div>
+</section>
+<%- include('../partials/footer') %>

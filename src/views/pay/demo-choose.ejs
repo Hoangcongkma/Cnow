@@ -1,0 +1,26 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <div class="auth-card demo-pay">
+    <p class="demo-warn" role="note">MÔI TRƯỜNG DEMO – KHÔNG TRỪ TIỀN THẬT</p>
+    <h1>Chọn phương thức thanh toán</h1>
+    <table class="kv">
+      <tr><th>Khóa học</th><td><%= order.course.title %></td></tr>
+      <% if (order.couponCode) { %><tr><th>Mã giảm giá</th><td><code><%= order.couponCode %></code> −<%= usd(order.discount) %></td></tr><% } %>
+      <tr><th>Số tiền</th><td><b><%= usd(order.amount) %></b> <span class="muted">≈ <%= fmtVnd(order.amountVnd) %></span></td></tr>
+      <tr><th>Mã đơn</th><td><code><%= order.providerOrderId %></code></td></tr>
+    </table>
+    <ul class="demo-methods">
+      <% Object.entries(gateways).forEach(([key, g]) => { %>
+        <li>
+          <a class="demo-method" href="/pay/demo/<%= order.providerOrderId %>/<%= key %>">
+            <span class="demo-ic" aria-hidden="true"><%= g.icon %></span>
+            <span><b><%= g.label %></b><br><span class="small muted">Thanh toán bằng <%= g.currency === 'USD' ? usd(order.amount) : fmtVnd(order.amountVnd) %></span></span>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+    <p class="small muted">Đây là cổng thanh toán mô phỏng của đồ án: không kết nối PayPal, VNPay hay MoMo thật và không yêu cầu số thẻ, mật khẩu hay mã OTP. Tỉ giá hiển thị là tỉ giá demo.</p>
+    <p class="small center"><a href="/courses/<%= order.course.slug %>">← Quay lại khóa học</a></p>
+  </div>
+</section>
+<%- include('../partials/footer') %>

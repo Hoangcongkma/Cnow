@@ -1,0 +1,59 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <h1><%= title %></h1>
+    <% if (errors.length) { %><div class="flash flash-error"><%= errors.join(' ') %></div><% } %>
+    <form class="form-grid" method="post" action="<%= action %>" data-builder-form>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="structure" data-structure>
+      <label>Tên khóa học<input name="title" value="<%= course.title || '' %>" required maxlength="120"></label>
+      <label>Đường dẫn (slug)<input name="slug" value="<%= course.slug || '' %>" required pattern="[a-z0-9-]+" placeholder="vd: nodejs-express"></label>
+      <label>Giá (USD, 0 = miễn phí)<input type="number" name="price" min="0" max="10000" step="0.01" value="<%= course.price %>" required></label>
+      <label>Trình độ
+        <select name="level"><% ['Cơ bản', 'Trung cấp', 'Nâng cao'].forEach(l => { %><option <%= course.level === l ? 'selected' : '' %>><%= l %></option><% }) %></select>
+      </label>
+      <label>Nhãn ảnh bìa<input name="tag" value="<%= course.tag || '' %>" maxlength="20" placeholder="vd: NodeJS"></label>
+      <fieldset><legend>Màu ảnh bìa</legend>
+        <div class="swatches"><% colors.forEach(c => { %><label class="swatch"><input type="radio" name="color" value="<%= c %>" <%= course.color === c ? 'checked' : '' %>><span data-color="<%= c %>"></span></label><% }) %></div>
+      </fieldset>
+      <label class="full">Tóm tắt<input name="summary" value="<%= course.summary || '' %>" maxlength="300"></label>
+      <label class="full">Mô tả chi tiết<textarea name="description" rows="5" maxlength="5000"><%= course.description || '' %></textarea></label>
+      <div class="full builder" data-builder>
+        <div class="section-head"><h2>Chương và bài học</h2><span class="muted small">Kéo biểu tượng ⠿ hoặc dùng nút ↑ ↓ để sắp xếp. Video mới được YouTube xác nhận khi lưu.</span></div>
+        <noscript><p class="flash flash-warn">Trình dựng chương/bài cần bật JavaScript.</p></noscript>
+        <div class="sections" data-sections>
+          <% const courseId = course._id ? String(course._id) : ''; sections.forEach(s => { %><%- include('_section', { s, courseId }) %><% }) %>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" data-add-section>+ Thêm chương</button>
+        <p class="muted small">Video của người khác chỉ dùng cho khóa miễn phí hoặc bài <b>Học thử</b>. Khóa có phí phải dùng video của bạn hoặc đã được tác giả cho phép.</p>
+        <template data-tpl-section><%- include('_section', { s: { id: '', title: '', lessons: [] }, courseId: '' }) %></template>
+        <template data-tpl-lesson><%- include('_lesson-row', { l: { id: '', title: '', youtubeId: '', minutes: 10, preview: false, sourceName: '' }, courseId: '' }) %></template>
+      </div>
+      <% const st = course.status || 'draft'; %>
+      <div class="full status-box">
+        <p>Trạng thái hiện tại: <span class="status cs-<%= st %>"><%= labels[st] %></span></p>
+        <% if (st === 'rejected' && course.rejectReason) { %><p class="flash flash-error small"><b>Lý do bị từ chối:</b> <%= course.rejectReason %></p><% } %>
+        <% if (me.role === 'admin') { %>
+          <label>Trạng thái sau khi lưu
+            <select name="status"><% Object.entries(labels).forEach(([k, v]) => { %><option value="<%= k %>" <%= st === k ? 'selected' : '' %>><%= v %></option><% }) %></select>
+          </label>
+        <% } %>
+      </div>
+      <div class="full actions-row">
+        <% if (me.role === 'admin') { %>
+          <button class="btn">Lưu khóa học</button>
+        <% } else if (st === 'published') { %>
+          <button class="btn" name="intent" value="submit" data-confirm-click="Lưu thay đổi và gửi duyệt lại? Khóa học sẽ chuyển về “Chờ duyệt” (tạm ẩn với học viên) cho tới khi quản trị viên duyệt.">Lưu và gửi duyệt lại</button>
+          <button class="btn btn-ghost" name="intent" value="unpublish" data-confirm-click="Ẩn khóa học? Học viên sẽ không vào học được cho tới khi khóa được duyệt lại.">Ẩn khóa học (về nháp)</button>
+        <% } else { %>
+          <button class="btn btn-ghost" name="intent" value="draft">Lưu nháp</button>
+          <button class="btn" name="intent" value="submit"><%= st === 'pending' ? 'Lưu và giữ chờ duyệt' : 'Gửi duyệt' %></button>
+        <% } %>
+        <a class="btn btn-ghost" href="/admin/courses">Hủy</a>
+      </div>
+      <% if (me.role !== 'admin') { %><p class="full muted small">Khóa học chỉ hiển thị cho người học sau khi quản trị viên duyệt. Mọi thay đổi trên khóa đã xuất bản đều phải được duyệt lại.</p><% } %>
+    </form>
+  </div>
+</section>
+<%- include('../partials/footer') %>

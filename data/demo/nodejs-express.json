@@ -1,0 +1,519 @@
+{
+  "slug": "nodejs-express",
+  "lessons": {
+    "01-nodejs-hoat-dong-the-nao": [
+      {
+        "q": "Mình chạy lại ví dụ thứ tự event loop nhưng đổi file sang .mjs thì dòng Promise lại in trước dòng process.nextTick. Mình có chạy sai gì không ạ?",
+        "answers": ["Mình cũng bị y vậy, tưởng máy lỗi :)"],
+        "instructor": "Bạn không sai. Trong ES module, code cấp cao nhất được chạy bên trong một microtask, nên hàng đợi Promise được xử lý tiếp ngay trong lượt đó, trước khi tới nextTick. Với CommonJS (file .js thường như trong bài) thứ tự là nextTick rồi mới tới Promise. Điều quan trọng cần nhớ vẫn không đổi: code đồng bộ chạy hết trước, setTimeout luôn sau các microtask."
+      },
+      {
+        "q": "setTimeout(fn, 0) nghĩa là chạy ngay lập tức đúng không mn?",
+        "answers": [],
+        "instructor": "Không hẳn. Số 0 chỉ là thời gian chờ tối thiểu. Callback được đưa vào hàng đợi timer và chỉ chạy khi toàn bộ code đồng bộ hiện tại và các microtask (Promise, nextTick) đã xong. Vì vậy trong ví dụ của bài nó luôn in cuối cùng."
+      },
+      {
+        "q": "Em viết const data = fs.readFile('a.txt', 'utf8'); console.log(data) thì ra Promise { pending }. Em đã require('fs/promises') rồi mà?",
+        "answers": ["Thiếu await đó bạn, và hàm bọc ngoài phải là async.", "Hoặc dùng .then((data) => console.log(data)) cũng được."],
+        "instructor": "Đúng như các bạn nói: bản fs/promises trả về Promise, muốn lấy nội dung thì phải await (trong hàm async) hoặc dùng .then. Nhớ bọc try...catch để bắt trường hợp file không tồn tại (ENOENT)."
+      },
+      {
+        "q": "Mình để await fs.readFile ở ngay đầu file server.js thì bị SyntaxError: await is only valid in async functions and the top level bodies of modules. Sửa sao ạ?",
+        "answers": ["Bọc vào async function main() { ... } rồi gọi main() là xong."],
+        "instructor": "File .js dùng require là CommonJS nên không có top-level await. Cách đơn giản nhất là bọc code vào async function main() và gọi main(), như mẫu trong bài. Nếu muốn dùng await ở cấp cao nhất thì phải chuyển file sang ES module (đuôi .mjs hoặc type: module), nhưng khi đó không còn require."
+      },
+      {
+        "q": "Lỗi Error: listen EADDRINUSE: address already in use :::3000 là sao thầy?",
+        "answers": [
+          "Chắc server cũ vẫn đang chạy ở terminal khác, tắt nó bằng Ctrl + C.",
+          "Hoặc chạy với cổng khác: đặt biến PORT=3001 rồi chạy lại."
+        ],
+        "instructor": "Cổng 3000 đang bị một tiến trình khác giữ, thường là chính server bạn chạy lần trước chưa tắt. Tắt tiến trình đó, hoặc đổi cổng qua biến môi trường PORT vì code mẫu đã đọc process.env.PORT."
+      },
+      {
+        "q": "Nếu Node.js chỉ có một luồng thì sao đọc file vẫn không bị chặn? Ai đọc file giúp nó vậy?",
+        "answers": [],
+        "instructor": "Luồng chính chỉ chạy code JavaScript của bạn. Phần đọc file được giao cho thư viện nền (libuv) và hệ điều hành; với file, libuv dùng một nhóm luồng phụ bên dưới. Khi đọc xong, kết quả được xếp vào hàng đợi và vòng lặp sự kiện gọi callback (hoặc hoàn thành Promise) lúc luồng chính rảnh. Bạn không phải quản lý các luồng đó."
+      },
+      {
+        "q": "Bài bảo không chạy tính toán nặng trong route. Vậy nếu mình bắt buộc phải xử lý một file Excel lớn thì làm thế nào?",
+        "answers": ["Mình nghe nói có worker_threads, chưa thử."],
+        "instructor": "Có vài hướng: dùng hàm bất đồng bộ hoặc đọc theo luồng (stream) nếu thư viện hỗ trợ; tách phần tính toán sang worker_threads hoặc một tiến trình riêng; hoặc đưa vào hàng đợi công việc chạy nền rồi báo kết quả sau. Mục tiêu là luồng chính luôn rảnh để phục vụ người dùng khác."
+      },
+      {
+        "q": "process.env.PORT của mình luôn undefined dù đã tạo file .env. Có cần cài gì thêm không?",
+        "answers": [
+          "Node 20.6 trở lên có cờ node --env-file=.env server.js đó bạn.",
+          "Hoặc cài gói dotenv rồi require('dotenv').config() ở dòng đầu."
+        ],
+        "instructor": "Node.js không tự đọc file .env. Bạn có thể chạy node --env-file=.env (Node 20.6+), hoặc dùng gói dotenv. Nhớ thêm .env vào .gitignore để không đưa secret lên Git."
+      },
+      {
+        "q": "Bài 2 em thêm route /gio nhưng tiếng Việt trả về bị lỗi font kiểu Xin chÃ o. Em sai chỗ nào ạ?",
+        "answers": [],
+        "instructor": "Trình duyệt không biết bảng mã nên đoán sai. Đặt header Content-Type: text/plain; charset=utf-8 trước khi res.end, như trong code mẫu. Khi chuyển sang Express, res.send tự đặt charset cho bạn."
+      },
+      {
+        "q": "Mình đặt try...catch bọc ngoài fs.readFile mà không có await thì lỗi ENOENT vẫn không bị bắt, còn hiện UnhandledPromiseRejection. Tại sao vậy?",
+        "answers": ["Vì lúc lỗi xảy ra thì khối try đã chạy xong từ lâu rồi."],
+        "instructor": "Chính xác. Không có await, try chỉ bọc lệnh tạo Promise, lệnh đó thành công ngay. Lỗi đến sau, khi Promise bị từ chối, lúc ấy không còn ai bắt. Thêm await để try...catch chờ kết quả, hoặc gắn .catch vào Promise. Từ Node 15, rejection không được bắt sẽ làm tiến trình dừng."
+      }
+    ],
+    "02-npm-va-module": [
+      {
+        "q": "npm install và npm ci khác nhau chỗ nào vậy mọi người? Thấy trên CI hay dùng npm ci.",
+        "answers": ["npm ci cài đúng y package-lock.json, không sửa lock file. Nhanh hơn trên máy CI."],
+        "instructor": "npm ci xóa node_modules rồi cài chính xác theo package-lock.json, và báo lỗi nếu lock file không khớp với package.json; nó không bao giờ sửa lock file. npm install thì có thể cập nhật lock file trong khoảng phiên bản cho phép. Vì vậy máy CI và máy chủ nên dùng npm ci, còn khi bạn thêm gói mới thì dùng npm install."
+      },
+      {
+        "q": "Mình lỡ commit node_modules lên Git rồi, repo nặng mấy trăm MB. Giờ xóa sao cho đúng ạ?",
+        "answers": ["Thêm node_modules/ vào .gitignore, rồi git rm -r --cached node_modules và commit lại."],
+        "instructor": "Cách bạn kia nói là đúng: thêm node_modules/ vào .gitignore, chạy git rm -r --cached node_modules để gỡ khỏi Git nhưng vẫn giữ trên máy, rồi commit. Lưu ý lịch sử cũ vẫn còn các file đó; với đồ án thì thường chấp nhận được. Người khác clone về chỉ cần chạy npm install."
+      },
+      {
+        "q": "Em viết exports = { tongTien } mà file kia require ra {} rỗng. Sao kỳ vậy?",
+        "answers": [],
+        "instructor": "exports chỉ là một biến trỏ tới module.exports. Gán exports = {...} là bạn cho biến đó trỏ sang đối tượng mới, còn module.exports (thứ mà require trả về) vẫn là đối tượng rỗng ban đầu. Dùng module.exports = { tongTien }, hoặc thêm thuộc tính kiểu exports.tongTien = tongTien."
+      },
+      {
+        "q": "Error: Cannot find module 'tinh-tien'. File tinh-tien.js nằm ngay cạnh app.js mà?",
+        "answers": ["Thiếu ./ ở đầu đường dẫn đó bạn.", "require('./tinh-tien') là chạy, không cần ghi .js."],
+        "instructor": "Không có ./ hay ../ thì Node.js hiểu đó là tên gói và đi tìm trong node_modules. Với file của bạn, luôn bắt đầu bằng ./ hoặc ../. Trong CommonJS có thể bỏ đuôi .js; trong ES module thì phải ghi đủ đuôi."
+      },
+      {
+        "q": "Mình đổi sang import express from 'express' thì báo SyntaxError: Cannot use import statement outside a module.",
+        "answers": ["Thêm type: module vào package.json là được, nhưng cẩn thận các file khác đang dùng require sẽ lỗi."],
+        "instructor": "Mặc định file .js được coi là CommonJS. Muốn dùng import thì đổi đuôi sang .mjs, hoặc khai báo type: module trong package.json. Bạn kia nhắc đúng: khi đã chuyển cả dự án sang ESM thì require, module.exports và __dirname không còn dùng như cũ. Mỗi file nên chọn một hệ thống."
+      },
+      {
+        "q": "Trong file .mjs thì __dirname bị ReferenceError: __dirname is not defined. Lấy thư mục hiện tại kiểu gì ạ?",
+        "answers": [],
+        "instructor": "ES module không có __dirname và __filename. Từ Node 20.11 bạn dùng import.meta.dirname và import.meta.filename. Với bản cũ hơn thì dùng fileURLToPath(import.meta.url) từ module url rồi path.dirname."
+      },
+      {
+        "q": "^5.1.0 với ~5.1.0 khác nhau sao thầy?",
+        "answers": ["~ thì chỉ nhận bản vá thôi, kiểu 5.1.x."],
+        "instructor": "Đúng vậy. ^5.1.0 cho phép mọi bản từ 5.1.0 đến dưới 6.0.0 (được lên minor và patch). ~5.1.0 chỉ cho phép từ 5.1.0 đến dưới 5.2.0 (chỉ lên patch). Dù dùng dấu nào, package-lock.json vẫn chốt phiên bản chính xác đã cài."
+      },
+      {
+        "q": "eslint nên cài -D hay cài bình thường ạ? Cài nhầm thì có sao không?",
+        "answers": ["-D nha bạn, chạy thật không cần nó.", "Cài nhầm vẫn chạy, chỉ là deploy nặng hơn chút."],
+        "instructor": "Công cụ chỉ dùng lúc phát triển như eslint, prettier, thư viện kiểm thử thì cài bằng npm install -D để vào devDependencies. Cài nhầm vào dependencies không làm hỏng code, nhưng khi triển khai với npm ci --omit=dev thì những gói đó vẫn bị cài theo, tốn thời gian và dung lượng."
+      },
+      {
+        "q": "Mình sửa một dòng trong node_modules/express để debug, chạy xong thì npm install lại mất hết. Có cách giữ lại không?",
+        "answers": [],
+        "instructor": "Đừng sửa trong node_modules vì đó là thư mục sinh ra tự động. Nếu chỉ để tìm hiểu thì đặt console.log hoặc breakpoint rồi bỏ đi. Nếu gói có lỗi thật, hãy nâng phiên bản, báo lỗi cho tác giả, hoặc bọc lại phần đó trong code của bạn."
+      },
+      {
+        "q": "npm audit báo 3 moderate vulnerabilities, em có nên chạy npm audit fix --force luôn không ạ?",
+        "answers": ["Đừng force bừa, nó có thể nâng major làm vỡ code đó."],
+        "instructor": "Chạy npm audit fix (không force) trước, nó chỉ nâng trong khoảng semver an toàn. --force có thể nâng phiên bản chính và làm hỏng ứng dụng, nên chỉ dùng khi bạn đã đọc báo cáo, hiểu gói nào bị đổi và chạy lại kiểm thử sau đó. Nhiều cảnh báo nằm ở devDependencies, mức độ ảnh hưởng thực tế thấp hơn."
+      }
+    ],
+    "03-express-routing": [
+      {
+        "q": "Mình có app.get('/khoa-hoc/:slug') và app.get('/khoa-hoc/moi') mà vào /khoa-hoc/moi lại ra Không tìm thấy khóa học. Mình nghĩ hai route khác nhau mà?",
+        "answers": ["Đảo thứ tự lại, route cụ thể để lên trên."],
+        "instructor": "Express duyệt route theo thứ tự khai báo. /khoa-hoc/:slug đứng trước nên bắt luôn /khoa-hoc/moi với slug = 'moi', rồi trả 404 vì không có khóa học tên đó. Đặt /khoa-hoc/moi lên trước route có tham số là xong."
+      },
+      {
+        "q": "Lỗi Cannot set headers after they are sent to the client là sao mn ơi",
+        "answers": ["Thiếu return trước res.status(404).json(...) rồi.", "Mình bị khi gọi res.send hai lần trong cùng một nhánh."],
+        "instructor": "Mỗi yêu cầu chỉ được trả lời một lần. Lỗi này xuất hiện khi code đã gửi response rồi vẫn chạy tiếp tới một lệnh gửi khác. Hãy viết return res.status(404).json(...) mỗi khi trả lời sớm, như trong code mẫu."
+      },
+      {
+        "q": "Em so sánh k.id === req.params.id mà không bao giờ tìm thấy, dù in ra thấy giống nhau.",
+        "answers": [],
+        "instructor": "req.params.id luôn là chuỗi, còn k.id trong mảng là số, nên === luôn sai. Chuyển bằng Number(req.params.id) và kiểm tra Number.isInteger trước khi dùng. req.query cũng vậy, mọi giá trị đều là chuỗi."
+      },
+      {
+        "q": "Mình nâng lên Express 5 thì app.get('*', ...) báo lỗi Missing parameter name. Trước đây Express 4 vẫn chạy được.",
+        "answers": ["Express 5 đổi cú pháp đường dẫn rồi, phải đặt tên cho dấu sao."],
+        "instructor": "Express 5 dùng phiên bản mới của path-to-regexp: ký tự đại diện phải có tên, ví dụ '/*splat'. Nếu mục đích là trang 404 thì gọn nhất là dùng app.use((req, res) => res.status(404)...) đặt sau mọi route, như bài Middleware sẽ hướng dẫn."
+      },
+      {
+        "q": "Gửi POST bằng fetch mà quên header Content-Type: application/json thì req.body.ten bị lỗi Cannot read properties of undefined. Có phải do server không ạ?",
+        "answers": [],
+        "instructor": "Do phía gửi. express.json() chỉ đọc body khi Content-Type là JSON; không khớp thì nó bỏ qua và trong Express 5 req.body vẫn là undefined. Thêm header đúng ở fetch. Phía server, viết phòng thủ như String(req.body?.ten || '') để không bị sập khi dữ liệu thiếu."
+      },
+      {
+        "q": "Route DELETE em trả res.status(204).json({ ok: true }) mà bên client nhận về rỗng?",
+        "answers": ["204 là No Content mà bạn, nó không gửi body đâu."],
+        "instructor": "Đúng, 204 nghĩa là thành công và không có nội dung, nên body sẽ bị bỏ. Muốn trả kèm dữ liệu thì dùng 200. Nếu không cần gì thêm thì res.status(204).end() như trong bài là chuẩn."
+      },
+      {
+        "q": "Thầy ơi tạo mới thì 201, vậy dữ liệu sai thì nên trả 400 hay 422 ạ?",
+        "answers": ["Mình thấy nhiều API dùng 422 cho lỗi kiểm tra dữ liệu."],
+        "instructor": "Cả hai đều được dùng. 400 là lựa chọn chung cho yêu cầu không hợp lệ và đủ cho khóa học này. Một số API dùng 422 khi cú pháp đúng nhưng nội dung không đạt điều kiện. Quan trọng là bạn thống nhất trong toàn bộ API và trả kèm thông báo lỗi rõ ràng."
+      },
+      {
+        "q": "Mình tách router ra file routes-khoa-hoc.js rồi app.use('/khoa-hoc', router), nhưng trong router mình lại viết router.get('/khoa-hoc/:slug') nên không chạy.",
+        "answers": [],
+        "instructor": "Tiền tố /khoa-hoc đã được gắn ở app.use, nên bên trong router chỉ viết phần còn lại: router.get('/:slug'). Viết như bạn thì đường dẫn thật sẽ thành /khoa-hoc/khoa-hoc/:slug."
+      },
+      {
+        "q": "Có nên làm một liên kết thường trỏ tới /xoa/5 để xóa cho nhanh không? Bài nói GET không được đổi dữ liệu nhưng mình chưa hiểu nguy hiểm chỗ nào.",
+        "answers": [
+          "Trình duyệt có thể tải trước link, thế là tự xóa luôn.",
+          "Người khác cũng có thể gài link đó vào một trang khác để bạn bấm."
+        ],
+        "instructor": "Hai bạn nói đều đúng. GET có thể bị trình duyệt tải trước, công cụ tìm kiếm thu thập, hoặc kẻ xấu nhúng vào ảnh để nạn nhân vô tình gọi. Thao tác xóa phải dùng POST hoặc DELETE, kèm kiểm tra đăng nhập, quyền và token CSRF."
+      },
+      {
+        "q": "Mình có router con app.use('/khoa-hoc/:slug/bai', routerBai) nhưng trong routerBai thì req.params.slug là undefined.",
+        "answers": [],
+        "instructor": "Mặc định router con không nhìn thấy tham số của đường dẫn cha. Tạo router bằng express.Router({ mergeParams: true }) thì req.params.slug sẽ có trong routerBai."
+      }
+    ],
+    "04-middleware": [
+      {
+        "q": "Request của mình treo mãi không trả về, Postman quay vòng. Middleware log của mình chỉ có console.log(req.method).",
+        "answers": ["Thiếu next() rồi bạn ơi."],
+        "instructor": "Middleware phải kết thúc bằng một trong hai việc: gửi response hoặc gọi next(). Chỉ log mà không gọi next() thì yêu cầu dừng ở đó và trình duyệt chờ tới khi hết thời gian. Thêm next() ở cuối là được."
+      },
+      {
+        "q": "req.body undefined dù mình đã có app.use(express.json()) rồi ạ.",
+        "answers": ["Bạn đặt nó trên hay dưới route? Phải đặt trên.", "Kiểm tra cả header Content-Type phía client nữa."],
+        "instructor": "Hai nguyên nhân hay gặp nhất: app.use(express.json()) khai báo sau route nên không áp dụng cho route đó, hoặc client không gửi Content-Type: application/json. Nếu bạn gửi từ form HTML thông thường thì cần express.urlencoded thay vì express.json."
+      },
+      {
+        "q": "Middleware lỗi của em viết (err, req, res) => {...} mà lỗi vẫn hiện trang HTML mặc định của Express.",
+        "answers": [],
+        "instructor": "Express nhận diện middleware lỗi bằng đúng 4 tham số. Thiếu next thì nó bị coi là middleware thường và không nhận lỗi. Viết đủ (err, req, res, next) dù không dùng next; có thể thêm dòng tắt cảnh báo no-unused-vars của ESLint như trong bài."
+      },
+      {
+        "q": "Express 5 tự bắt lỗi async, vậy Express 4 thì sao? Dự án nhóm em vẫn dùng bản 4.",
+        "answers": ["Hồi trước mình phải bọc try catch rồi gọi next(err) thủ công."],
+        "instructor": "Ở Express 4, lỗi trong hàm async không tự tới middleware lỗi, Promise bị từ chối sẽ không được xử lý. Bạn phải try...catch và gọi next(err), hoặc viết một hàm bọc nhỏ kiểu fn => (req, res, next) => fn(req, res, next).catch(next). Nếu được, nâng lên Express 5 cho gọn."
+      },
+      {
+        "q": "Mình để app.use(express.static('public')) mà khi chạy node src/server.js từ thư mục khác thì CSS 404.",
+        "answers": [],
+        "instructor": "Đường dẫn 'public' được tính theo thư mục bạn đang đứng khi chạy lệnh, không theo vị trí file. Dùng path.join(__dirname, 'public') (hoặc đường dẫn tương ứng với cấu trúc dự án) để luôn đúng dù chạy từ đâu."
+      },
+      {
+        "q": "Trang 404 của mình đặt trên cùng nên route nào cũng ra 404 :) Vậy middleware lỗi và 404 cái nào đặt trước?",
+        "answers": ["404 trước, middleware lỗi cuối cùng."],
+        "instructor": "Thứ tự đúng: các middleware chung (log, đọc body, bảo mật), tới các route, rồi middleware 404, cuối cùng là middleware lỗi 4 tham số. Middleware lỗi chỉ được gọi khi có lỗi nên đặt cuối không ảnh hưởng tới 404."
+      },
+      {
+        "q": "Gửi body hơn 10kb thì nhận lỗi PayloadTooLargeError. Mình muốn trả thông báo tiếng Việt thay vì trang lỗi mặc định được không?",
+        "answers": [],
+        "instructor": "Được. Lỗi do express.json ném ra có err.status = 413 và err.type = 'entity.too.large'. Trong middleware lỗi bạn kiểm tra err.status rồi trả res.status(413).json({ loi: 'Dữ liệu quá lớn' }); các lỗi khác vẫn trả 500 với thông báo chung."
+      },
+      {
+        "q": "Có nên gửi err.stack cho client lúc đang làm đồ án để dễ debug không thầy?",
+        "answers": ["Chỉ in ra console server thôi là đủ debug rồi."],
+        "instructor": "Chỉ nên ghi stack vào log phía server. Nếu muốn hiện chi tiết trên trang thì chỉ bật khi NODE_ENV là development, và chắc chắn tắt ở production. Stack làm lộ đường dẫn file, tên thư viện và đôi khi cả câu truy vấn."
+      },
+      {
+        "q": "Middleware có tham số kiểu chiGioHanhChinh(8, 17) em chưa hiểu, sao lại gọi hàm rồi mới truyền vào app.get?",
+        "answers": ["Nó gọi hàm ngoài để lấy ra hàm (req, res, next) bên trong, giống closure."],
+        "instructor": "Đúng vậy. chiGioHanhChinh(8, 17) chạy một lần lúc khai báo và trả về một middleware mới nhớ sẵn gioMo, gioDong nhờ closure. Express sau đó gọi middleware này cho mỗi yêu cầu. express.json({ limit }) cũng là một hàm tạo middleware theo đúng kiểu đó."
+      },
+      {
+        "q": "Mình muốn middleware log in ra mã trạng thái nhưng res.statusCode lúc gọi next() luôn là 200.",
+        "answers": [],
+        "instructor": "Lúc middleware chạy thì route chưa xử lý nên chưa có mã trạng thái thật. Lắng nghe res.on('finish', ...) như ví dụ đo thời gian trong bài; khi sự kiện này chạy, response đã gửi xong và res.statusCode là giá trị cuối cùng."
+      }
+    ],
+    "05-ket-noi-mongodb-voi-mongoose": [
+      {
+        "q": "MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017. Mình cài MongoDB rồi mà ạ.",
+        "answers": ["Kiểm tra dịch vụ MongoDB đã chạy chưa, trên Windows vào Services xem.", "Mình bị do quên bật Docker container mongo."],
+        "instructor": "ECONNREFUSED nghĩa là không có chương trình nào lắng nghe ở cổng 27017. Cài rồi chưa chắc đã chạy: hãy khởi động dịch vụ MongoDB (hoặc container), rồi thử kết nối bằng mongosh. Nếu dùng Atlas thì đặt MONGODB_URI là chuỗi mongodb+srv của bạn."
+      },
+      {
+        "q": "Chuỗi kết nối mongodb://localhost:27017 thì lỗi ECONNREFUSED ::1:27017, đổi sang 127.0.0.1 lại chạy. Sao vậy thầy?",
+        "answers": [],
+        "instructor": "Từ Node 17, localhost có thể được phân giải thành địa chỉ IPv6 ::1 trước, trong khi MongoDB mặc định chỉ lắng nghe IPv4 127.0.0.1. Vì vậy bài dùng 127.0.0.1 trong chuỗi kết nối. Cách khác là cấu hình MongoDB lắng nghe thêm IPv6."
+      },
+      {
+        "q": "Operation khoahocs.find() buffering timed out after 10000ms. Server vẫn chạy bình thường nhưng gọi API thì đợi 10 giây rồi lỗi.",
+        "answers": ["Bạn có await mongoose.connect không? Mình quên gọi connect luôn."],
+        "instructor": "Mongoose cho phép gọi model trước khi kết nối và xếp truy vấn vào hàng đợi; nếu sau 10 giây vẫn chưa kết nối được thì báo lỗi này. Kiểm tra bạn đã gọi và await mongoose.connect chưa, chuỗi kết nối đúng chưa, và nên kết nối xong rồi mới app.listen."
+      },
+      {
+        "q": "Model mình đặt tên KhoaHoc mà vào mongosh không thấy collection KhoaHoc, chỉ thấy khoahocs. Có phải bị lỗi không?",
+        "answers": [],
+        "instructor": "Không lỗi. Mongoose tự đổi tên model sang chữ thường và thêm số nhiều để làm tên collection, nên KhoaHoc thành khoahocs. Muốn đặt tên riêng thì truyền tham số thứ ba: mongoose.model('KhoaHoc', schema, 'khoa_hoc')."
+      },
+      {
+        "q": "Mình dùng updateOne({ ten: 'HTML' }, { $set: { gia: -10 } }) mà nó vẫn lưu giá âm, trong khi schema có min: 0. Validation không chạy với update à?",
+        "answers": ["Hình như phải thêm runValidators: true."],
+        "instructor": "Đúng, mặc định validator chỉ chạy khi create hoặc save. Với updateOne, findOneAndUpdate... bạn truyền tùy chọn { runValidators: true } ở tham số thứ ba để Mongoose kiểm tra các trường được cập nhật."
+      },
+      {
+        "q": "findById('abc') ném CastError: Cast to ObjectId failed. Em nên trả 400 hay 404 ạ?",
+        "answers": ["Mình theo bài, .catch(() => null) rồi trả 404 cho gọn."],
+        "instructor": "Cả hai đều có lý, nhưng với trang xem chi tiết, trả 404 là tự nhiên hơn vì với người dùng, một id sai định dạng cũng chỉ là không có tài nguyên. Cách .catch(() => null) trong bài vừa gọn vừa tránh để lỗi rơi xuống thành 500."
+      },
+      {
+        "q": "Schema có email unique: true nhưng mình tạo 2 user trùng email vẫn được, không có ValidationError.",
+        "answers": [],
+        "instructor": "unique không phải validator mà là yêu cầu tạo chỉ mục (index) duy nhất trong MongoDB. Nếu collection đã có dữ liệu trùng từ trước, index không tạo được nên không chặn. Xóa dữ liệu trùng, đảm bảo index được tạo (ví dụ Model.syncIndexes()). Khi trùng, MongoDB báo lỗi E11000 với err.code = 11000, không phải ValidationError, nên hãy bắt riêng mã này."
+      },
+      {
+        "q": "In ra console.log(KhoaHoc.find()) ra một đống thông tin lạ chứ không phải mảng.",
+        "answers": ["Thiếu await nha.", "Đó là đối tượng Query, await nó mới ra dữ liệu."],
+        "instructor": "Đúng như các bạn nói. find() trả về một Query, chưa chạy lên CSDL. Thêm await (hoặc .exec()) để nhận mảng document."
+      },
+      {
+        "q": "Dùng Atlas thì báo lỗi kiểu could not connect to any servers in your MongoDB Atlas cluster, có nhắc IP whitelist.",
+        "answers": [],
+        "instructor": "Atlas chỉ cho phép kết nối từ các địa chỉ IP trong Network Access. Thêm IP hiện tại của bạn vào danh sách. Mở cho mọi IP chỉ nên dùng tạm khi học, và khi đó hãy đặt mật khẩu người dùng CSDL mạnh. Ngoài ra kiểm tra lại tên người dùng, mật khẩu trong chuỗi kết nối; ký tự đặc biệt trong mật khẩu cần mã hóa URL."
+      },
+      {
+        "q": "Ví dụ NoSQL injection mình chưa hình dung. Gửi { email: { $ne: null } } thì sao lại đăng nhập được?",
+        "answers": ["Nó biến điều kiện thành email khác null, tức là khớp với user đầu tiên trong collection."],
+        "instructor": "Bạn kia giải thích đúng. Với body JSON, req.body.email có thể là một đối tượng chứa toán tử thay vì chuỗi. Đưa thẳng vào findOne({ email }) thì MongoDB hiểu đó là điều kiện. Ép String(req.body.email) biến đối tượng đó thành chuỗi vô nghĩa nên truy vấn không khớp ai."
+      }
+    ],
+    "06-xac-thuc-nguoi-dung": [
+      {
+        "q": "bcrypt.compare(hash, matKhau) luôn trả về false dù mình nhập đúng mật khẩu.",
+        "answers": ["Đảo thứ tự tham số đi bạn, mật khẩu trước, hash sau."],
+        "instructor": "Thứ tự đúng là bcrypt.compare(matKhauNguoiDungNhap, hashDaLuu). Đảo lại thì thư viện coi hash là mật khẩu cần kiểm tra nên kết quả luôn false."
+      },
+      {
+        "q": "Sao không mã hóa mật khẩu rồi giải mã lại khi cần, như vậy còn khôi phục mật khẩu cho người dùng được?",
+        "answers": [],
+        "instructor": "Mật khẩu phải băm một chiều chứ không mã hóa hai chiều. Nếu server giải mã được thì kẻ chiếm được khóa cũng giải mã được toàn bộ. Khi người dùng quên mật khẩu, đúng cách là gửi liên kết đặt lại mật khẩu có thời hạn, không phải gửi lại mật khẩu cũ."
+      },
+      {
+        "q": "Mỗi lần hash cùng một mật khẩu lại ra chuỗi khác nhau, vậy lúc compare nó biết muối ở đâu ạ?",
+        "answers": ["Muối nằm luôn trong chuỗi hash 60 ký tự đó."],
+        "instructor": "Đúng. Chuỗi bcrypt chứa phiên bản thuật toán, cost factor, muối và phần hash. compare đọc muối và cost từ chính chuỗi đã lưu, băm lại mật khẩu vừa nhập với chúng rồi so sánh kết quả. Vì vậy bạn không cần lưu muối riêng."
+      },
+      {
+        "q": "Đặt cookie secure: true thì đăng nhập xong vẫn bị đòi đăng nhập lại khi chạy localhost.",
+        "answers": [],
+        "instructor": "Với secure: true, trình duyệt chỉ gửi cookie qua HTTPS, mà localhost của bạn đang chạy http nên cookie phiên không được gửi lại. Đặt secure theo môi trường: true khi chạy HTTPS thật, false khi phát triển. Nếu chạy sau proxy HTTPS thì nhớ bật trust proxy."
+      },
+      {
+        "q": "Lỗi TypeError: Cannot set properties of undefined (setting 'userId') khi gán req.session.userId.",
+        "answers": ["app.use(session(...)) phải đặt trước route đăng nhập."],
+        "instructor": "req.session chỉ có khi middleware express-session đã chạy trước route đó. Kiểm tra bạn đã app.use(session({...})) và đặt nó phía trên các route. Đây chính là bài học về thứ tự middleware ở bài trước."
+      },
+      {
+        "q": "Terminal hiện cảnh báo MemoryStore is not designed for a production environment. Có sao không mn?",
+        "answers": ["Học thì kệ nó cũng được, deploy thật thì đổi sang connect-mongo."],
+        "instructor": "Khi học thì không sao. Bộ nhớ trong tiến trình sẽ mất hết phiên khi khởi động lại, rò rỉ bộ nhớ theo thời gian và không chia sẻ được giữa nhiều máy. Triển khai thật hãy dùng một store như connect-mongo để lưu phiên trong MongoDB."
+      },
+      {
+        "q": "Gọi req.session.regenerate xong thì giỏ hàng mình lưu trong session trước đó mất luôn.",
+        "answers": [],
+        "instructor": "regenerate tạo phiên mới hoàn toàn nên dữ liệu cũ bị bỏ. Nếu cần giữ, hãy sao chép những trường cần thiết ra biến trước khi gọi regenerate, rồi gán lại vào req.session trong callback. Đừng sao chép cả phiên cũ, chỉ giữ dữ liệu bạn thật sự cần."
+      },
+      {
+        "q": "Mình test bằng fetch trong Node thì đăng nhập thành công nhưng gọi /ho-so vẫn 401. Trên trình duyệt thì ổn.",
+        "answers": ["fetch của Node không tự lưu cookie như trình duyệt đâu bạn, xem lại đoạn goi trong bài."],
+        "instructor": "Đúng vậy. fetch trong Node không có kho cookie, nên phải tự lấy Set-Cookie từ response đăng nhập rồi gửi lại trong header cookie ở các lần gọi sau, như hàm goi trong code mẫu. Ngoài ra nhớ saveUninitialized: false nghĩa là trước khi đăng nhập, server chưa gửi cookie."
+      },
+      {
+        "q": "Cost factor 10 với 12 khác nhau nhiều không ạ? Em để 14 thấy đăng ký chậm hẳn.",
+        "answers": [],
+        "instructor": "Mỗi lần tăng 1 đơn vị thì thời gian băm gấp đôi, nên 14 chậm hơn 10 khoảng 16 lần. Mức 10 tới 12 là cân bằng hợp lý cho đa số ứng dụng. Chọn mức để mỗi lần băm mất cỡ vài chục tới vài trăm mili giây trên máy chủ của bạn."
+      },
+      {
+        "q": "Đăng xuất mình chỉ res.clearCookie thôi có được không thầy?",
+        "answers": ["Không đủ đâu, phiên trên server vẫn còn sống.", "Ai đã copy được cookie vẫn dùng tiếp được."],
+        "instructor": "Chưa đủ. Xóa cookie chỉ làm trình duyệt hiện tại quên mã phiên, còn bản ghi phiên trên server vẫn hợp lệ, ai có mã đó vẫn dùng được. Gọi req.session.destroy để hủy phiên ở server rồi mới clearCookie, như route dang-xuat trong bài."
+      }
+    ]
+  },
+  "comments": [
+    "Khóa học viết rất dễ hiểu, ví dụ bồi bàn ở bài event loop làm mình nhớ lâu luôn.",
+    "Cảm ơn thầy, cuối cùng mình cũng hiểu vì sao phải gọi next().",
+    "Phần middleware lỗi 4 tham số đúng là thứ mình bị mất cả buổi chiều tuần trước.",
+    "Các đoạn code chạy được ngay, copy về là thấy kết quả giống hệt bài, rất yên tâm.",
+    "Mong khóa có thêm một bài về deploy lên server thật.",
+    "Bài Mongoose hơi dài nhưng đáng đọc, nhất là đoạn nhúng hay tham chiếu.",
+    "Mình đã làm xong bài tập API ghi chú, thấy tự tin hơn hẳn.",
+    "Có ai học khóa này song song với làm đồ án không, mình đang làm web bán sách.",
+    "Phần bảo mật đăng nhập rất thực tế, trước giờ mình toàn lưu mật khẩu thẳng vào CSDL.",
+    "Thầy có thể thêm ví dụ upload file bằng multer không ạ?",
+    "Bài npm giải thích dấu ^ rõ ràng, trước giờ nhìn mà không hiểu.",
+    "Học xong bài 3 mới thấy viết bằng http thuần cực thế nào.",
+    "Bài tập middleware giờ hành chính hay, lần đầu mình dùng closure vào việc thật.",
+    "Đọc bài thì hiểu nhưng tự viết lại thì vẫn quên thứ tự app.use, chắc phải làm thêm.",
+    "Phần quiz cuối bài giúp mình ôn lại nhanh, mong có thêm câu khó hơn.",
+    "Mình học trên điện thoại, khối code dài phải kéo ngang hơi mệt.",
+    "Ví dụ tự gọi API bằng fetch rất hay, giờ mình không cần mở Postman nữa.",
+    "Tuần này mình đặt mục tiêu xong bài 5, ai cùng tiến độ không?",
+    "Câu hỏi nhanh: học xong khóa này có đủ làm REST API cho đồ án không mọi người?",
+    "Bài 1 hơi nặng lý thuyết với người mới, nhưng đọc lần hai thì ổn.",
+    "Cảm ơn đội ngũ Cnow, nội dung tiếng Việt chuẩn và dễ theo.",
+    "Mình thích phần Lỗi hay gặp, toàn đúng mấy lỗi mình từng gặp.",
+    "Giá như có video minh họa phần event loop thì tốt hơn, đọc chữ hơi khó hình dung.",
+    "Phần NoSQL injection mở mang đầu óc thật sự.",
+    "Bài 6 dài nhưng cực kỳ hữu ích, mình đã sửa lại code đăng nhập của nhóm.",
+    "Mong có bài về kiểm thử tự động với node:test.",
+    "Khóa này nên học sau khóa JavaScript cơ bản, chứ vào thẳng thì hơi đuối.",
+    "Đã hoàn thành 100%, giờ đi làm dự án riêng thôi :)",
+    "Mình chưa hiểu lắm phần regenerate, chắc phải đọc lại.",
+    "Phần package-lock.json giải thích gọn mà đủ.",
+    "Bài Express routing có bảng phương thức HTTP rất dễ tra lại.",
+    "Có thể thêm phần phân trang danh sách với Mongoose không ạ?",
+    "Ví dụ khoa-bi-mat-demo làm mình hiểu middleware chặn quyền rất nhanh.",
+    "Học tới bài 4 rồi, càng học càng thấy Express gọn.",
+    "Thông báo lỗi chung khi đăng nhập là chi tiết nhỏ mà mình chưa từng để ý.",
+    "Mình muốn thêm một bài tổng hợp ghép tất cả lại thành một ứng dụng hoàn chỉnh.",
+    "Bài 2 phần ES module với CommonJS hơi nhanh, nên có thêm ví dụ chuyển đổi.",
+    "Thầy trả lời hỏi đáp nhanh quá, cảm ơn thầy nhiều.",
+    "Lần đầu mình chạy được MongoDB trên máy, mừng muốn khóc.",
+    "Bài tập phần xác thực hơi khó với mình, mất gần hai tiếng mới xong.",
+    "Mọi người nhớ đọc kỹ phần thứ tự route, mình bị dính đúng lỗi đó trong đồ án.",
+    "Mình đề xuất thêm sơ đồ minh họa luồng request đi qua middleware.",
+    "Học xong bài 5 mình đã chuyển đồ án từ file JSON sang MongoDB.",
+    "Cách giải thích cookie như vé gửi xe dễ nhớ ghê.",
+    "Bài viết sạch, không lan man, đúng kiểu mình cần.",
+    "Có cách nào tải bài về đọc offline không ạ?",
+    "Phần cost factor của bcrypt mình mới biết lần đầu.",
+    "Mình đang ở bài 3, ai có tài liệu ôn HTTP status code thì chia sẻ với.",
+    "Nội dung tốt nhưng thiếu phần giải thích cách đọc thông báo lỗi dài của Node.",
+    "Khóa này giúp mình qua vòng phỏng vấn thực tập backend, cảm ơn Cnow.",
+    "Đọc phần express.static mới hiểu sao CSS của mình cứ 404.",
+    "Mong thêm phần so sánh session với JWT.",
+    "Cấu trúc mỗi bài giống nhau nên dễ theo dõi, biết ngay phần nào ở đâu.",
+    "Bài tập nên có thêm gợi ý từng bước cho người mới.",
+    "Hôm nay mình đã hiểu vì sao nhóm mình bị Cannot set headers, hóa ra thiếu return.",
+    "Phần CRUD với Mongoose ngắn gọn, nhìn bảng là nhớ.",
+    "Mình thấy bài 1 có thể bớt lý thuyết và thêm bài tập nhỏ.",
+    "Thanks khóa học, giờ mình đọc code server của Cnow cũng hiểu được kha khá.",
+    "Lời giải để trong mục ẩn rất hay, tự làm trước rồi mới mở xem.",
+    "Mong có thêm khóa nâng cao về WebSocket và realtime.",
+    "Cách dùng listen(0) để test mình áp dụng luôn cho đồ án.",
+    "Phần semver giúp mình hiểu tại sao máy bạn chạy được còn máy mình thì không.",
+    "Mình chưa thấy phần nói về CORS, gọi API từ frontend riêng thì bị chặn.",
+    "Bài 4 là bài mình thích nhất cả khóa.",
+    "Học một tuần là xong khóa, tốc độ vừa phải.",
+    "Có ai cần ôn chung tối nay không, mình mở phòng chat nhé.",
+    "Cảm ơn thầy đã giải đáp câu hỏi của mình về ECONNREFUSED, chạy được rồi ạ."
+  ],
+  "spam": [
+    "Giảm giá khóa học khác 90% tại kênh của mình, nhắn riêng để nhận mã nhé mọi người!!!",
+    "Khóa này dở tệ, ai học cũng phí thời gian, đi chỗ khác mà học.",
+    "Bán tài khoản game giá rẻ, uy tín, ai cần liên hệ mình ngay hôm nay."
+  ],
+  "reviews": {
+    "1": [
+      "Quá ít bài và không có video. Với người mới hoàn toàn, mình thấy khó theo, nhất là bài event loop và bài xác thực.",
+      "Khóa không hướng dẫn cài Node.js và MongoDB, mình không chạy được ví dụ nào ở bài 5 nên bỏ dở. Mong bổ sung phần cài đặt chi tiết.",
+      "Bài tập khó, lời giải ngắn, không có giải thích từng bước. Mình cần một khóa có nhiều bài tập nhỏ hơn và lộ trình chậm hơn."
+    ],
+    "2": [
+      "Khóa giả định người học đã vững JavaScript bất đồng bộ nhưng không nói rõ ở phần giới thiệu. Mình bị hụt ngay từ bài 1.",
+      "Không có video, không có bài hướng dẫn cài đặt môi trường. Người mới như mình mất nhiều thời gian xử lý lỗi cài đặt hơn là học.",
+      "Bài tập xác thực yêu cầu khá nhiều thứ nhưng lời giải không chạy trong Express thật mà chỉ thử hàm rời, mình không biết ghép lại sao cho đúng.",
+      "Phần deploy hoàn toàn không có. Học xong vẫn chỉ chạy được trên localhost, chưa đủ để nộp đồ án có đường dẫn online.",
+      "Bài Mongoose nhồi nhiều khái niệm vào một bài: schema, validation, CRUD, nhúng, tham chiếu, injection. Nên tách làm hai bài.",
+      "Thiếu ví dụ giao diện, toàn API trả JSON. Mình cần làm web có form và trang EJS thì khóa không giúp được nhiều.",
+      "Tốc độ không đều: bài 3 rất kỹ nhưng bài 2 lướt nhanh phần ES module và semver, ví dụ chuyển đổi gần như không có."
+    ],
+    "3": [
+      "Nội dung đúng nhưng tốc độ hơi nhanh với người mới. Bài 1 nói về event loop, Promise, process.env cùng lúc, mình phải đọc ba lần.",
+      "Ổn, nhưng thiếu hẳn phần triển khai. Học xong mình vẫn không biết đưa ứng dụng lên mạng thế nào, biến môi trường đặt ở đâu.",
+      "Bài viết tốt nhưng chỉ có chữ. Với chủ đề trừu tượng như event loop, một video hoặc hình động sẽ giúp rất nhiều.",
+      "Bài tập phần middleware và xác thực khó hơn hẳn nội dung bài, lời giải lại khá cô đọng, người mới khó tự làm.",
+      "Phần ES module chỉ lướt qua, trong khi nhiều dự án mới đều dùng import. Mong được viết kỹ hơn.",
+      "Khóa ngắn quá, chỉ sáu bài. Mình mong có thêm phần kiểm thử, phân trang, upload file để đủ làm đồ án.",
+      "Hướng dẫn cài MongoDB gần như không có, mình kẹt ở lỗi ECONNREFUSED cả buổi trước khi học được bài 5.",
+      "Kiến thức ổn nhưng ví dụ chủ yếu là dữ liệu trong bộ nhớ, ít khi ghép với CSDL thật nên khó hình dung ứng dụng hoàn chỉnh.",
+      "Quiz cuối bài quá dễ, đọc lướt cũng trả lời được. Cần câu hỏi đọc code và dự đoán kết quả nhiều hơn.",
+      "Trung bình. Nội dung chính xác nhưng trình bày khô, ít hình ảnh, đọc trên điện thoại khối code bị tràn."
+    ],
+    "4": [
+      "Nội dung tốt, code chạy được. Trừ một sao vì mình mong có thêm bài về kiểm thử tự động và cấu trúc thư mục dự án lớn.",
+      "Rất dễ hiểu, nhưng bài 2 phần ES module hơi ngắn, mình phải tìm đọc thêm mới chuyển được dự án sang import.",
+      "Khóa hay, giải thích kỹ. Giá có thêm sơ đồ minh họa luồng request qua middleware thì sẽ trọn vẹn hơn.",
+      "Phần MongoDB và Mongoose rất tốt, nhưng thiếu hướng dẫn cài MongoDB trên Windows, mình mất khá lâu mới chạy được.",
+      "Kiến thức chắc, ví dụ đời thường dễ nhớ. Bài tập phần xác thực hơi khó so với các bài trước.",
+      "Mình học xong trong một tuần, nội dung ổn. Mong có bài về phân trang và tìm kiếm với Mongoose.",
+      "Bài viết rõ ràng, có nhiều cảnh báo bảo mật hữu ích. Chỉ tiếc là không có video cho ai thích học nghe nhìn.",
+      "Rất thích phần Lỗi hay gặp. Trừ một sao vì khối code dài khó đọc trên điện thoại.",
+      "Khóa đi đúng trọng tâm, nhưng nên có một bài cuối ghép tất cả thành một ứng dụng nhỏ hoàn chỉnh.",
+      "Hỏi đáp được thầy trả lời nhanh. Nội dung ổn, chỉ mong thêm phần so sánh session với token.",
+      "Bài routing và middleware xuất sắc. Bài 1 hơi nặng lý thuyết với người chưa từng học về bất đồng bộ.",
+      "Code mẫu chất lượng, có chú thích từng dòng. Mong có thêm bài tập nhỏ giữa bài thay vì chỉ ở cuối.",
+      "Giải thích bcrypt và session rất hay. Mình muốn có thêm phần quên mật khẩu và gửi email đặt lại.",
+      "Nội dung đáng tiền. Mình chỉ thấy thiếu phần CORS khi frontend và backend chạy khác cổng.",
+      "Học dễ vào, cấu trúc bài thống nhất. Một vài chỗ nên có ảnh chụp màn hình kết quả trên trình duyệt.",
+      "Tốt cho người mới, nhưng người đã biết Express 4 sẽ thấy vài bài hơi cơ bản. Phần khác biệt Express 5 thì rất có ích.",
+      "Phần npm rất rõ, phần Mongoose rất thực tế. Quiz hơi dễ, mong có thêm câu hỏi đánh đố hơn.",
+      "Khóa học tốt, mình mong có phần hướng dẫn upload ảnh vì đồ án nào cũng cần.",
+      "Mọi thứ đều ổn, chỉ là mình muốn có thêm phần xử lý lỗi kết nối CSDL khi đang chạy, ví dụ mất mạng giữa chừng.",
+      "Giải thích dễ hiểu, ví dụ sát thực tế. Trừ một sao vì chưa có bài về triển khai lên máy chủ."
+    ],
+    "5": [
+      "Khóa học rất chắc kiến thức. Ví dụ bồi bàn trong bài event loop và ví dụ sân bay trong bài middleware giúp mình hiểu bản chất thay vì học thuộc.",
+      "Code mẫu chạy được ngay và kết quả in ra khớp từng dòng với bài, nên mình tin tưởng nội dung. Phần tự kiểm tra API bằng fetch là điểm cộng lớn.",
+      "Bài xác thực người dùng là bài hay nhất mình từng đọc bằng tiếng Việt: bcrypt, regenerate, destroy, thông báo lỗi chung đều có giải thích lý do.",
+      "Mình là sinh viên năm ba, học xong khóa này đã tự dựng được API cho đồ án với Express và MongoDB. Rất đáng thời gian.",
+      "Phần Lỗi hay gặp ở mỗi bài cực kỳ thực tế. Gần như lỗi nào mình từng gặp cũng có trong đó kèm cách sửa.",
+      "Khóa ngắn gọn, đi thẳng vào trọng tâm. Sáu bài nhưng phủ đủ từ module, routing, middleware tới CSDL và đăng nhập.",
+      "Giải thích npm ci, package-lock và semver rất rõ. Giờ nhóm mình không còn cảnh máy này chạy máy kia lỗi.",
+      "Bài Mongoose có phần nhúng hay tham chiếu rất hữu ích cho việc thiết kế dữ liệu đồ án. Ví dụ ép kiểu chống NoSQL injection mình áp dụng ngay.",
+      "Thầy trả lời hỏi đáp nhanh và đúng trọng tâm. Mình hỏi lỗi ECONNREFUSED chưa đầy một buổi đã có câu trả lời.",
+      "Bài tập có lời giải ẩn, mình tự làm trước rồi đối chiếu, học như vậy nhớ lâu hơn hẳn xem video.",
+      "Từ một người sợ backend, giờ mình hiểu vì sao phải có next(), vì sao middleware lỗi cần 4 tham số. Cảm ơn khóa học.",
+      "Nội dung bám sát Express 5, có nhắc khác biệt về bắt lỗi async. Nhiều tài liệu khác vẫn còn viết cho bản cũ.",
+      "Phần bảo mật được lồng vào từng bài chứ không dồn cuối khóa: giới hạn body, không lộ stack, ép kiểu dữ liệu. Rất có tâm.",
+      "Tiếng Việt chuẩn, thuật ngữ tiếng Anh để trong ngoặc nên mình vừa hiểu vừa tra cứu thêm được dễ dàng.",
+      "Mình thích việc mỗi bài có mục tiêu rõ ràng và quiz cuối bài. Làm quiz sai câu nào thì đọc lại phần đó.",
+      "Bài routing giải thích lỗi thứ tự route và thiếu return rất dễ hiểu. Đồ án nhóm mình sửa được hai lỗi nhờ bài này.",
+      "Ví dụ đăng nhập hoàn chỉnh với express-session là thứ mình tìm mãi. Có cả bước test cookie bằng fetch, rất chi tiết.",
+      "Học xong khóa mình đọc được code của các dự án mã nguồn mở dùng Express mà không bị ngợp nữa.",
+      "Khóa rất phù hợp để ôn trước khi phỏng vấn thực tập. Các câu hỏi về event loop và middleware mình trả lời trôi chảy.",
+      "Mỗi bài dài vừa phải, khoảng mười lăm phút đọc, phù hợp học buổi tối sau giờ làm.",
+      "Phần middleware đo thời gian bằng sự kiện finish rất hay, mình dùng nó để tìm route chậm trong dự án.",
+      "Không lan man, không quảng cáo, chỉ có kiến thức. Năm sao xứng đáng.",
+      "Mình đánh giá cao việc khóa học nhấn mạnh đọc secret từ biến môi trường ngay từ bài đầu.",
+      "Bài tập API ghi chú và bài đăng ký có kiểm tra mật khẩu là hai bài tập mình thấy sát thực tế nhất.",
+      "Một khóa nhập môn backend Node.js rất chất lượng. Mình đã giới thiệu cho cả lớp."
+    ]
+  },
+  "chat": [
+    "Chào mọi người, mình mới vào khóa hôm nay.",
+    "Mọi người đang học tới bài mấy rồi?",
+    "Mình đang ở bài middleware, thấy hay mà hơi rối chỗ thứ tự app.use.",
+    "Ai bị lỗi ECONNREFUSED 27017 thì kiểm tra xem dịch vụ MongoDB đã bật chưa nhé.",
+    "Tối nay 8 giờ có ai muốn học nhóm bài 5 không?",
+    "Mình vừa xong bài tập API ghi chú, vui ghê.",
+    "Tip nhỏ: dùng node --watch để khỏi phải tắt bật server liên tục.",
+    "Có ai làm bài tập giờ hành chính chưa, chia sẻ cách nghĩ với.",
+    "Chào buổi sáng cả nhà, hôm nay quyết tâm xong bài 3.",
+    "Nhớ thêm node_modules vào .gitignore nha mọi người, mình vừa bị nhắc.",
+    "Mình học trên Windows, ai cần hỏi cài MongoDB thì hỏi mình.",
+    "Bài 6 dài thật, mình chia ra học hai buổi.",
+    "Có ai thấy quiz bài 1 câu thứ tự setTimeout khó không :)",
+    "Mình lập nhóm ôn tập cuối tuần, ai tham gia thì nhắn trong phòng này nhé.",
+    "Mọi người dùng Postman hay tự viết fetch như trong bài?",
+    "Ai bị Cannot set headers thì kiểm tra return trước res.json nha.",
+    "Mình vừa hiểu ra vì sao req.body undefined, đặt express.json sai chỗ.",
+    "Hôm nay học được cách băm mật khẩu, thấy mình an toàn hơn hẳn.",
+    "Có ai đang làm đồ án dùng Express không, trao đổi cấu trúc thư mục với.",
+    "Chúc mọi người học tốt, mình xong khóa rồi nè.",
+    "Mình đang kẹt bài 2 phần ES module, ai giải thích giúp với.",
+    "Tip: in err.name khi bắt lỗi Mongoose để biết là ValidationError hay CastError.",
+    "Có ai học buổi trưa không, mình hay học lúc nghỉ trưa.",
+    "Mình thấy đọc phần Lỗi hay gặp trước rồi mới đọc code mẫu dễ hiểu hơn.",
+    "Mọi người ơi bài 5 dùng Atlas được không hay bắt buộc cài máy?",
+    "Dùng Atlas được nha, chỉ cần đổi biến MONGODB_URI.",
+    "Hôm nay mình ôn lại event loop, ai muốn đố nhau thứ tự in ra không?",
+    "Ai có mẹo nhớ mã trạng thái 401 với 403 không?",
+    "401 là chưa biết bạn là ai, 403 là biết rồi nhưng không cho vào.",
+    "Cảm ơn bạn, nhớ kiểu đó dễ hơn nhiều.",
+    "Mình vừa đổi localhost thành 127.0.0.1 là kết nối MongoDB chạy luôn.",
+    "Cuối tuần này mình mở phòng học online ôn bài 4 và 6, ai rảnh vào nhé.",
+    "Có ai thấy bcrypt cost 12 chạy hơi chậm trên laptop cũ không?",
+    "Mình để 10 thôi, học thì vậy là đủ.",
+    "Chào mọi người, mình là thành viên mới, đang ở bài 1.",
+    "Chào bạn, bài 1 đọc kỹ phần bồi bàn là thấm liền.",
+    "Mình thử deploy thử ứng dụng nhỏ, ai làm rồi cho xin kinh nghiệm đặt biến môi trường.",
+    "Nhắc nhẹ: đừng đưa file .env lên Git nhé mọi người.",
+    "Hôm nay mình hoàn thành bài cuối rồi, cảm ơn mọi người đã giải đáp.",
+    "Ngủ ngon cả nhà, mai học tiếp."
+  ]
+}

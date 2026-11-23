@@ -1,0 +1,35 @@
+<%- include('../partials/header') %>
+<section class="wrap section">
+  <h1>Khóa học của tôi</h1>
+  <% if (!items.length) { %>
+    <div class="empty">Bạn chưa có khóa học nào. <a href="/courses">Khám phá khóa học</a></div>
+  <% } %>
+  <div class="grid">
+    <% items.forEach(({ e, c, s, cert }) => { %>
+      <article class="card">
+        <a class="thumb" href="/courses/<%= c.slug %>" data-color="<%= c.color %>" aria-label="<%= c.title %>"><span class="thumb-tag"><%= c.tag || c.title %></span><span class="thumb-logo"><span class="brand-c">C</span>now</span></a>
+        <div class="card-body">
+          <h3><a class="card-link" href="/courses/<%= c.slug %>"><%= c.title %></a></h3>
+          <p class="small muted">Ghi danh ngày <%= e.createdAt.toLocaleDateString('vi-VN') %> · <%= c.lessons.length %> bài học</p>
+          <div class="progress-row">
+            <progress max="100" value="<%= s.pct %>" aria-label="Tiến độ <%= c.title %>"><%= s.pct %>%</progress>
+            <span class="small"><b><%= s.pct %>%</b> · <%= s.completed %>/<%= s.total %> bài</span>
+          </div>
+          <div class="card-foot">
+            <% if (s.finished) { %><span class="price owned">✓ Đã hoàn thành</span><% } else { %><span class="muted small"><%= s.completed ? 'Đang học' : 'Chưa bắt đầu' %></span><% } %>
+            <a class="btn btn-sm" href="/learn/<%= c.slug %>?lesson=<%= s.resume %>"><%= s.finished ? 'Xem lại' : s.completed ? 'Học tiếp' : 'Bắt đầu học' %></a>
+          </div>
+          <% if (cert) { %>
+            <a class="cert-link small" href="/certificate/<%= cert._id %>">🎓 Xem chứng nhận</a>
+          <% } else if (s.finished) { %>
+            <form method="post" action="/courses/<%= c.slug %>/certificate" class="inline">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="linkbtn cert-link small">🎓 Nhận chứng nhận</button>
+            </form>
+          <% } %>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

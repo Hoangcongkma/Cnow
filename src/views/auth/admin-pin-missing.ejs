@@ -1,0 +1,16 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <div class="auth-card">
+    <h1>Chưa đặt mã quản trị</h1>
+    <div class="flash flash-warn" role="alert">Tài khoản quản trị <b><%= username %></b> chưa có mã quản trị nên chưa thể vào trang quản trị.</div>
+    <p>Mã quản trị là bước xác thực thứ hai bắt buộc của tài khoản admin. Mã chỉ đặt được trên máy chủ, bởi người có quyền truy cập cơ sở dữ liệu:</p>
+    <ol class="steps">
+      <li>Mở terminal trong thư mục dự án (cùng <span class="mono">MONGODB_URI</span> với website).</li>
+      <li>Chạy <span class="mono">npm run set:admin-pin</span>.</li>
+      <li>Nhập tên đăng nhập <span class="mono"><%= username %></span>, rồi nhập mã quản trị 2 lần (ký tự được ẩn): ít nhất 10 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.</li>
+      <li>Quay lại đây đăng nhập.</li>
+    </ol>
+    <p class="small center"><a href="/login">← Quay lại đăng nhập</a></p>
+  </div>
+</section>
+<%- include('../partials/footer') %>

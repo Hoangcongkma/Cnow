@@ -1,0 +1,546 @@
+{
+  "course": "javascript-cho-nguoi-moi",
+  "note": "Câu hỏi do Cnow tự soạn theo chủ đề từng bài. Khớp bài học theo mã video YouTube. answer = chỉ số phương án đúng (0 = A).",
+  "lessons": {
+    "0SJE9dYdpps": [
+      {
+        "question": "JavaScript chủ yếu được dùng để làm gì trên trang web?",
+        "options": [
+          "Định nghĩa cấu trúc nội dung",
+          "Tạo tương tác và xử lý logic",
+          "Chỉ để tạo kiểu (màu sắc, bố cục)",
+          "Lưu trữ cơ sở dữ liệu"
+        ],
+        "answer": 1,
+        "explain": "HTML tạo cấu trúc, CSS tạo kiểu, còn JavaScript thêm tương tác và xử lý logic cho trang web."
+      },
+      {
+        "question": "Nền tảng nào cho phép chạy JavaScript ở phía máy chủ?",
+        "options": ["Node.js", "Photoshop", "MySQL Workbench", "Microsoft Word"],
+        "answer": 0,
+        "explain": "Node.js là môi trường chạy JavaScript bên ngoài trình duyệt, thường dùng để viết server."
+      },
+      {
+        "question": "Phát biểu nào về JavaScript là ĐÚNG?",
+        "options": [
+          "JavaScript là phiên bản rút gọn của Java",
+          "JavaScript chỉ chạy được trên Internet Explorer",
+          "JavaScript chạy được trong mọi trình duyệt hiện đại",
+          "JavaScript bắt buộc phải biên dịch thành file .exe"
+        ],
+        "answer": 2,
+        "explain": "Mọi trình duyệt hiện đại đều có engine JavaScript. Java và JavaScript là hai ngôn ngữ khác nhau."
+      }
+    ],
+    "efI98nT8Ffo": [
+      {
+        "question": "Công cụ nào thường dùng để viết code JavaScript?",
+        "options": ["Paint", "Visual Studio Code", "Excel", "Windows Media Player"],
+        "answer": 1,
+        "explain": "VS Code là trình soạn thảo code miễn phí, phổ biến, hỗ trợ tốt JavaScript."
+      },
+      {
+        "question": "Để xem kết quả console.log() trong trình duyệt, bạn mở công cụ nào?",
+        "options": ["Thanh địa chỉ", "Trình quản lý tác vụ", "Developer Tools (tab Console)", "Trang cài đặt trình duyệt"],
+        "answer": 2,
+        "explain": "Nhấn F12 (hoặc Ctrl+Shift+I) để mở DevTools, rồi chọn tab Console."
+      },
+      {
+        "question": "Để chạy JavaScript trong trình duyệt, bạn có bắt buộc phải cài thêm phần mềm biên dịch không?",
+        "options": [
+          "Không, trình duyệt đã có sẵn engine JavaScript",
+          "Có, phải cài JDK",
+          "Có, phải cài Python",
+          "Có, phải cài Visual Studio bản trả phí"
+        ],
+        "answer": 0,
+        "explain": "Trình duyệt có sẵn engine (V8, SpiderMonkey…) để chạy JavaScript."
+      }
+    ],
+    "W0vEUmyvthQ": [
+      {
+        "question": "Thẻ HTML nào dùng để nhúng JavaScript?",
+        "options": ["<js>", "<javascript>", "<script>", "<code>"],
+        "answer": 2,
+        "explain": "Dùng <script>...</script> hoặc <script src=\"file.js\"></script>."
+      },
+      {
+        "question": "Cách nào nạp một file JavaScript bên ngoài?",
+        "options": [
+          "<script href=\"app.js\">",
+          "<script src=\"app.js\"></script>",
+          "<link rel=\"script\" href=\"app.js\">",
+          "<import file=\"app.js\">"
+        ],
+        "answer": 1,
+        "explain": "Thuộc tính src của thẻ <script> trỏ tới file JavaScript bên ngoài."
+      },
+      {
+        "question": "Vì sao thường đặt thẻ <script> ở cuối thẻ <body> (hoặc dùng defer)?",
+        "options": [
+          "Để code chạy nhanh hơn gấp đôi",
+          "Để trang HTML được tải xong trước khi script truy cập các phần tử",
+          "Vì đặt trong <head> sẽ bị lỗi cú pháp",
+          "Để trình duyệt không tải file JavaScript"
+        ],
+        "answer": 1,
+        "explain": "Khi script chạy, các phần tử HTML phía trên đã có sẵn; đồng thời không chặn việc hiển thị trang."
+      }
+    ],
+    "CLbx37dqYEI": [
+      {
+        "question": "Từ khóa nào khai báo một biến KHÔNG thể gán lại giá trị?",
+        "options": ["var", "let", "const", "static"],
+        "answer": 2,
+        "explain": "Biến khai báo bằng const không thể gán lại (nhưng nội dung object/mảng bên trong vẫn có thể thay đổi)."
+      },
+      {
+        "question": "Tên biến nào sau đây KHÔNG hợp lệ?",
+        "options": ["userName", "_count", "$price", "2nd"],
+        "answer": 3,
+        "explain": "Tên biến không được bắt đầu bằng chữ số."
+      },
+      {
+        "question": "Sau đoạn code: let a = 5; a = 10; giá trị của a là gì?",
+        "options": ["5", "10", "15", "Lỗi vì không gán lại được"],
+        "answer": 1,
+        "explain": "Biến khai báo bằng let có thể gán lại, giá trị mới là 10."
+      }
+    ],
+    "SZb-N7TfPlw": [
+      {
+        "question": "Kết quả của 10 % 3 là bao nhiêu?",
+        "options": ["3", "1", "3.33", "0"],
+        "answer": 1,
+        "explain": "% là phép chia lấy dư: 10 chia 3 được 3 dư 1."
+      },
+      {
+        "question": "Kết quả của biểu thức '5' + 2 là gì?",
+        "options": ["7", "'52'", "NaN", "Lỗi"],
+        "answer": 1,
+        "explain": "Khi một vế là chuỗi, toán tử + sẽ nối chuỗi: '5' + 2 = '52'."
+      },
+      {
+        "question": "Toán tử nào so sánh cả giá trị và kiểu dữ liệu?",
+        "options": ["=", "==", "===", "=>"],
+        "answer": 2,
+        "explain": "=== là so sánh nghiêm ngặt: 5 === '5' cho kết quả false."
+      }
+    ],
+    "P-fMQ3elxSE": [
+      {
+        "question": "typeof 'Hello' trả về gì?",
+        "options": ["'text'", "'string'", "'char'", "'object'"],
+        "answer": 1,
+        "explain": "Chuỗi ký tự có kiểu 'string'."
+      },
+      {
+        "question": "Giá trị nào sau đây thuộc kiểu boolean?",
+        "options": ["'true'", "1", "true", "null"],
+        "answer": 2,
+        "explain": "Kiểu boolean chỉ có hai giá trị true và false (không có dấu nháy)."
+      },
+      {
+        "question": "Một biến được khai báo nhưng chưa gán giá trị sẽ có giá trị gì?",
+        "options": ["null", "0", "undefined", "''"],
+        "answer": 2,
+        "explain": "let x; thì x có giá trị undefined."
+      }
+    ],
+    "9MpHrdWBdxg": [
+      {
+        "question": "Với let n = 7; câu lệnh if (n > 5) { console.log('A') } else { console.log('B') } in ra gì?",
+        "options": ["A", "B", "A và B", "Không in gì"],
+        "answer": 0,
+        "explain": "7 > 5 là true nên khối if chạy và in 'A'."
+      },
+      {
+        "question": "Giá trị nào sau đây là falsy (được coi là false trong điều kiện)?",
+        "options": ["'0'", "[]", "0", "'false'"],
+        "answer": 2,
+        "explain": "Các giá trị falsy: false, 0, '', null, undefined, NaN. Chuỗi '0' và mảng rỗng [] vẫn là truthy."
+      },
+      {
+        "question": "Toán tử && trả về true khi nào?",
+        "options": ["Khi ít nhất một vế đúng", "Khi cả hai vế đều đúng", "Khi cả hai vế đều sai", "Luôn trả về true"],
+        "answer": 1,
+        "explain": "&& (VÀ) chỉ đúng khi tất cả các vế đều đúng; || (HOẶC) đúng khi có ít nhất một vế đúng."
+      }
+    ],
+    "b4YivuRmcEw": [
+      {
+        "question": "'JavaScript'.length bằng bao nhiêu?",
+        "options": ["9", "10", "11", "Lỗi"],
+        "answer": 1,
+        "explain": "Chuỗi 'JavaScript' có 10 ký tự."
+      },
+      {
+        "question": "Phương thức nào chuyển chuỗi thành chữ in hoa?",
+        "options": ["toUpperCase()", "upper()", "toCapital()", "bigCase()"],
+        "answer": 0,
+        "explain": "'abc'.toUpperCase() trả về 'ABC'."
+      },
+      {
+        "question": "Template string (chuỗi có thể nhúng biến) được viết bằng ký tự nào?",
+        "options": ["Dấu nháy đơn ' '", "Dấu nháy kép \" \"", "Dấu backtick ` `", "Dấu ngoặc nhọn { }"],
+        "answer": 2,
+        "explain": "Ví dụ: `Xin chào ${name}` – biến được nhúng qua ${...} trong cặp backtick."
+      }
+    ],
+    "YzO65uOJNMg": [
+      {
+        "question": "Phần tử đầu tiên của mảng có chỉ số (index) là bao nhiêu?",
+        "options": ["1", "0", "-1", "Tùy trình duyệt"],
+        "answer": 1,
+        "explain": "Mảng trong JavaScript đánh chỉ số từ 0."
+      },
+      {
+        "question": "Với const arr = ['a', 'b', 'c']; arr.length bằng bao nhiêu?",
+        "options": ["2", "3", "4", "'c'"],
+        "answer": 1,
+        "explain": "Mảng có 3 phần tử nên length = 3."
+      },
+      {
+        "question": "Cách nào kiểm tra chính xác một biến có phải là mảng?",
+        "options": ["typeof arr === 'array'", "Array.isArray(arr)", "arr.isArray", "arr instanceof Object"],
+        "answer": 1,
+        "explain": "typeof của mảng là 'object'; dùng Array.isArray() để kiểm tra chính xác."
+      }
+    ],
+    "KrYacXScNQk": [
+      {
+        "question": "Phương thức nào thêm phần tử vào CUỐI mảng?",
+        "options": ["push()", "pop()", "shift()", "unshift()"],
+        "answer": 0,
+        "explain": "push() thêm vào cuối, pop() xóa phần tử cuối, unshift() thêm vào đầu, shift() xóa phần tử đầu."
+      },
+      {
+        "question": "[1, 2, 3].join('-') trả về gì?",
+        "options": ["[1-2-3]", "'1-2-3'", "6", "'123'"],
+        "answer": 1,
+        "explain": "join() nối các phần tử thành một chuỗi, ngăn cách bằng ký tự truyền vào."
+      },
+      {
+        "question": "Phương thức nào trả về một mảng mới chỉ gồm các phần tử thỏa điều kiện?",
+        "options": ["forEach()", "filter()", "push()", "includes()"],
+        "answer": 1,
+        "explain": "filter() trả về mảng mới gồm các phần tử mà hàm điều kiện trả về true."
+      }
+    ],
+    "4g9ENVc2KLA": [
+      {
+        "question": "Cú pháp nào khai báo hàm đúng?",
+        "options": ["function sayHi() { }", "def sayHi():", "func sayHi() { }", "sayHi = function { }"],
+        "answer": 0,
+        "explain": "Khai báo hàm trong JavaScript dùng từ khóa function."
+      },
+      {
+        "question": "Một hàm không có câu lệnh return sẽ trả về gì?",
+        "options": ["0", "null", "undefined", "Chuỗi rỗng"],
+        "answer": 2,
+        "explain": "Hàm không return (hoặc return không có giá trị) sẽ trả về undefined."
+      },
+      {
+        "question": "Đã khai báo function greet() { ... }. Làm thế nào để gọi hàm này?",
+        "options": ["call greet", "greet()", "greet[]", "run greet"],
+        "answer": 1,
+        "explain": "Gọi hàm bằng tên hàm kèm cặp ngoặc tròn: greet()."
+      }
+    ],
+    "jE6UPl17Nvo": [
+      {
+        "question": "function sum(a, b) { return a + b } – sum(2, 3) trả về gì?",
+        "options": ["5", "'23'", "undefined", "Lỗi"],
+        "answer": 0,
+        "explain": "a = 2, b = 3, a + b = 5."
+      },
+      {
+        "question": "Gọi một hàm nhưng truyền THIẾU đối số, tham số bị thiếu có giá trị gì?",
+        "options": ["0", "null", "undefined", "Chương trình báo lỗi ngay"],
+        "answer": 2,
+        "explain": "Tham số không được truyền có giá trị undefined (trừ khi có giá trị mặc định)."
+      },
+      {
+        "question": "Cú pháp nào đặt giá trị mặc định cho tham số?",
+        "options": ["function f(x = 10) { }", "function f(x: 10) { }", "function f(x || 10) { }", "function f(default x = 10) { }"],
+        "answer": 0,
+        "explain": "ES6 cho phép tham số mặc định: function f(x = 10)."
+      }
+    ],
+    "orIXdOPFWeM": [
+      {
+        "question": "Với const user = { name: 'An', age: 20 }; cách nào lấy ra tên?",
+        "options": ["user(name)", "user.name", "user->name", "user::name"],
+        "answer": 1,
+        "explain": "Truy cập thuộc tính bằng dấu chấm user.name hoặc ngoặc vuông user['name']."
+      },
+      {
+        "question": "Cách nào thêm thuộc tính email vào object user?",
+        "options": ["user.add('email')", "user.email = 'an@cnow.vn'", "add user.email", "user = email"],
+        "answer": 1,
+        "explain": "Gán giá trị cho thuộc tính chưa có sẽ tự thêm thuộc tính đó vào object."
+      },
+      {
+        "question": "Phương thức nào trả về mảng các khóa (key) của một object?",
+        "options": ["Object.keys(obj)", "obj.keys", "Object.list(obj)", "obj.getKeys()"],
+        "answer": 0,
+        "explain": "Object.keys({a: 1, b: 2}) trả về ['a', 'b']."
+      }
+    ],
+    "24lIiJ4xVQE": [
+      {
+        "question": "Trong switch, từ khóa nào dùng để thoát khỏi một case?",
+        "options": ["stop", "exit", "break", "return case"],
+        "answer": 2,
+        "explain": "Nếu thiếu break, code sẽ chạy tiếp sang các case phía dưới (fall-through)."
+      },
+      {
+        "question": "Nhánh nào chạy khi không case nào khớp?",
+        "options": ["else", "default", "otherwise", "finally"],
+        "answer": 1,
+        "explain": "Nhánh default chạy khi không có case nào khớp giá trị."
+      },
+      {
+        "question": "switch so sánh giá trị với các case theo kiểu nào?",
+        "options": ["So sánh lỏng ==", "So sánh nghiêm ngặt ===", "So sánh lớn hơn >", "So sánh độ dài chuỗi"],
+        "answer": 1,
+        "explain": "switch dùng so sánh nghiêm ngặt (===), nên case 1 không khớp với giá trị '1'."
+      }
+    ],
+    "tzaq2ay3Q0w": [
+      {
+        "question": "Vòng lặp for (let i = 0; i < 3; i++) chạy bao nhiêu lần?",
+        "options": ["2", "3", "4", "Vô hạn"],
+        "answer": 1,
+        "explain": "i nhận các giá trị 0, 1, 2 – tổng cộng 3 lần."
+      },
+      {
+        "question": "Trong for (khởi tạo; điều kiện; bước nhảy), phần nào được kiểm tra trước MỖI lần lặp?",
+        "options": ["Khởi tạo", "Điều kiện", "Bước nhảy", "Không phần nào"],
+        "answer": 1,
+        "explain": "Điều kiện được kiểm tra trước mỗi vòng; khi sai thì vòng lặp kết thúc."
+      },
+      {
+        "question": "Câu lệnh nào bỏ qua lần lặp hiện tại và chuyển sang lần lặp kế tiếp?",
+        "options": ["break", "continue", "skip", "next"],
+        "answer": 1,
+        "explain": "continue bỏ qua phần còn lại của lần lặp hiện tại; break thoát hẳn vòng lặp."
+      }
+    ],
+    "rdH9Dm7IVxU": [
+      {
+        "question": "Điểm khác biệt chính của do...while so với while là gì?",
+        "options": [
+          "do...while luôn chạy ít nhất một lần",
+          "do...while không cần điều kiện",
+          "while luôn chạy ít nhất một lần",
+          "Không có khác biệt"
+        ],
+        "answer": 0,
+        "explain": "do...while thực hiện khối lệnh trước rồi mới kiểm tra điều kiện."
+      },
+      {
+        "question": "let i = 0; while (i < 3) { i++ } – sau vòng lặp i bằng bao nhiêu?",
+        "options": ["2", "3", "4", "0"],
+        "answer": 1,
+        "explain": "Vòng lặp dừng khi i < 3 sai, tức là khi i = 3."
+      },
+      {
+        "question": "Điều gì xảy ra nếu điều kiện của while luôn đúng và không có break?",
+        "options": ["Vòng lặp tự dừng sau 100 lần", "Vòng lặp vô hạn, treo trang", "Trình duyệt tự sửa code", "Không chạy lần nào"],
+        "answer": 1,
+        "explain": "Điều kiện luôn đúng tạo ra vòng lặp vô hạn – nhớ cập nhật biến điều kiện."
+      }
+    ],
+    "-xZkVmkDwbU": [
+      {
+        "question": "[1, 2, 3].map(x => x * 2) trả về gì?",
+        "options": ["[2, 4, 6]", "[1, 2, 3]", "12", "undefined"],
+        "answer": 0,
+        "explain": "map() gọi hàm cho từng phần tử và trả về mảng mới gồm các kết quả."
+      },
+      {
+        "question": "map() có làm thay đổi mảng ban đầu không?",
+        "options": ["Có, luôn thay đổi", "Không, map() trả về một mảng mới", "Chỉ thay đổi phần tử đầu tiên", "Xóa mảng ban đầu"],
+        "answer": 1,
+        "explain": "map() không sửa mảng gốc mà tạo mảng mới cùng độ dài."
+      },
+      {
+        "question": "Hàm truyền vào map() nhận những tham số nào (theo thứ tự)?",
+        "options": ["(index, element)", "(element, index, array)", "(array, element)", "Không nhận tham số nào"],
+        "answer": 1,
+        "explain": "Callback của map nhận (phần tử, chỉ số, mảng gốc)."
+      }
+    ],
+    "W8vJ-yOtSbE": [
+      {
+        "question": "Callback function là gì?",
+        "options": [
+          "Hàm được truyền vào hàm khác làm đối số để gọi lại sau",
+          "Hàm tự gọi chính nó",
+          "Hàm không có tên",
+          "Hàm chỉ chạy trên server"
+        ],
+        "answer": 0,
+        "explain": "Callback là hàm được truyền làm đối số và được hàm kia gọi lại vào thời điểm thích hợp."
+      },
+      {
+        "question": "Trong setTimeout(sayHi, 1000), sayHi đóng vai trò gì?",
+        "options": ["Số mili giây chờ", "Callback được gọi sau khoảng 1 giây", "Tên của timer", "Giá trị trả về"],
+        "answer": 1,
+        "explain": "setTimeout nhận một callback và gọi nó sau khoảng thời gian chỉ định (ms)."
+      },
+      {
+        "question": "Khi truyền callback, vì sao viết arr.forEach(log) mà không viết arr.forEach(log())?",
+        "options": [
+          "Hai cách như nhau",
+          "log() sẽ gọi hàm ngay và truyền kết quả trả về thay vì truyền hàm",
+          "Thiếu ngoặc sẽ báo lỗi",
+          "forEach không nhận hàm"
+        ],
+        "answer": 1,
+        "explain": "Cần truyền chính hàm (log); viết log() là gọi hàm ngay lập tức."
+      }
+    ],
+    "TsTr-tKCREc": [
+      {
+        "question": "DOM là viết tắt của gì?",
+        "options": ["Data Object Model", "Document Object Model", "Digital Output Module", "Document Order Method"],
+        "answer": 1,
+        "explain": "DOM (Document Object Model) biểu diễn trang HTML dưới dạng cây các đối tượng."
+      },
+      {
+        "question": "Trong DOM, trang HTML được tổ chức theo cấu trúc nào?",
+        "options": ["Bảng tính", "Cây (tree) các node", "Danh sách phẳng", "Ảnh bitmap"],
+        "answer": 1,
+        "explain": "Mỗi thẻ, thuộc tính và đoạn văn bản là một node trong cây DOM."
+      },
+      {
+        "question": "Đối tượng nào là điểm bắt đầu để truy cập DOM trong JavaScript?",
+        "options": ["window.html", "document", "page", "dom.root"],
+        "answer": 1,
+        "explain": "Đối tượng document đại diện cho toàn bộ trang HTML."
+      }
+    ],
+    "gETNXKi3l_U": [
+      {
+        "question": "Phương thức nào lấy phần tử theo id?",
+        "options": ["document.getElementById('box')", "document.getId('box')", "document.query('#box')", "document.id('box')"],
+        "answer": 0,
+        "explain": "getElementById nhận id (không có dấu #) và trả về một phần tử hoặc null."
+      },
+      {
+        "question": "document.querySelector('.item') trả về gì?",
+        "options": [
+          "Tất cả phần tử có class item",
+          "Phần tử ĐẦU TIÊN khớp selector .item",
+          "Số lượng phần tử có class item",
+          "Luôn trả về mảng"
+        ],
+        "answer": 1,
+        "explain": "querySelector trả về phần tử đầu tiên khớp; querySelectorAll trả về NodeList tất cả phần tử khớp."
+      },
+      {
+        "question": "Để lấy TẤT CẢ thẻ <li> trên trang, nên dùng gì?",
+        "options": ["document.querySelector('li')", "document.querySelectorAll('li')", "document.getElementById('li')", "document.li"],
+        "answer": 1,
+        "explain": "querySelectorAll('li') trả về NodeList chứa mọi thẻ <li>."
+      }
+    ],
+    "AA3WWZAMv_0": [
+      {
+        "question": "Phương thức nào gắn một hàm xử lý sự kiện vào phần tử?",
+        "options": [
+          "element.on('click', fn)",
+          "element.addEventListener('click', fn)",
+          "element.bind('click', fn)",
+          "element.event('click', fn)"
+        ],
+        "answer": 1,
+        "explain": "addEventListener(tên sự kiện, hàm xử lý) là cách chuẩn để lắng nghe sự kiện."
+      },
+      {
+        "question": "Sự kiện nào xảy ra khi người dùng bấm chuột vào phần tử?",
+        "options": ["hover", "click", "press", "tap-up"],
+        "answer": 1,
+        "explain": "Sự kiện click xảy ra khi bấm (nhấn và thả) chuột lên phần tử."
+      },
+      {
+        "question": "event.preventDefault() dùng để làm gì?",
+        "options": [
+          "Xóa phần tử khỏi trang",
+          "Ngăn hành vi mặc định, ví dụ form tự gửi đi",
+          "Dừng toàn bộ JavaScript trên trang",
+          "Tải lại trang"
+        ],
+        "answer": 1,
+        "explain": "preventDefault() chặn hành vi mặc định của trình duyệt (gửi form, mở link…)."
+      }
+    ],
+    "Uph14HYkgEQ": [
+      {
+        "question": "JSON là viết tắt của gì?",
+        "options": ["JavaScript Object Notation", "Java Standard Output Network", "JavaScript Online Node", "JSON Server Object Name"],
+        "answer": 0,
+        "explain": "JSON là định dạng văn bản để trao đổi dữ liệu, cú pháp dựa trên object của JavaScript."
+      },
+      {
+        "question": "Phương thức nào chuyển chuỗi JSON thành giá trị JavaScript?",
+        "options": ["JSON.stringify()", "JSON.parse()", "JSON.toObject()", "JSON.read()"],
+        "answer": 1,
+        "explain": "JSON.parse() đọc chuỗi JSON; JSON.stringify() làm điều ngược lại."
+      },
+      {
+        "question": "Chuỗi nào là JSON HỢP LỆ?",
+        "options": ["{name: 'An'}", "{'name': 'An'}", "{\"name\": \"An\"}", "{name = \"An\"}"],
+        "answer": 2,
+        "explain": "Trong JSON, khóa và chuỗi phải dùng dấu nháy kép."
+      }
+    ],
+    "QJmNEqy0zV0": [
+      {
+        "question": "Một Promise có thể ở những trạng thái nào?",
+        "options": ["start, stop", "pending, fulfilled, rejected", "open, closed", "true, false"],
+        "answer": 1,
+        "explain": "Promise bắt đầu ở pending, sau đó chuyển sang fulfilled (thành công) hoặc rejected (thất bại)."
+      },
+      {
+        "question": "Phương thức nào xử lý kết quả THÀNH CÔNG của Promise?",
+        "options": [".then()", ".catch()", ".finally()", ".error()"],
+        "answer": 0,
+        "explain": ".then() nhận kết quả khi fulfilled; .catch() xử lý lỗi; .finally() luôn chạy."
+      },
+      {
+        "question": "console.log(1); setTimeout(() => console.log(2), 0); console.log(3); – thứ tự in ra là gì?",
+        "options": ["1 2 3", "1 3 2", "2 1 3", "3 2 1"],
+        "answer": 1,
+        "explain": "Callback của setTimeout là bất đồng bộ, chỉ chạy sau khi code đồng bộ (in 1 và 3) đã chạy xong."
+      }
+    ],
+    "9QeNLypIiZs": [
+      {
+        "question": "Arrow function nào tương đương function (x) { return x * 2 }?",
+        "options": ["x => x * 2", "x -> x * 2", "(x) => { x * 2 }", "function => x * 2"],
+        "answer": 0,
+        "explain": "Thân hàm một biểu thức không có {} sẽ tự return. Viết (x) => { x * 2 } thiếu return nên trả về undefined."
+      },
+      {
+        "question": "Arrow function KHÁC function thường ở điểm nào?",
+        "options": [
+          "Không có this riêng, dùng this của phạm vi bên ngoài",
+          "Chạy nhanh gấp 10 lần",
+          "Không nhận tham số",
+          "Không thể return giá trị"
+        ],
+        "answer": 0,
+        "explain": "Arrow function không tạo this riêng nên không phù hợp làm method cần this của object."
+      },
+      {
+        "question": "Arrow function trả về trực tiếp một object phải viết thế nào?",
+        "options": ["() => { a: 1 }", "() => ({ a: 1 })", "() => [a: 1]", "() => return { a: 1 }"],
+        "answer": 1,
+        "explain": "Bọc object trong ngoặc tròn để không bị hiểu nhầm là thân hàm."
+      }
+    ]
+  }
+}

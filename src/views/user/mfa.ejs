@@ -1,0 +1,65 @@
+<%- include('../partials/header') %>
+<section class="wrap section mfa">
+  <a class="small" href="/profile">← Hồ sơ của tôi</a>
+  <h1>Xác thực hai lớp (2FA)</h1>
+  <% if (isAdmin) { %><p class="muted small">Tài khoản quản trị: khi bật 2FA, mã 6 số từ ứng dụng thay cho <b>mã quản trị</b> lúc đăng nhập. Tắt 2FA thì đăng nhập lại bằng mã quản trị (đặt bằng <span class="mono">npm run set:admin-pin</span>).</p><% } %>
+  <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+
+  <% if (codes) { %>
+    <div class="card-pad recovery">
+      <h2><%= typeof justEnabled !== 'undefined' ? '✓ Đã bật xác thực hai lớp' : 'Mã khôi phục mới' %></h2>
+      <p><b>Lưu ngay 8 mã khôi phục dưới đây</b> (in ra giấy hoặc lưu trong trình quản lý mật khẩu). Mỗi mã dùng được <b>một lần</b> để đăng nhập khi bạn mất điện thoại. Cnow chỉ lưu bản băm nên <b>sẽ không hiển thị lại</b> các mã này.</p>
+      <ol class="codes mono"><% codes.forEach(c => { %><li><%= c %></li><% }) %></ol>
+      <p><button type="button" class="btn btn-ghost btn-sm" data-print>🖨 In mã</button> <a class="btn btn-sm" href="/profile/2fa">Tôi đã lưu các mã</a></p>
+    </div>
+  <% } else if (!enabled) { %>
+    <div class="card-pad mfa-setup">
+      <h2>Bật xác thực hai lớp</h2>
+      <ol class="steps">
+        <li>Cài ứng dụng xác thực trên điện thoại: Google Authenticator, Microsoft Authenticator…</li>
+        <li>Quét mã QR (hoặc nhập khóa thủ công).</li>
+        <li>Nhập mã 6 số mà ứng dụng hiển thị để xác nhận.</li>
+      </ol>
+      <div class="mfa-qr">
+        <img src="<%= setup.qr %>" alt="Mã QR để thêm tài khoản Cnow vào ứng dụng xác thực" width="220" height="220">
+        <div>
+          <p class="small muted">Không quét được? Nhập khóa thủ công:</p>
+          <p class="mono secret-key"><%= setup.secret %></p>
+        </div>
+      </div>
+      <form method="post" action="/profile/2fa/enable" class="mfa-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label>Mã 6 số từ ứng dụng
+          <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="7" required>
+        </label>
+        <button class="btn">Xác nhận và bật 2FA</button>
+      </form>
+    </div>
+  <% } else { %>
+    <div class="profile-grid">
+      <div class="card-pad">
+        <h2>Trạng thái</h2>
+        <p><span class="status st-COMPLETED">Đang bật</span></p>
+        <p>Còn <b><%= left %></b>/8 mã khôi phục chưa dùng.</p>
+        <form method="post" action="/profile/2fa/recovery" class="mfa-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <label>Mã 6 số hiện tại (để tạo lại mã khôi phục)
+            <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required>
+          </label>
+          <button class="btn btn-ghost btn-sm">Tạo lại 8 mã khôi phục</button>
+        </form>
+      </div>
+      <div class="card-pad">
+        <h2>Tắt xác thực hai lớp</h2>
+        <% if (isAdmin) { %><p class="muted small">Sau khi tắt, lần đăng nhập sau bạn cần <b>mã quản trị</b> – hãy chắc chắn đã đặt mã trước.</p><% } %>
+          <form method="post" action="/profile/2fa/disable" class="mfa-form" data-confirm="Tắt xác thực hai lớp sẽ làm tài khoản kém an toàn hơn. Tiếp tục?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <label>Mật khẩu<input type="password" name="password" required autocomplete="current-password"></label>
+            <label>Mã 6 số hoặc mã khôi phục<input name="code" required autocomplete="one-time-code" maxlength="12"></label>
+            <button class="btn btn-danger btn-sm">Tắt 2FA</button>
+          </form>
+      </div>
+    </div>
+  <% } %>
+</section>
+<%- include('../partials/footer') %>

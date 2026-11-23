@@ -1,0 +1,62 @@
+<section class="qa" id="qa" aria-labelledby="qa-h">
+  <h2 id="qa-h">💬 Hỏi – Đáp bài này <span class="muted small">(<%= thread.length %> câu hỏi)</span></h2>
+  <% const roleBadge = (p) => p.isInstructorPost ? 'Giảng viên' : (p.user && p.user.role === 'admin' ? 'Quản trị' : (p.user && p.user.role === 'collaborator' ? 'Cộng tác viên' : '')); %>
+  <% if (enrolled) { %>
+    <form method="post" action="/learn/<%= course.slug %>/qa" class="qa-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="lessonId" value="<%= lesson._id %>">
+      <label class="sr-only" for="qa-new">Câu hỏi của bạn</label>
+      <textarea id="qa-new" name="content" rows="3" minlength="2" maxlength="2000" required placeholder="Bạn chưa hiểu chỗ nào trong bài này? Đặt câu hỏi cho giảng viên và các bạn học…"></textarea>
+      <button class="btn btn-sm">Đặt câu hỏi</button>
+    </form>
+  <% } else { %>
+    <p class="muted small">Chỉ học viên của khóa học mới được đặt câu hỏi và trả lời.</p>
+  <% } %>
+  <% if (!thread.length) { %><p class="muted small">Chưa có câu hỏi nào cho bài này.</p><% } %>
+  <ul class="qa-list">
+    <% thread.forEach(q => { %>
+      <li class="qa-q">
+        <div class="qa-post">
+          <%- include('../partials/avatar', { u: q.user }) %>
+          <div class="qa-main">
+            <b><%= q.user ? q.user.name : 'Người dùng' %></b><%- include('../partials/demo-label', { u: q.user }) %>
+            <% if (roleBadge(q)) { %><span class="pill pill-staff"><%= roleBadge(q) %></span><% } %>
+            <span class="muted small"> · <%= q.createdAt.toLocaleString('vi-VN') %></span>
+            <p class="prewrap"><%= q.content %></p>
+            <%- include('_qa-actions', { p: q, isAnswer: false }) %>
+          </div>
+        </div>
+        <% if (q.answers.length) { %>
+          <ul class="qa-answers">
+            <% q.answers.forEach(a => { %>
+              <li class="qa-post <%= a.best ? 'is-best' : '' %>">
+                <%- include('../partials/avatar', { u: a.user }) %>
+                <div class="qa-main">
+                  <% if (a.best) { %><span class="pill pill-ok">★ Câu trả lời hay nhất</span><br><% } %>
+                  <b><%= a.user ? a.user.name : 'Người dùng' %></b><%- include('../partials/demo-label', { u: a.user }) %>
+                  <% if (roleBadge(a)) { %><span class="pill pill-staff"><%= roleBadge(a) %></span><% } %>
+                  <span class="muted small"> · <%= a.createdAt.toLocaleString('vi-VN') %></span>
+                  <p class="prewrap"><%= a.content %></p>
+                  <%- include('_qa-actions', { p: a, isAnswer: true }) %>
+                </div>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+        <% if (enrolled) { %>
+          <details class="qa-reply">
+            <summary class="small">Trả lời (<%= q.answers.length %>)</summary>
+            <form method="post" action="/learn/<%= course.slug %>/qa">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="lessonId" value="<%= lesson._id %>">
+              <input type="hidden" name="parent" value="<%= q.id %>">
+              <label class="sr-only" for="reply-<%= q.id %>">Câu trả lời</label>
+              <textarea id="reply-<%= q.id %>" name="content" rows="2" minlength="2" maxlength="2000" required></textarea>
+              <button class="btn btn-xs">Gửi câu trả lời</button>
+            </form>
+          </details>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+</section>

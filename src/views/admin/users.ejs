@@ -1,0 +1,62 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="section-head">
+      <h1>Thành viên & phân quyền</h1>
+      <a class="btn btn-ghost btn-sm" href="/admin/export/users.csv<%= qs({ page: '' }) %>" download>⬇ Xuất CSV (theo bộ lọc)</a>
+    </div>
+    <form method="get" class="filters filters-admin" role="search">
+      <label class="f-q">Tìm kiếm<input type="search" name="q" value="<%= f.q %>" maxlength="80" placeholder="Tên, email, tên đăng nhập"></label>
+      <label>Vai trò
+        <select name="role"><option value="">Tất cả</option><% Object.entries(roles).forEach(([v, t]) => { %><option value="<%= v %>" <%= f.role === v ? 'selected' : '' %>><%= t %></option><% }) %></select>
+      </label>
+      <label>Trạng thái
+        <select name="status"><option value="">Tất cả</option><option value="active" <%= f.status === 'active' ? 'selected' : '' %>>Hoạt động</option><option value="locked" <%= f.status === 'locked' ? 'selected' : '' %>>Bị khóa</option></select>
+      </label>
+      <label>Sắp xếp
+        <select name="sort"><option value="new" <%= f.sort === 'new' ? 'selected' : '' %>>Mới đăng ký</option><option value="old" <%= f.sort === 'old' ? 'selected' : '' %>>Cũ nhất</option><option value="name" <%= f.sort === 'name' ? 'selected' : '' %>>Tên A–Z</option></select>
+      </label>
+      <% if (f.demo) { %><input type="hidden" name="demo" value="<%= f.demo %>"><% } %>
+      <div class="f-actions"><button class="btn btn-sm">Lọc</button><% if (f.q || f.role || f.status || f.demo || f.sort !== 'new') { %><a class="small" href="/admin/users">Xóa lọc</a><% } %></div>
+    </form>
+    <%- include('_pager', { list, qs }) %>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Thành viên</th><th>Email</th><th>Ngày tạo</th><th>Vai trò</th><th>Trạng thái</th></tr></thead>
+        <tbody>
+          <% if (!users.length) { %><tr><td colspan="5" class="muted">Không có thành viên phù hợp.</td></tr><% } %>
+          <% const back = '/admin/users' + qs({ page: list.page }); %>
+          <% users.forEach(u => { const self = String(u._id) === String(me._id); %>
+            <tr>
+              <td><%= u.name %><%- include('../partials/demo-label', { u }) %><% if (u.mfaEnabled) { %> <span class="pill pill-ok" title="Đã bật xác thực hai lớp">2FA</span><% } %><br><span class="muted small">@<%= u.username %></span></td>
+              <td><%= u.email %></td>
+              <td><%= u.createdAt.toLocaleDateString('vi-VN') %></td>
+              <td>
+                <form method="post" action="/admin/users/<%= u._id %>" class="inline">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="back" value="<%= back %>">
+                  <select name="role" <%= self ? 'disabled' : '' %> data-autosubmit aria-label="Vai trò của @<%= u.username %>">
+                    <% Object.entries(roles).forEach(([v, t]) => { %><option value="<%= v %>" <%= u.role === v ? 'selected' : '' %>><%= t %></option><% }) %>
+                  </select>
+                </form>
+              </td>
+              <td>
+                <% if (self) { %><span class="muted small">(bạn)</span><% } else { %>
+                <form method="post" action="/admin/users/<%= u._id %>" class="inline" data-confirm="<%= u.locked ? 'Mở khóa' : 'Khóa' %> tài khoản @<%= u.username %>?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="back" value="<%= back %>">
+                  <input type="hidden" name="locked" value="<%= u.locked ? '0' : '1' %>">
+                  <button class="btn btn-xs <%= u.locked ? 'btn-ghost' : 'btn-danger' %>"><%= u.locked ? 'Mở khóa' : 'Khóa' %></button>
+                </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <%- include('_pager', { list, qs }) %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

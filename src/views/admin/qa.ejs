@@ -1,0 +1,38 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <h1>Kiểm duyệt Hỏi – Đáp</h1>
+    <%- include('_mod-filters', { f, courses, base: '/admin/qa' }) %>
+    <%- include('_pager', { list, qs }) %>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Thời gian</th><th>Người viết</th><th>Loại</th><th>Khóa học / bài</th><th>Nội dung</th><th>Vote</th><th><span class="sr-only">Thao tác</span></th></tr></thead>
+        <tbody>
+          <% if (!rows.length) { %><tr><td colspan="7" class="muted">Không có bài viết phù hợp.</td></tr><% } %>
+          <% const back = '/admin/qa' + qs({ page: list.page }); %>
+          <% rows.forEach(({ p, lessonIndex, lessonTitle }) => { %>
+            <tr class="<%= p.hidden ? 'dim' : '' %>">
+              <td><%= p.createdAt.toLocaleString('vi-VN') %></td>
+              <td><%= p.user ? p.user.name : '—' %><%- include('../partials/demo-label', { u: p.user }) %><% if (p.user) { %><br><span class="muted small">@<%= p.user.username %></span><% } %></td>
+              <td><%= p.parent ? 'Trả lời' : 'Câu hỏi' %><% if (p.best) { %><br><span class="pill pill-ok">★ Hay nhất</span><% } %></td>
+              <td><% if (p.course) { %><a href="/learn/<%= p.course.slug %>?lesson=<%= lessonIndex %>#qa"><%= p.course.title %></a><br><span class="muted small"><%= lessonTitle %></span><% } else { %>—<% } %></td>
+              <td class="prewrap"><%= p.content %></td>
+              <td><%= p.votes.length %></td>
+              <td>
+                <form method="post" action="/admin/qa/<%= p._id %>">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="hidden" value="<%= p.hidden ? '0' : '1' %>">
+                  <input type="hidden" name="back" value="<%= back %>">
+                  <button class="btn btn-xs <%= p.hidden ? 'btn-ghost' : 'btn-danger' %>"><%= p.hidden ? 'Hiện lại' : 'Ẩn' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <%- include('_pager', { list, qs }) %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

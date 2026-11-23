@@ -1,0 +1,37 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <h1>Kiểm duyệt bình luận</h1>
+    <p class="muted small">Bình luận ngắn của học viên ở trang khóa học. Bình luận bị ẩn không còn hiển thị công khai.</p>
+    <%- include('_mod-filters', { f, courses, base: '/admin/comments' }) %>
+    <%- include('_pager', { list, qs }) %>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Thời gian</th><th>Người viết</th><th>Khóa học</th><th>Nội dung</th><th><span class="sr-only">Thao tác</span></th></tr></thead>
+        <tbody>
+          <% if (!comments.length) { %><tr><td colspan="5" class="muted">Không có bình luận phù hợp.</td></tr><% } %>
+          <% const back = '/admin/comments' + qs({ page: list.page }); %>
+          <% comments.forEach(c => { %>
+            <tr class="<%= c.hidden ? 'dim' : '' %>">
+              <td><%= c.createdAt.toLocaleString('vi-VN') %></td>
+              <td><%= c.user ? c.user.name : '—' %><%- include('../partials/demo-label', { u: c.user }) %><% if (c.user) { %><br><span class="muted small">@<%= c.user.username %></span><% } %></td>
+              <td><% if (c.course) { %><a href="/courses/<%= c.course.slug %>#comments"><%= c.course.title %></a><% } else { %>—<% } %></td>
+              <td class="prewrap"><%= c.content %></td>
+              <td>
+                <form method="post" action="/admin/comments/<%= c._id %>">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="hidden" value="<%= c.hidden ? '0' : '1' %>">
+                  <input type="hidden" name="back" value="<%= back %>">
+                  <button class="btn btn-xs <%= c.hidden ? 'btn-ghost' : 'btn-danger' %>"><%= c.hidden ? 'Hiện lại' : 'Ẩn' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <%- include('_pager', { list, qs }) %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

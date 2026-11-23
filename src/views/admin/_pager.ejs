@@ -1,0 +1,18 @@
+<%# Phân trang dùng chung: list = { page, pages, total, per }, qs = hàm giữ bộ lọc hiện tại %>
+<div class="pager-bar">
+  <span class="muted small">
+    <% if (list.total) { %>Hiển thị <b><%= (list.page - 1) * list.per + 1 %>–<%= Math.min(list.page * list.per, list.total) %></b> / <b><%= list.total.toLocaleString('vi-VN') %></b><% } else { %>Không có kết quả<% } %>
+  </span>
+  <% if (list.pages > 1) { %>
+    <nav class="pager" aria-label="Phân trang">
+      <% if (list.page > 1) { %><a href="<%= qs({ page: list.page - 1 }) %>" rel="prev">‹ Trước</a><% } %>
+      <% const from = Math.max(1, list.page - 2), to = Math.min(list.pages, list.page + 2); %>
+      <% if (from > 1) { %><a href="<%= qs({ page: 1 }) %>">1</a><% if (from > 2) { %><span class="muted">…</span><% } %><% } %>
+      <% for (let p = from; p <= to; p++) { %>
+        <% if (p === list.page) { %><span class="on" aria-current="page"><%= p %></span><% } else { %><a href="<%= qs({ page: p }) %>"><%= p %></a><% } %>
+      <% } %>
+      <% if (to < list.pages) { %><% if (to < list.pages - 1) { %><span class="muted">…</span><% } %><a href="<%= qs({ page: list.pages }) %>"><%= list.pages %></a><% } %>
+      <% if (list.page < list.pages) { %><a href="<%= qs({ page: list.page + 1 }) %>" rel="next">Sau ›</a><% } %>
+    </nav>
+  <% } %>
+</div>

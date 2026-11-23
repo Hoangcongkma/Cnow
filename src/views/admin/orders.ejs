@@ -1,0 +1,60 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="section-head">
+      <h1>Hóa đơn & đơn hàng</h1>
+      <a class="btn btn-ghost btn-sm" href="/admin/export/orders.csv<%= qs({ page: '' }) %>" download>⬇ Xuất CSV (theo bộ lọc)</a>
+      <div class="tabs">
+        <a href="<%= qs({ status: '', page: '' }) %>" class="<%= !status ? 'on' : '' %>">Tất cả</a>
+        <% orderView.STATUSES.forEach(s => { %><a href="<%= qs({ status: s, page: '' }) %>" class="<%= status === s ? 'on' : '' %>"><%= orderView.STATUS[s] %></a><% }) %>
+      </div>
+    </div>
+    <form method="get" class="filters filters-admin" role="search">
+      <label class="f-q">Tìm theo học viên<input type="search" name="q" value="<%= f.q %>" maxlength="80" placeholder="Tên, email, tên đăng nhập"></label>
+      <label>Khóa học
+        <select name="course"><option value="">Tất cả</option><% courses.forEach(c => { %><option value="<%= c._id %>" <%= f.course === String(c._id) ? 'selected' : '' %>><%= c.title %></option><% }) %></select>
+      </label>
+      <label>Phương thức
+        <select name="method"><option value="">Tất cả</option><% Object.entries(methods).forEach(([k, m]) => { %><option value="<%= k %>" <%= f.method === k ? 'selected' : '' %>><%= m.label %></option><% }) %></select>
+      </label>
+      <label>Sắp xếp
+        <select name="sort"><option value="new" <%= f.sort === 'new' ? 'selected' : '' %>>Mới nhất</option><option value="old" <%= f.sort === 'old' ? 'selected' : '' %>>Cũ nhất</option></select>
+      </label>
+      <% if (f.status) { %><input type="hidden" name="status" value="<%= f.status %>"><% } %>
+      <div class="f-actions"><button class="btn btn-sm">Lọc</button><% if (f.q || f.course || f.method || f.status || f.sort !== 'new') { %><a class="small" href="/admin/orders">Xóa lọc</a><% } %></div>
+    </form>
+    <%- include('_pager', { list, qs }) %>
+    <% if (demoMode) { %><p class="muted small"><span class="demo-pill">DEMO</span> Thanh toán chạy ở chế độ demo – đơn DEMO không phải giao dịch thật; "Hoàn tiền (demo)" chỉ đổi trạng thái và thu hồi quyền học.</p><% } %>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Thời gian</th><th>Học viên</th><th>Khóa học</th><th>Số tiền</th><th>Cổng</th><th>Trạng thái</th><th>Mã đơn / giao dịch</th></tr></thead>
+        <tbody>
+          <% if (!orders.length) { %><tr><td colspan="7" class="muted">Không có đơn hàng.</td></tr><% } %>
+          <% orders.forEach(o => { %>
+            <tr>
+              <td><%= o.createdAt.toLocaleString('vi-VN') %></td>
+              <td><%= o.user ? o.user.name : '—' %><%- include('../partials/demo-label', { u: o.user }) %><br><span class="muted small"><%= o.user ? o.user.email : '' %></span></td>
+              <td><%= o.course ? o.course.title : '—' %></td>
+              <td><%= usd(o.amount) %><% if (o.amountVnd) { %><br><span class="muted small">≈ <%= fmtVnd(o.amountVnd) %></span><% } %><% if (o.couponCode) { %><br><span class="muted small">mã <code><%= o.couponCode %></code> −<%= usd(o.discount) %></span><% } %></td>
+              <td><%= orderView.methodLabel(o) %><% if (orderView.isDemo(o)) { %> <span class="demo-pill" title="<%= orderView.DEMO_NOTE %>">DEMO</span><% } %></td>
+              <td>
+                <span class="status st-<%= o.status %>"><%= orderView.STATUS[o.status] %></span><% if (o.failureReason) { %><br><span class="muted small"><%= o.failureReason %></span><% } %>
+                <% if (o.refundedAt) { %><br><span class="muted small">hoàn <%= o.refundedAt.toLocaleString('vi-VN') %></span><% } %>
+                <% if (orderView.refundable(o)) { %>
+                  <form method="post" action="/admin/orders/<%= o._id %>/refund" data-confirm="Hoàn tiền (demo) đơn <%= usd(o.amount) %> của <%= o.user ? o.user.name : '' %>? Học viên sẽ mất quyền học khóa này.">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-ghost btn-xs">↩ Hoàn tiền (demo)</button>
+                  </form>
+                <% } %>
+              </td>
+              <td class="small"><code><%= o.providerOrderId || '—' %></code><br><code><%= o.captureId || '' %></code><% if (orderView.billable(o)) { %><br><a href="/orders/<%= o._id %>/invoice.pdf" download>Hóa đơn PDF</a><% } %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <%- include('_pager', { list, qs }) %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

@@ -1,0 +1,23 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <div class="auth-card">
+    <h1>Kiểm tra chứng nhận</h1>
+    <form method="get" action="/verify" class="search">
+      <label for="code" class="sr-only">Mã xác thực</label>
+      <input id="code" name="code" value="<%= cert ? cert.displayCode : code %>" placeholder="VD: 1A2B-3C4D-5E6F-7A8B" maxlength="40" required>
+      <button class="btn btn-sm">Kiểm tra</button>
+    </form>
+    <% if (checked && cert) { %>
+      <div class="flash flash-success" role="status">✓ Chứng nhận hợp lệ</div>
+      <table class="kv">
+        <tr><th>Học viên</th><td><%= cert.name %></td></tr>
+        <tr><th>Khóa học</th><td><%= cert.courseTitle %></td></tr>
+        <tr><th>Ngày cấp</th><td><%= cert.issuedAt.toLocaleDateString('vi-VN') %></td></tr>
+        <tr><th>Mã xác thực</th><td class="mono"><%= cert.displayCode %></td></tr>
+      </table>
+    <% } else if (checked) { %>
+      <div class="flash flash-error" role="status">✗ Không tìm thấy chứng nhận với mã này.</div>
+    <% } %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

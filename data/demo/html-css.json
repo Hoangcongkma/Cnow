@@ -1,0 +1,543 @@
+{
+  "slug": "html-css",
+  "lessons": {
+    "01-cau-truc-trang-html": [
+      {
+        "q": "Mọi người ơi, mình mở file index.html bằng trình duyệt thì chữ tiếng Việt bị lỗi thành mấy ký tự kiểu Ã¡ Ã© ạ. Mình đã gõ đúng hết rồi mà?",
+        "answers": [
+          "Bạn kiểm tra xem trong head đã có thẻ meta charset utf-8 chưa nhé, mình cũng bị y hệt lúc mới học.",
+          "Ngoài thẻ meta thì bạn xem file có được lưu dạng UTF-8 trong trình soạn thảo không, góc dưới bên phải VS Code có ghi bảng mã đấy."
+        ],
+        "instructor": "Hai bạn trả lời đúng rồi. Bạn cần đặt <meta charset='utf-8'> ở ngay đầu phần head, và file phải thực sự được lưu bằng mã UTF-8. Nếu thiếu một trong hai, trình duyệt sẽ đọc sai byte và hiện ký tự lạ. Sửa xong nhớ tải lại trang (Ctrl + F5) để chắc chắn trình duyệt không dùng bản cũ."
+      },
+      {
+        "q": "Thẻ <title> với thẻ <h1> khác nhau chỗ nào vậy ạ? Em thấy cả hai đều là tiêu đề.",
+        "answers": ["title hiện trên tab trình duyệt, còn h1 thì hiện trong trang luôn."],
+        "instructor": "Đúng vậy. <title> nằm trong head, là tên của cả tài liệu: hiện trên tab, khi lưu dấu trang và trong kết quả tìm kiếm, nhưng không hiển thị trong thân trang. <h1> nằm trong body, là tiêu đề chính mà người xem đọc được. Hai nội dung có thể giống hoặc khác nhau tùy bạn, nhưng trang nên có đủ cả hai."
+      },
+      {
+        "q": "Em viết <p>Giá <strong>15.000</p></strong> mà trình duyệt vẫn hiện bình thường, vậy sai thứ tự đóng thẻ có sao đâu thầy?",
+        "answers": [],
+        "instructor": "Trình duyệt rất 'dễ tính', nó tự đoán và sửa cấu trúc giúp bạn, nên trong ví dụ nhỏ bạn thấy như không có gì. Nhưng với trang lớn, cách nó đoán có thể khác ý bạn: phần in đậm lan sang đoạn sau, CSS chọn sai phần tử, JavaScript tìm không ra. Hãy giữ quy tắc mở sau đóng trước, và mở tab Elements trong DevTools để xem cây phần tử thực tế trình duyệt đã dựng."
+      },
+      {
+        "q": "Dòng <!DOCTYPE html> có bắt buộc không ạ? Em xóa đi thì trang vẫn chạy.",
+        "answers": ["Mình nghe nói thiếu nó thì trình duyệt chuyển sang chế độ cũ gì đó, CSS dễ bị lệch."],
+        "instructor": "Bạn ở trên nói đúng. Thiếu DOCTYPE, trình duyệt hiển thị ở chế độ tương thích cũ (quirks mode), một số cách tính kích thước và khoảng cách sẽ khác chuẩn, nhất là khi bạn học tới box model. Dòng này chỉ tốn một dòng, nên luôn đặt nó ở đầu file."
+      },
+      {
+        "q": "mn cho mình hỏi section với article khác nhau sao, mình đọc bảng trong bài vẫn hơi mơ hồ",
+        "answers": [
+          "Mình hiểu là article đứng một mình vẫn có nghĩa, ví dụ một bài blog, còn section là một phần của cái gì đó lớn hơn.",
+          "Cứ thử hỏi: nếu cắt đoạn này mang sang trang khác mà người ta vẫn hiểu thì là article."
+        ],
+        "instructor": "Hai mẹo của các bạn rất hay. <article> là nội dung trọn vẹn, độc lập: bài viết, thẻ sản phẩm, một bình luận. <section> là một nhóm nội dung cùng chủ đề trong trang, thường có tiêu đề riêng như 'Thực đơn', 'Liên hệ'. Một section có thể chứa nhiều article, như ví dụ tiệm bánh trong bài. Nếu khu vực chỉ để bọc lại cho dễ trang trí, không có ý nghĩa riêng, thì dùng <div>."
+      },
+      {
+        "q": "Một trang có được dùng 2 thẻ <header> không ạ? Em định để 1 cái đầu trang và 1 cái trong article.",
+        "answers": [],
+        "instructor": "Được bạn nhé. <header> là phần mở đầu của khu vực chứa nó, nên ngoài header của cả trang, mỗi article hay section cũng có thể có header riêng (ví dụ tiêu đề và ngày đăng của bài viết). Thẻ chỉ nên xuất hiện một lần là <main>, vì nó đại diện cho nội dung chính duy nhất."
+      },
+      {
+        "q": "Em bấm vào link href='#menu' mà không nhảy đi đâu cả. Code: <a href='#menu'>Thực đơn</a> và <section class='menu'>...",
+        "answers": ["Bạn đang đặt class chứ không phải id rồi, neo # tìm theo id."],
+        "instructor": "Chính xác. Liên kết #menu sẽ tìm phần tử có id='menu', không phải class. Bạn sửa thành <section id='menu'> là được. Lưu ý thêm: id phân biệt chữ hoa chữ thường và không nên có dấu cách, nên đặt kiểu chữ thường nối bằng gạch ngang như 'lien-he'."
+      },
+      {
+        "q": "Thụt lề code có ảnh hưởng gì tới trang không ạ, em thấy có bạn viết hết trên một dòng.",
+        "answers": [
+          "Không ảnh hưởng hiển thị đâu, nhưng viết một dòng thì sau này sửa rất mệt.",
+          "VS Code có Format Document (Shift + Alt + F) tự thụt lề giúp đó bạn."
+        ],
+        "instructor": "Trình duyệt bỏ qua phần thụt lề, nên kết quả hiển thị như nhau. Thụt lề là để người đọc nhìn ra quan hệ cha con và phát hiện thẻ chưa đóng. Bạn nên thụt mỗi cấp 2 dấu cách và dùng tính năng định dạng tự động của trình soạn thảo như bạn ở trên gợi ý."
+      },
+      {
+        "q": "Tab Elements trong DevTools hiện thẻ <tbody> mà em đâu có viết? Hơi hoang mang.",
+        "answers": [],
+        "instructor": "Tab Elements hiển thị cây phần tử sau khi trình duyệt đã phân tích và chuẩn hóa HTML, không phải nguyên văn file của bạn. Có những phần tử trình duyệt tự thêm theo quy tắc HTML, như <tbody> trong bảng, hoặc tự đóng thẻ bạn quên đóng. Muốn xem đúng file gốc thì dùng View Page Source (Ctrl + U). So sánh hai chỗ này là cách hay để phát hiện lỗi lồng thẻ."
+      },
+      {
+        "q": "Thầy ơi em muốn chữ to hơn nên dùng <h1> cho cả mấy dòng mô tả có được không?",
+        "answers": ["Bài có nói rồi đó bạn, chữ to là việc của CSS."],
+        "instructor": "Không nên bạn nhé. Thẻ tiêu đề mô tả cấu trúc nội dung, như mục lục của sách; dùng sai sẽ làm trình đọc màn hình và công cụ tìm kiếm hiểu nhầm trang. Dòng mô tả hãy để trong <p>, còn kích thước chữ bạn chỉnh bằng CSS ở bài 3, ví dụ font-size: 1.25rem."
+      }
+    ],
+    "02-the-van-ban-lien-ket-hinh-anh": [
+      {
+        "q": "Ảnh của em không hiện, chỉ hiện chữ trong alt. File HTML nằm trong thư mục bai-viet, ảnh nằm trong thư mục anh ở ngoài. Em viết src='anh/logo.png'.",
+        "answers": ["Bạn thử ../anh/logo.png xem, vì phải lên một cấp đã.", "Mở F12 tab Console là thấy nó báo 404 với đường dẫn sai đó."],
+        "instructor": "Đúng rồi. Đường dẫn tương đối tính từ thư mục chứa file HTML hiện tại, tức bai-viet. Viết anh/logo.png thì trình duyệt tìm bai-viet/anh/logo.png, không có nên lỗi 404. Bạn sửa thành ../anh/logo.png để lên thư mục cha rồi mới vào anh. Trong tab Network bạn sẽ thấy rõ đường dẫn đầy đủ mà trình duyệt đã thử."
+      },
+      {
+        "q": "Trên máy em ảnh hiện bình thường nhưng đưa lên host thì mất. Tên file là Logo.PNG ạ.",
+        "answers": [],
+        "instructor": "Rất có thể do chữ hoa chữ thường. Windows coi Logo.PNG và logo.png là một, nhưng phần lớn máy chủ chạy Linux thì phân biệt, nên nếu code ghi logo.png mà file là Logo.PNG sẽ lỗi 404. Thói quen tốt: đặt tên file toàn chữ thường, không dấu, không khoảng trắng, nối bằng gạch ngang, và viết đường dẫn khớp từng ký tự."
+      },
+      {
+        "q": "Em nhấn Enter 3 lần trong code để cách đoạn mà trang vẫn dính liền, sao kỳ vậy mn",
+        "answers": ["HTML gộp hết khoảng trắng với xuống dòng thành 1 dấu cách nha bạn, phải dùng thẻ p."],
+        "instructor": "Bạn ở trên nói đúng. Trình duyệt coi nhiều dấu cách, tab, xuống dòng liên tiếp là một khoảng trắng. Muốn tách đoạn thì mỗi đoạn là một <p>; chỉ cần xuống dòng trong cùng đoạn (địa chỉ, thơ) thì dùng <br>. Đừng chồng nhiều <br> để tạo khoảng cách, phần đó để CSS (margin) lo."
+      },
+      {
+        "q": "<b> với <strong>, <i> với <em> khác nhau gì ạ? Nhìn ra thì y hệt nhau.",
+        "answers": ["strong với em có ý nghĩa, trình đọc màn hình sẽ nhấn giọng, còn b với i chỉ là kiểu chữ thôi."],
+        "instructor": "Đúng ý chính. Về hiển thị mặc định thì giống, nhưng <strong> nghĩa là nội dung quan trọng, <em> là nhấn giọng, có giá trị ngữ nghĩa. <b> và <i> chỉ tách một đoạn chữ ra về mặt trình bày mà không mang nghĩa quan trọng hơn. Nếu bạn chỉ muốn chữ đậm cho đẹp, hãy dùng CSS font-weight."
+      },
+      {
+        "q": "Link của em là <a href='www.example.com'> mà bấm vào lại ra trang lỗi, đường dẫn bị nối thêm vào sau thư mục của em.",
+        "answers": ["Thiếu https:// rồi bạn ơi."],
+        "instructor": "Chuẩn rồi. Không có giao thức, trình duyệt hiểu www.example.com là tên một file hoặc thư mục tương đối và ghép vào sau thư mục hiện tại. Liên kết ra website khác luôn phải viết đầy đủ, ví dụ href='https://www.example.com'."
+      },
+      {
+        "q": "Ảnh chỉ để trang trí (hình gạch hoa văn) thì alt viết gì ạ? Hay bỏ luôn thuộc tính alt?",
+        "answers": [],
+        "instructor": "Vẫn giữ thuộc tính alt nhưng để rỗng: alt=''. Như vậy trình đọc màn hình biết ảnh không mang thông tin và bỏ qua. Nếu bỏ hẳn alt, một số trình đọc sẽ đọc tên file ảnh, rất khó chịu cho người nghe. Còn ảnh có nội dung thì mô tả điều ảnh muốn truyền tải, tránh kiểu alt='anh1'."
+      },
+      {
+        "q": "Tại sao phải ghi width và height cho thẻ img trong khi em dùng CSS chỉnh kích thước sau? Có thừa không?",
+        "answers": [
+          "Để trang không bị giật khi ảnh tải xong đó bạn.",
+          "Mình thử bật mạng chậm trong DevTools thì thấy rõ, không có width height thì chữ bên dưới bị đẩy xuống đột ngột."
+        ],
+        "instructor": "Không thừa đâu. width và height trong HTML cho trình duyệt biết tỉ lệ ảnh từ trước khi tải, để giữ sẵn chỗ, tránh nội dung bị nhảy. CSS sau đó vẫn có thể thu phóng ảnh (ví dụ max-width: 100%; height: auto) mà tỉ lệ giữ đúng. Mẹo giả lập mạng chậm trong tab Network mà bạn chia sẻ rất đáng thử."
+      },
+      {
+        "q": "Em đặt <li> ngay trong <div> không có ul mà vẫn hiện dấu chấm, vậy có sao không ạ?",
+        "answers": [],
+        "instructor": "Hiển thị có thể vẫn ổn, nhưng đó là HTML không hợp lệ: <li> chỉ được là con trực tiếp của <ul>, <ol> (hoặc menu). Khi sai cấu trúc, trình đọc màn hình không biết đây là danh sách có bao nhiêu mục, và CSS chọn theo kiểu ul li cũng không áp dụng. Bạn bọc các <li> vào <ul> hoặc <ol> tùy có cần thứ tự hay không."
+      },
+      {
+        "q": "Có nên lúc nào cũng target='_blank' không ạ, em sợ người dùng bấm xong rời khỏi trang mình.",
+        "answers": ["Mình thấy nhiều trang làm vậy nhưng bản thân mình hơi ghét khi tab mở lung tung."],
+        "instructor": "Không nên lạm dụng. Người dùng có thể tự mở tab mới khi muốn (chuột giữa hoặc Ctrl + bấm), còn ép mở tab mới khiến nút Quay lại mất tác dụng. Chỉ dùng khi có lý do rõ, như mở tài liệu tham khảo trong lúc đang điền form. Khi dùng, nhớ kèm rel='noopener' để trang mới không can thiệp được vào trang của bạn qua window.opener."
+      },
+      {
+        "q": "Em viết src='/anh/logo.png' (có dấu / đầu) thì mở file trực tiếp không thấy ảnh, mà chạy Live Server lại thấy. Vì sao vậy thầy?",
+        "answers": ["Dấu / là tính từ gốc, mở file trực tiếp thì gốc là ổ đĩa C luôn á."],
+        "instructor": "Bạn ở trên giải thích đúng. Đường dẫn bắt đầu bằng / được tính từ gốc website. Khi chạy qua máy chủ web (Live Server), gốc là thư mục dự án nên tìm thấy. Khi mở file trực tiếp (file:///), gốc là gốc ổ đĩa nên trình duyệt tìm sai chỗ. Khi học, bạn có thể dùng đường dẫn tương đối như anh/logo.png để chạy được cả hai cách."
+      }
+    ],
+    "03-selector-va-box-model": [
+      {
+        "q": "Em đã link file CSS mà không ăn gì hết. <link rel='stylesheet' href='css/style.css'> nhưng file style.css nằm cùng thư mục với index.html.",
+        "answers": [
+          "Href đang trỏ vào thư mục css mà file lại nằm ngoài, bạn sửa href='style.css' là được.",
+          "Mở tab Network lọc CSS sẽ thấy file báo đỏ 404."
+        ],
+        "instructor": "Đúng là lỗi đường dẫn. href của thẻ link cũng tính tương đối như ảnh ở bài trước. File nằm cạnh index.html thì viết href='style.css'. Mẹo kiểm tra nhanh: thêm tạm body { background: yellow; } vào đầu file CSS, nếu nền không vàng nghĩa là file chưa được tải."
+      },
+      {
+        "q": "Width 300px mà DevTools đo ra 342px, em không hiểu sao luôn",
+        "answers": [],
+        "instructor": "Đó là box model mặc định content-box: width chỉ tính phần nội dung, padding và border được cộng thêm. Ví dụ padding 20px hai bên và border 1px hai bên: 300 + 40 + 2 = 342px. Thêm quy tắc *, *::before, *::after { box-sizing: border-box; } ở đầu file thì width sẽ tính cả padding và border, hộp rộng đúng 300px. Xem sơ đồ box model trong tab Computed để thấy từng lớp."
+      },
+      {
+        "q": "Mình viết the { color: red; } mà chữ trong thẻ class the không đổi màu ạ",
+        "answers": ["Thiếu dấu chấm .the bạn nhé, kinh điển luôn haha."],
+        "instructor": "Đúng rồi. Không có dấu chấm, trình duyệt hiểu 'the' là tên thẻ và tìm phần tử <the>, vốn không tồn tại. Trong CSS chọn class phải viết .the, còn trong HTML thì chỉ ghi class='the' không có dấu chấm."
+      },
+      {
+        "q": "p { color: blue; } viết sau .note { color: red; } mà chữ vẫn đỏ. Không phải viết sau thì thắng sao ạ?",
+        "answers": ["Viết sau thắng chỉ khi độ ưu tiên bằng nhau thôi bạn.", "Class mạnh hơn tên thẻ nên .note thắng dù viết trước."],
+        "instructor": "Hai bạn trả lời chuẩn. Trình duyệt so độ ưu tiên (specificity) trước: id mạnh hơn class, class mạnh hơn tên thẻ. Chỉ khi ngang nhau mới xét thứ tự viết. Vì vậy .note thắng p bất kể vị trí. Đây cũng là lý do bài khuyên dùng chủ yếu class để độ ưu tiên đồng đều, khi đó chỉ cần nhớ 'viết sau thắng'."
+      },
+      {
+        "q": "Padding trên dưới của thẻ <a> không đẩy được các thứ xung quanh ra, nền màu cam lại đè lên dòng trên. Code: .nut { padding: 8px 16px; background: orange; }",
+        "answers": [],
+        "instructor": "<a> mặc định là phần tử inline, padding trên dưới vẫn vẽ nền nhưng không chiếm chỗ trong dòng, nên nền bị chồng lên dòng khác. Thêm display: inline-block cho .nut như code mẫu trong bài: phần tử vẫn nằm trong dòng nhưng padding và margin trên dưới được tính đầy đủ."
+      },
+      {
+        "q": "Có nên dùng !important cho nhanh không mọi người, mình sửa mãi không đè được màu",
+        "answers": [
+          "Mình từng làm vậy, sau đó muốn đổi lại thì lại phải !important tiếp, rối lắm.",
+          "Bạn mở DevTools xem dòng bị gạch ngang, nó chỉ cho bạn quy tắc nào đang thắng."
+        ],
+        "instructor": "Hạn chế tối đa. !important vượt qua độ ưu tiên thông thường nên lần sau muốn ghi đè bạn lại phải dùng !important, càng lúc càng khó kiểm soát. Cách đúng: trong tab Styles, tìm khai báo bị gạch ngang và quy tắc đang thắng, rồi viết selector có độ ưu tiên phù hợp hoặc đặt quy tắc của bạn sau quy tắc kia."
+      },
+      {
+        "q": "Thiếu dấu ; ở color: red rồi xuống dòng padding: 10px. Em tưởng chỉ mất mỗi color, ai ngờ padding cũng mất?",
+        "answers": [],
+        "instructor": "Đúng vậy. Không có dấu chấm phẩy, trình duyệt đọc liền thành một khai báo color với giá trị 'red padding: 10px', giá trị này không hợp lệ nên bị bỏ qua cả cụm. Kết quả là mất cả hai. Trong DevTools bạn sẽ thấy khai báo có biểu tượng cảnh báo. Thói quen tốt: luôn kết thúc mọi khai báo bằng dấu chấm phẩy, kể cả dòng cuối."
+      },
+      {
+        "q": "margin: 24px auto căn giữa được thẻ nhưng em đổi width thành 100% thì hết căn giữa?",
+        "answers": ["Rộng 100% rồi thì còn chỗ đâu mà căn giữa nữa bạn :)"],
+        "instructor": "Bạn ở trên nói đúng. margin auto hai bên chia đều phần dư còn lại theo chiều ngang. Khi hộp đã rộng 100% cha thì không còn phần dư, nên trông như không căn giữa. Muốn hộp co giãn mà vẫn ở giữa, dùng max-width (ví dụ max-width: 300px) thay vì width cố định hoặc 100%."
+      },
+      {
+        "q": "Font-family đặt ở body thì các thẻ con ăn theo, nhưng border đặt ở body thì sao các thẻ con không có viền ạ?",
+        "answers": ["Vì border không kế thừa, chỉ mấy thuộc tính về chữ mới kế thừa thôi."],
+        "instructor": "Chính xác. Các thuộc tính liên quan đến chữ như color, font-family, font-size, line-height được kế thừa từ cha xuống con. Các thuộc tính về hộp như border, margin, padding, background thì không. Thử nghĩ nếu border kế thừa, mọi phần tử con đều có viền thì trang sẽ rất rối. Khi cần, bạn có thể ép kế thừa bằng giá trị inherit."
+      },
+      {
+        "q": "padding: 10px 20px 5px nghĩa là sao ạ, 3 giá trị em không nhớ thứ tự",
+        "answers": [],
+        "instructor": "Ba giá trị nghĩa là: trên 10px, trái và phải 20px, dưới 5px. Quy tắc chung đi theo chiều kim đồng hồ bắt đầu từ trên: 4 giá trị là trên, phải, dưới, trái; 2 giá trị là trên dưới, trái phải; 3 giá trị thì giá trị giữa dùng chung cho trái và phải. Cách viết này áp dụng giống nhau cho margin."
+      }
+    ],
+    "04-flexbox": [
+      {
+        "q": "Em đặt display: flex cho từng thẻ <a> trong nav mà chúng vẫn không nằm ngang được ạ?",
+        "answers": ["Phải đặt lên nav (thẻ cha) chứ không phải từng a nha."],
+        "instructor": "Đúng rồi. display: flex biến phần tử thành flex container, và chỉ các con trực tiếp của nó mới được xếp theo hàng. Đặt lên từng <a> thì mỗi <a> thành container của chính chữ bên trong, không ảnh hưởng gì tới các anh em. Chuyển display: flex lên .menu (thẻ nav) là các liên kết sẽ xếp ngang."
+      },
+      {
+        "q": "Mình đổi flex-direction: column rồi dùng justify-content: center để căn giữa ngang mà nó lại không căn được, bị gì vậy mn?",
+        "answers": [
+          "Column thì trục chính là dọc rồi, căn ngang phải dùng align-items: center.",
+          "Mẹo của mình: justify luôn đi theo hướng xếp, align là hướng còn lại."
+        ],
+        "instructor": "Hai bạn giải thích đúng. Khi đổi sang column, trục chính quay thành chiều dọc nên justify-content căn theo chiều dọc; trục phụ nằm ngang nên align-items mới là thứ căn ngang. Ngoài ra justify-content: center theo chiều dọc chỉ thấy tác dụng khi container cao hơn tổng chiều cao các item."
+      },
+      {
+        "q": "justify-content: space-between không có tác dụng gì hết, các item vẫn dính sát nhau.",
+        "answers": [],
+        "instructor": "Thường có hai nguyên nhân. Một là container không còn chỗ trống, ví dụ có item đang đặt flex: 1 nên đã ăn hết phần dư. Hai là bạn đặt justify-content lên sai phần tử (lên item thay vì container). Bạn mở DevTools, bấm nhãn 'flex' cạnh phần tử trong tab Elements để xem lớp phủ, sẽ thấy ngay có khoảng trống để chia hay không."
+      },
+      {
+        "q": "6 thẻ sản phẩm của em bị ép bẹp lại thành 1 hàng trên điện thoại chứ không xuống dòng.",
+        "answers": ["Thêm flex-wrap: wrap cho container là được bạn ơi."],
+        "instructor": "Mặc định flex-wrap là nowrap, mọi item buộc phải nằm trên một hàng nên co lại hết mức. Thêm flex-wrap: wrap cho container, kết hợp flex: 1 1 220px cho item như ví dụ 2 trong bài, các thẻ sẽ giữ khoảng 220px và tự rơi xuống hàng khi hết chỗ."
+      },
+      {
+        "q": "flex: 1 1 220px nghĩa là gì ạ, em đọc mà vẫn chưa thấm ba con số này",
+        "answers": ["Lần lượt là flex-grow, flex-shrink, flex-basis đó bạn."],
+        "instructor": "Đúng, đây là cách viết tắt của ba thuộc tính. Số đầu (flex-grow = 1): được giãn ra chia phần chỗ trống. Số thứ hai (flex-shrink = 1): được co lại khi thiếu chỗ. Giá trị thứ ba (flex-basis = 220px): kích thước khởi điểm trước khi giãn hoặc co. Khi kết hợp với flex-wrap: wrap, item không bị co quá nhỏ mà sẽ xuống hàng, nên trông như có độ rộng tối thiểu khoảng 220px."
+      },
+      {
+        "q": "Gap với margin cái nào tốt hơn? Em quen dùng margin-right cho từng item.",
+        "answers": [],
+        "instructor": "Với flex container, gap thường gọn hơn: chỉ khai báo một lần trên container, khoảng cách chỉ nằm giữa các item và không thừa ra ở hai đầu. Dùng margin-right thì item cuối vẫn có khoảng thừa, phải viết thêm quy tắc để bỏ, và khi xuống hàng càng khó căn. Margin vẫn hữu ích khi bạn muốn một item cụ thể có khoảng cách riêng, như mẹo margin-top: auto trong bài."
+      },
+      {
+        "q": "Ví dụ 4, em thêm margin-top: auto cho nút Mua mà nút không chạy xuống đáy thẻ. Thẻ của em có display: flex rồi nhé.",
+        "answers": [
+          "Bạn có quên flex-direction: column không? Thiếu nó thì nút nằm ngang hàng với chữ.",
+          "Còn nữa, các thẻ phải cao bằng nhau thì mới thấy, kiểm tra hàng cha có dùng flex hoặc grid để kéo dãn chưa."
+        ],
+        "instructor": "Hai ý của các bạn đều đúng. margin-top: auto đẩy item về cuối trục chính, nên trục chính phải là dọc (flex-direction: column). Ngoài ra thẻ phải cao hơn nội dung thì mới có khoảng trống để đẩy; khi các thẻ nằm trong một hàng flex với align-items mặc định là stretch, chúng sẽ cao bằng nhau và nút mới thẳng hàng ở đáy."
+      },
+      {
+        "q": "Căn giữa màn hình bằng justify-content + align-items center mà hộp chỉ căn ngang, dọc thì vẫn sát trên ạ",
+        "answers": [],
+        "instructor": "Container của bạn có lẽ chỉ cao bằng nội dung, nên căn dọc không có chỗ để căn. Hãy thêm min-height: 100vh cho container như ví dụ 3, để nó cao ít nhất bằng màn hình. Kiểm tra trong DevTools xem chiều cao thực tế của container là bao nhiêu."
+      },
+      {
+        "q": "Thầy ơi cháu của container (con của con) có bị ảnh hưởng bởi flex không? Em thấy chữ trong thẻ vẫn bình thường.",
+        "answers": ["Không đâu, chỉ con trực tiếp thôi."],
+        "instructor": "Đúng vậy, flex chỉ tác động lên con trực tiếp. Phần tử cháu vẫn bố cục bình thường bên trong item. Nếu muốn sắp xếp tiếp bên trong, bạn đặt display: flex cho chính item đó, giống cách header chứa nav trong ví dụ thanh điều hướng: flex lồng flex là chuyện rất bình thường."
+      },
+      {
+        "q": "Bài tập footer: dòng bản quyền của em cứ nằm chung hàng với 3 cột chứ không xuống riêng.",
+        "answers": [],
+        "instructor": "Dòng bản quyền cũng là con trực tiếp của .chan-trang nên nó là một flex item như các cột. Muốn nó chiếm một hàng riêng, đặt flex-basis: 100% cho nó, đồng thời container phải có flex-wrap: wrap thì item mới được phép xuống hàng. Thêm text-align: center để chữ ra giữa."
+      }
+    ],
+    "05-css-grid": [
+      {
+        "q": "1fr 2fr với 1px 2px khác gì nhau vậy ạ, fr là đơn vị gì?",
+        "answers": ["fr là phần chia của không gian còn lại, không phải độ dài cố định."],
+        "instructor": "fr (fraction) chia phần không gian còn trống theo tỉ lệ. 1fr 2fr nghĩa là chia thành 3 phần, cột đầu nhận 1 phần, cột sau nhận 2 phần, nên cột sau luôn rộng gấp đôi dù màn hình to hay nhỏ. Còn 1px 2px là hai cột cực kỳ hẹp, có kích thước cố định, không liên quan đến độ rộng container."
+      },
+      {
+        "q": "Mình đặt grid-template-columns cho từng ô con mà lưới không chia cột gì cả",
+        "answers": ["Thuộc tính đó phải đặt trên container có display: grid nha bạn."],
+        "instructor": "Đúng. grid-template-columns thuộc về container: nó kẻ lưới. Các ô con chỉ dùng thuộc tính của item như grid-column, grid-row, grid-area để chọn vị trí. Đặt nhầm chỗ thì trình duyệt không báo lỗi mà chỉ âm thầm bỏ qua, nên trong DevTools bạn sẽ thấy dòng đó vẫn hiện nhưng không có tác dụng."
+      },
+      {
+        "q": "grid-template-areas của em không chạy: 'dau dau' 'ben noidung chan'. Em kiểm tra tên vùng thấy đúng rồi.",
+        "answers": ["Hàng 1 có 2 từ, hàng 2 có 3 từ, không bằng nhau rồi bạn."],
+        "instructor": "Bạn trả lời đúng. Mỗi chuỗi là một hàng và tất cả các hàng phải có cùng số ô, bằng số cột. Hàng thứ hai có 3 ô nên cả khai báo bị bỏ qua. Bạn tách chân trang ra thành hàng riêng: 'dau dau' 'ben noidung' 'chan chan'. Nếu cần ô trống thì dùng dấu chấm."
+      },
+      {
+        "q": "Lưới 3 cột thì grid-column: 1 / 3 là chiếm 3 cột phải không ạ?",
+        "answers": [],
+        "instructor": "Không, chỉ 2 cột. Số trong grid-column là số đường kẻ, không phải số cột. Lưới 3 cột có 4 đường kẻ dọc đánh số 1 đến 4; 1 / 3 là từ đường 1 tới đường 3, tức cột 1 và 2. Muốn trải hết 3 cột thì viết 1 / 4, hoặc gọn hơn là 1 / -1 (đường cuối cùng). Bật lớp phủ grid trong DevTools sẽ thấy số đường kẻ ngay trên trang."
+      },
+      {
+        "q": "auto-fill với auto-fit khác nhau như nào ạ? Em có 2 ảnh thôi mà dùng auto-fill thì bên phải trống trơn.",
+        "answers": [
+          "Đổi sang auto-fit thử, 2 ảnh sẽ giãn ra lấp kín.",
+          "Mình hiểu là auto-fill vẫn giữ cột trống, auto-fit thì gộp cột trống lại."
+        ],
+        "instructor": "Các bạn nói đúng. Cả hai đều tạo nhiều cột nhất có thể với minmax. Khi số item ít hơn số cột vừa khít, auto-fill giữ lại các cột trống nên có khoảng trống bên phải, còn auto-fit co các cột trống về 0 và để 1fr của các item giãn ra lấp đầy. Khi có nhiều item thì hai từ khóa cho kết quả như nhau."
+      },
+      {
+        "q": "Ảnh trong bộ sưu tập bị méo khi em đặt aspect-ratio: 1 ạ.",
+        "answers": [],
+        "instructor": "Khi ép ảnh vào khung vuông mà ảnh gốc là hình chữ nhật, mặc định ảnh bị kéo giãn cho vừa. Thêm object-fit: cover như code mẫu: ảnh giữ đúng tỉ lệ, phần thừa bị cắt bớt. Nếu muốn thấy toàn bộ ảnh mà chấp nhận viền trống thì dùng object-fit: contain."
+      },
+      {
+        "q": "Grid với Flexbox nên chọn cái nào cho thanh menu ạ? Em thấy cái nào cũng làm được.",
+        "answers": ["Menu thì flex cho nhẹ đầu, mình chỉ dùng grid cho khung trang."],
+        "instructor": "Cả hai đều làm được, nhưng thanh menu là bố cục một chiều (một hàng liên kết) nên Flexbox thường đơn giản hơn. Grid phát huy khi bạn cần thẳng hàng theo cả hàng lẫn cột, như khung trang, bảng điều khiển, bộ sưu tập ảnh. Cách phổ biến là Grid cho khung lớn, Flexbox cho các thành phần nhỏ bên trong."
+      },
+      {
+        "q": "Bài tập dashboard: ô Biểu đồ span 2 hàng nhưng lưới của em xuất hiện một ô trống ở giữa, trông xấu xấu.",
+        "answers": ["Mình cũng bị, thêm grid-auto-flow: dense thì nó tự lấp ô trống.", "Hoặc đổi thứ tự các ô trong HTML là được."],
+        "instructor": "Mặc định Grid đặt item lần lượt theo thứ tự HTML; khi một item lớn không vừa chỗ còn lại của hàng, nó nhảy xuống hàng sau và để lại lỗ. Bạn có thể đổi thứ tự trong HTML, hoặc đặt grid-auto-flow: dense trên container để trình duyệt lấp các ô nhỏ vào chỗ trống. Lưu ý dense có thể làm thứ tự hiển thị khác thứ tự đọc, nên dùng khi thứ tự không quan trọng."
+      },
+      {
+        "q": "Tên vùng 'a b' 'b a' bị lỗi đúng không thầy? Em thử thì cả layout bị vỡ hết.",
+        "answers": [],
+        "instructor": "Đúng, mỗi vùng có tên phải là một hình chữ nhật liền khối. Với 'a b' 'b a', vùng a và b đều bị tách thành hai mảnh chéo nhau, không hợp lệ, nên trình duyệt bỏ qua toàn bộ grid-template-areas và các item quay về xếp tự động. Nếu cần hình chữ L, bạn hãy tách thành hai vùng khác tên."
+      },
+      {
+        "q": "grid-template-rows: auto 1fr auto mà phần nội dung giữa không giãn, chân trang vẫn bị đẩy lên giữa màn hình ạ.",
+        "answers": ["Container phải có min-height: 100vh thì 1fr mới có chỗ để giãn."],
+        "instructor": "Đúng rồi. 1fr chia phần chiều cao còn dư, nhưng nếu container chỉ cao bằng nội dung thì chẳng có phần dư nào. Thêm min-height: 100vh cho .trang như ví dụ 1, hàng giữa sẽ giãn ra và chân trang nằm sát đáy màn hình khi nội dung ngắn."
+      }
+    ],
+    "06-responsive-design": [
+      {
+        "q": "Em viết media query đúng hết mà mở trên điện thoại thật thì trang vẫn bé tí như bản máy tính thu nhỏ.",
+        "answers": ["99% là thiếu thẻ meta viewport đó bạn."],
+        "instructor": "Bạn ở trên nói đúng. Thiếu <meta name='viewport' content='width=device-width, initial-scale=1'>, trình duyệt di động giả định màn hình rộng khoảng 980px rồi thu nhỏ cả trang, nên media query theo độ rộng nhỏ không bao giờ khớp. Thêm thẻ này vào head là media query hoạt động đúng."
+      },
+      {
+        "q": "Em đặt @media (min-width: 1024px) trước @media (min-width: 640px) thì trên laptop lưới chỉ có 2 cột. Tại sao vậy ạ?",
+        "answers": ["Cùng selector nên cái viết sau thắng, mà 640px thì laptop cũng thỏa."],
+        "instructor": "Chính xác. Ở laptop, cả hai điều kiện đều đúng, hai quy tắc có cùng độ ưu tiên nên quy tắc viết sau (640px, 2 cột) thắng. Với mobile-first, các khối min-width phải xếp từ nhỏ đến lớn để quy tắc cho màn hình rộng hơn luôn nằm sau và được ưu tiên."
+      },
+      {
+        "q": "rem với em khác nhau thế nào ạ? Em dùng em cho chữ trong menu lồng nhau thì chữ càng vào trong càng to.",
+        "answers": [
+          "em tính theo cỡ chữ của phần tử, mà cỡ chữ lại kế thừa từ cha nên nó nhân dồn lên.",
+          "Dùng rem cho font-size cho lành bạn ạ."
+        ],
+        "instructor": "Các bạn giải thích đúng. rem luôn tính theo cỡ chữ của phần tử gốc html (thường 16px), nên ổn định dù lồng bao nhiêu cấp. em dùng cho font-size thì tính theo cỡ chữ của phần tử cha, nên 1.2em lồng ba cấp sẽ thành khoảng 1.2 x 1.2 x 1.2. Nên dùng rem cho cỡ chữ; em hợp với padding của nút để khoảng đệm tỉ lệ theo chữ trong nút."
+      },
+      {
+        "q": "Trang của em có thanh cuộn ngang trên điện thoại, cuộn sang phải toàn khoảng trắng. Tìm mãi không ra phần tử nào gây ra.",
+        "answers": [],
+        "instructor": "Thường là có phần tử rộng cố định bằng px (ví dụ width: 1200px), ảnh không có max-width: 100%, hoặc bảng quá rộng. Cách tìm: bật chế độ thiết bị trong DevTools, cuộn sang phải và rê chuột trên tab Elements để xem phần tử nào lòi ra ngoài. Sửa bằng max-width thay cho width cố định, thêm img { max-width: 100%; height: auto; }, và bọc bảng trong khối overflow-x: auto."
+      },
+      {
+        "q": "Mobile-first là phải viết CSS cho điện thoại trước rồi mới tới máy tính đúng không mn? Mình quen làm ngược lại bằng max-width.",
+        "answers": [
+          "Đúng rồi, mặc định là điện thoại, rồi min-width để thêm cho màn to.",
+          "Mình thấy mobile-first đỡ phải ghi đè hơn hẳn."
+        ],
+        "instructor": "Đúng vậy. CSS ngoài media query là cho màn hình nhỏ, thường đơn giản: một cột. Sau đó các khối @media (min-width: ...) chỉ thêm bố cục cho màn hình lớn. Desktop-first với max-width vẫn đúng về kỹ thuật, nhưng hay phải gỡ bỏ những gì đã viết cho màn hình to, dễ chồng chéo. Với dự án mới, bạn nên tập mobile-first."
+      },
+      {
+        "q": "Breakpoint nên đặt bao nhiêu px ạ? Em định tra kích thước của mấy dòng điện thoại phổ biến.",
+        "answers": [],
+        "instructor": "Không cần chạy theo kích thước từng thiết bị, vì máy mới ra liên tục. Hãy chọn theo nội dung: mở trang, kéo hẹp hoặc nới rộng cửa sổ từ từ, chỗ nào bố cục bắt đầu xấu (chữ quá dài một dòng, thẻ quá hẹp) thì đặt breakpoint ở đó. Các mốc như 640px, 1024px trong bài chỉ là điểm khởi đầu hợp lý, không phải quy định."
+      },
+      {
+        "q": "font-size: clamp(1.75rem, 5vw, 3rem) đọc thế nào ạ, em không hiểu giá trị ở giữa.",
+        "answers": ["Giữa là giá trị mong muốn, hai đầu là chặn dưới chặn trên."],
+        "instructor": "Đúng. clamp(min, ưu tiên, max) dùng giá trị ở giữa (5vw, tức 5% chiều rộng màn hình) nhưng không cho nhỏ hơn 1.75rem và không lớn hơn 3rem. Màn hình hẹp thì chữ dừng ở 1.75rem để còn đọc được, màn hình rất rộng thì dừng ở 3rem để không quá to, ở giữa thì co giãn mượt theo màn hình."
+      },
+      {
+        "q": "Media query của em bị bỏ qua hết: @media min-width: 768px { ... }",
+        "answers": ["Thiếu ngoặc tròn quanh điều kiện kìa."],
+        "instructor": "Đúng, điều kiện phải nằm trong ngoặc tròn: @media (min-width: 768px) { ... }. Ngoài ra hãy kiểm tra có đơn vị px và có đủ dấu ngoặc nhọn đóng ở cuối khối. Thiếu ngoặc đóng có thể khiến mọi quy tắc phía sau bị nuốt vào media query, nên lỗi lan rộng mà khó nhận ra."
+      },
+      {
+        "q": "Trong DevTools chế độ thiết bị nhìn ổn rồi, có cần thử máy thật không ạ?",
+        "answers": [],
+        "instructor": "Nên thử nếu có thể. Chế độ thiết bị giả lập rất tốt về độ rộng màn hình và breakpoint, nhưng không tái hiện đầy đủ cảm giác chạm bằng ngón tay, kích thước nút bấm thực tế, bàn phím ảo che form hay thanh địa chỉ co giãn khi cuộn. Hãy dùng DevTools khi phát triển, rồi kiểm tra lại trên ít nhất một điện thoại thật trước khi hoàn thành."
+      },
+      {
+        "q": "Bài tập gói cước: em thêm grid rồi mà thẻ vẫn rộng 260px, không giãn theo cột ạ.",
+        "answers": ["Bạn xóa width: 260px trong .goi đi, gợi ý trong bài có nói đó."],
+        "instructor": "Đúng rồi. width cố định trên thẻ thắng việc co giãn theo cột, nên mỗi thẻ vẫn chỉ 260px dù cột rộng hơn. Xóa width (và display: inline-block cũ) trong .goi để thẻ lấp đầy ô lưới. Khi đó độ rộng thẻ do grid-template-columns của .cac-goi quyết định, và đổi theo từng breakpoint."
+      }
+    ]
+  },
+  "comments": [
+    "Khóa học dễ hiểu quá, mình học xong bài box model mới hiểu vì sao trước giờ layout của mình toàn bị tràn.",
+    "Ví dụ tiệm bánh ở bài đầu dễ thương ghê, đọc không bị khô.",
+    "Cảm ơn thầy, phần thẻ ngữ nghĩa giải thích rất rõ ràng.",
+    "Mình là dân trái ngành, học tới Flexbox thấy tự tin hơn nhiều rồi.",
+    "Bài Grid hơi nhiều kiến thức một lúc, mình phải đọc lại hai lần mới thấm.",
+    "Mong khóa có thêm một bài về form HTML, mấy thẻ input mình vẫn chưa rõ.",
+    "Phần lỗi hay gặp là phần mình thích nhất, đúng y những lỗi mình từng mắc.",
+    "Có ai học xong cả khóa chưa, cho mình hỏi làm bài tập cuối mất bao lâu?",
+    "Bài tập dashboard ở bài Grid hay thật, làm xong thấy mình xịn hẳn.",
+    "Ví dụ chân thẻ dùng margin-top: auto quá đỉnh, mình áp dụng luôn vào đồ án.",
+    "Mình thấy bài Responsive nên có thêm hình minh họa trước và sau khi thêm media query.",
+    "Học nửa tiếng mỗi tối, đã xong 4 bài, cảm giác rất ổn.",
+    "Câu hỏi trắc nghiệm cuối bài giúp mình nhớ lâu hơn, cảm ơn đội ngũ.",
+    "Giải thích trục chính trục phụ của Flexbox là rõ nhất mà mình từng đọc.",
+    "Mình mong có video quay màn hình phần DevTools, đọc chữ hơi khó hình dung chỗ bấm.",
+    "Lời giải bài tập để trong phần ẩn rất hợp lý, mình tự làm trước rồi mới mở ra so.",
+    "Phần đường dẫn tương đối và tuyệt đối cứu mình một bàn thua, ảnh hiện lại rồi!",
+    "Khóa này có chứng chỉ sau khi hoàn thành không ạ?",
+    "Bài selector nên có thêm ví dụ về selector con trực tiếp với dấu lớn hơn.",
+    "Văn phong thân thiện, đọc như có người đang giảng bên cạnh vậy.",
+    "Mình đã giới thiệu khóa này cho em gái đang học cấp ba.",
+    "Bài Flexbox hơi dài, có thể tách phần ví dụ ra thành bài riêng không ạ?",
+    "Lần đầu mình hiểu được box-sizing: border-box để làm gì, cảm ơn thầy nhiều.",
+    "Đọc xong bài Grid mới biết có grid-template-areas, tiện thật sự.",
+    "Mình thích cách so sánh trang web với ngôi nhà, dễ nhớ lắm.",
+    "Có ai muốn lập nhóm cùng làm bài tập responsive không?",
+    "Thời gian đọc ghi 16 phút nhưng mình tính cả làm bài tập thì gần 1 tiếng :)",
+    "Phần mobile-first thay đổi hẳn cách mình viết CSS.",
+    "Bài tập hơi ít, mong mỗi bài có thêm một bài nâng cao cho ai muốn thử sức.",
+    "Cảm ơn khóa học, mình vừa tự làm xong trang giới thiệu bản thân đầu tiên.",
+    "Mẹo thêm nền vàng để kiểm tra CSS đã tải chưa trong phần hỏi đáp hay quá.",
+    "Câu hỏi về auto-fill và auto-fit trong phần thảo luận giúp mình hiểu ra.",
+    "Mình học trên điện thoại, giao diện bài học đọc rất thoải mái.",
+    "Mong có thêm bài về animation và transition trong CSS.",
+    "Bài 2 phần alt cho ảnh khiến mình nghĩ nhiều hơn về người dùng khiếm thị, rất ý nghĩa.",
+    "Đây là khóa HTML CSS đầu tiên mà mình học hết được, không bỏ giữa chừng.",
+    "Ví dụ trong bài thực tế, không phải kiểu foo bar khó hiểu.",
+    "Ai bị lỗi chữ tiếng Việt thì nhớ thẻ meta charset nhé, mình mất cả buổi vì nó.",
+    "Mình thấy phần độ ưu tiên selector nên có bảng tính điểm cụ thể hơn.",
+    "Thầy trả lời câu hỏi nhanh và kỹ, rất có tâm.",
+    "Học xong bài 4 mình làm lại thanh menu cho blog cá nhân, đẹp hơn hẳn.",
+    "Phần bảng rộng cuộn ngang trên điện thoại đúng thứ mình đang cần.",
+    "Có cách nào tải nội dung bài học về đọc offline không ạ?",
+    "Bài 3 hơi nhồi nhiều khái niệm: selector, cascade, box model trong một bài, hơi ngợp.",
+    "Câu trắc nghiệm tính chiều rộng 250px làm mình sai lần đầu, giờ nhớ mãi.",
+    "Code mẫu có chú thích từng dòng rất dễ theo dõi.",
+    "Mình đã hoàn thành khóa học, giờ chuyển sang học JavaScript thôi.",
+    "Phần căn giữa tuyệt đối ba dòng code làm mình bất ngờ, trước giờ toàn dùng mẹo lạ.",
+    "Mong có thêm phần chấm bài tập tự động thì tuyệt.",
+    "Đọc phần Grid hay Flexbox xong cuối cùng cũng biết khi nào dùng cái nào.",
+    "Khóa học ngắn gọn, đi thẳng vào trọng tâm, hợp với người bận như mình.",
+    "Bài Responsive có nhắc menu hamburger nhưng không hướng dẫn làm, hơi tiếc.",
+    "Cảm ơn mọi người trong phần hỏi đáp, nhiều câu trả lời của các bạn rất có ích.",
+    "Mình in phần tóm tắt cuối mỗi bài ra dán cạnh bàn học luôn.",
+    "Thuật ngữ tiếng Anh để trong ngoặc giúp mình tra tài liệu dễ hơn.",
+    "Bài 1 nên có thêm hướng dẫn cài trình soạn thảo cho người mới tinh.",
+    "Học xong khóa này có đủ để làm giao diện đồ án tốt nghiệp không mọi người?",
+    "Mình thích việc mỗi bài đều có đường dẫn đọc thêm tới tài liệu chính thức.",
+    "Phần flex: 1 1 220px giải thích rất dễ hiểu, cảm ơn thầy.",
+    "Vừa làm xong bài tập footer, ba cột xuống dòng đẹp như trong bài.",
+    "Mong khóa sau có dự án tổng hợp làm nguyên một trang landing page từ đầu.",
+    "Mình hơi bối rối ở phần đường kẻ trong Grid, đánh số từ 1 dễ nhầm với số cột.",
+    "Học từ bài 1 tới bài 6 thấy lộ trình đi rất mạch lạc.",
+    "Bài viết hay, nhưng mình nghĩ nên có thêm ảnh chụp kết quả hiển thị của code mẫu.",
+    "Cảm ơn Cnow, mình đã nắm chắc nền tảng trước khi đi thực tập.",
+    "Lộ trình hợp lý: HTML trước, CSS sau, rồi bố cục và responsive.",
+    "Nhờ khóa này mình biết dùng DevTools thay vì đoán mò sửa CSS."
+  ],
+  "spam": [
+    "Nhận làm đồ án thuê trọn gói giá rẻ, ai cần nhắn tin riêng cho mình nhé, bao qua môn!",
+    "Khóa gì mà toàn chữ, ai rảnh đâu mà đọc, chán chết đi được.",
+    "Ghé xem kênh của mình đi mọi người, đăng ký ủng hộ nhé, mình làm video giải trí hằng ngày."
+  ],
+  "reviews": {
+    "1": [
+      "Mình mong đợi khóa có video hướng dẫn từng bước nhưng chỉ toàn bài đọc. Với người mới hoàn toàn thì rất khó theo.",
+      "Các bài tăng độ khó quá nhanh, bài tập không có gợi ý từng bước và không có cách tự kiểm tra kết quả, mình bỏ dở ở bài Grid.",
+      "Nội dung quá ngắn so với tên khóa, thiếu form, bảng, hiệu ứng, không có dự án cuối khóa. Chưa đủ để làm một website thật."
+    ],
+    "2": [
+      "Tốc độ quá nhanh từ bài Flexbox sang Grid, chưa kịp luyện flex đã chuyển. Thiếu bài tập trung gian nên mình bị đuối.",
+      "Bài tập dashboard ở bài Grid khó so với phần lý thuyết, đề không nói cách xử lý ô trống khiến mình mắc kẹt khá lâu.",
+      "Không có video và không có hình minh họa, toàn chữ. Với người học bằng hình ảnh như mình thì rất khó tiếp thu.",
+      "Phần độ ưu tiên selector chỉ nói id mạnh hơn class mà không giải thích cách tính khi kết hợp nhiều selector, mình vẫn mơ hồ.",
+      "Thiếu hẳn các chủ đề cơ bản như form, bảng, màu sắc, phông chữ. Học xong vẫn phải tìm nguồn khác để làm được trang thật.",
+      "Mình mong có hướng dẫn cài đặt môi trường từ đầu. Bài 1 bảo mở file bằng trình duyệt nhưng không nói dùng trình soạn thảo nào.",
+      "Lời giải bài tập không giải thích vì sao viết như vậy, chỉ đưa code. Làm sai mình không biết mình sai ở bước nào."
+    ],
+    "3": [
+      "Kiến thức đúng và rõ, nhưng chỉ có chữ và code nên với mình hơi khô. Một video ngắn mỗi bài sẽ giúp dễ theo hơn nhiều.",
+      "Bài 3 dồn selector, cascade, kế thừa và box model vào một bài, nhịp quá nhanh với người mới. Nên tách thành hai bài.",
+      "Bài tập ít, mỗi bài chỉ một đề. Mình cần thêm vài bài luyện nhỏ cho từng thuộc tính trước khi làm bài tổng hợp.",
+      "Phần Grid nói đến auto-fill, minmax, grid-auto-flow mà không có hình minh họa lưới, mình phải tự vẽ ra giấy mới hiểu.",
+      "Nội dung ổn nhưng thiếu phần về form HTML, một thứ rất cơ bản. Học xong mình vẫn không biết làm trang đăng nhập.",
+      "Code mẫu không có ảnh kết quả đi kèm, nhiều lúc mình không chắc mình chạy ra có đúng như mong đợi không.",
+      "Bài Responsive nhắc menu hamburger rồi bảo học ở khóa sau, hơi hụt hẫng vì đó là thứ mình cần nhất.",
+      "Khóa phù hợp người mới hoàn toàn, còn ai đã biết qua thì bài 1, 2 hơi chậm, nên có phần tóm tắt nhanh để nhảy qua.",
+      "Trắc nghiệm chỉ 4 đến 5 câu mỗi bài, khá dễ. Mình mong có câu hỏi dạng đọc code đoán kết quả để luyện sâu hơn.",
+      "Không có dự án cuối khóa nên kiến thức hơi rời rạc. Mình mong có một trang hoàn chỉnh làm từ đầu đến cuối."
+    ],
+    "4": [
+      "Nội dung rất tốt và dễ hiểu. Trừ một sao vì mình mong có thêm ảnh chụp kết quả hiển thị bên cạnh code mẫu.",
+      "Flexbox và Grid giải thích hay, nhưng bài Grid hơi dày, nên tách phần auto-fill, minmax ra một bài riêng.",
+      "Khóa học tốt cho người mới. Mình mong có thêm bài về form và bảng HTML vì đồ án của mình dùng nhiều.",
+      "Văn phong thân thiện, ví dụ thực tế. Chỉ tiếc là chưa có video, một số thao tác DevTools đọc chữ hơi khó hình dung.",
+      "Bài tập vừa sức, lời giải rõ ràng. Mình muốn có thêm bài tập nâng cao cho người đã biết chút ít.",
+      "Phần responsive rất thực tế. Có nhắc menu hamburger nhưng chưa hướng dẫn, mong được bổ sung sau.",
+      "Mình đánh giá cao mục Lỗi hay gặp. Chỉ thấy phần độ ưu tiên selector nên có cách tính điểm cụ thể.",
+      "Khóa ngắn gọn và đi thẳng vào vấn đề. Với người đã biết chút HTML như mình thì bài 1 và 2 hơi dễ.",
+      "Thầy hỗ trợ nhiệt tình. Mong có thêm một dự án tổng hợp cuối khóa để ghép mọi kiến thức lại.",
+      "Giải thích box model rất rõ. Phần selector quan hệ cha con nên có thêm ví dụ với dấu lớn hơn và dấu cộng.",
+      "Học dễ vào, mỗi bài vừa một buổi tối. Mình mong trắc nghiệm có nhiều câu hơn một chút.",
+      "Bài viết chất lượng, tiếng Việt chuẩn. Chỉ có vài chỗ thuật ngữ mình phải tra thêm như cross axis.",
+      "Grid template areas được trình bày rất trực quan. Mình mong có thêm ví dụ về cách đổi areas trong media query.",
+      "Nội dung tốt nhưng thiếu phần về đơn vị màu sắc và phông chữ, mấy cái này mình phải tự tìm hiểu thêm.",
+      "Khóa học rất có ích cho đồ án. Trừ một sao vì không tải được nội dung về đọc offline.",
+      "Flexbox là bài mình thích nhất. Bài 3 thì gom nhiều khái niệm nên lần đầu đọc hơi ngợp.",
+      "Hướng dẫn dùng DevTools rất hay. Nếu có thêm ảnh chụp màn hình chỉ chỗ bấm thì hoàn hảo.",
+      "Lộ trình mạch lạc, câu hỏi được trả lời nhanh. Mong có thêm phần transition và hiệu ứng rê chuột.",
+      "Mình học xong trong một tuần, kiến thức đủ dùng. Phần bài tập responsive nên có file khởi đầu để đỡ phải gõ lại.",
+      "Tổng thể rất tốt, nhất là phần mobile-first. Mình mong có thêm checklist kiểm tra trang trước khi hoàn thành."
+    ],
+    "5": [
+      "Khóa học rất chất lượng. Phần box model và box-sizing được giải thích bằng ví dụ con số cụ thể nên mình hiểu ngay vì sao hộp bị to hơn dự kiến.",
+      "Mình hoàn toàn mới với lập trình mà vẫn theo được. Ví dụ tiệm bánh ở bài đầu và trang công thức nấu ăn ở bài 2 rất gần gũi.",
+      "Phần Flexbox là điểm sáng nhất: trục chính, trục phụ, rồi bốn ví dụ thực tế từ thanh menu đến nút luôn nằm dưới đáy thẻ. Mình dùng được ngay vào dự án.",
+      "Lời giải được ẩn sau phần Xem lời giải giúp mình tự làm trước. Bài tập dashboard bằng Grid rất đáng làm.",
+      "Bài Responsive dạy mobile-first rất bài bản, thứ tự media query từ nhỏ đến lớn được nhấn mạnh rõ, giúp mình sửa được lỗi tồn tại cả tháng.",
+      "Mục Lỗi hay gặp ở mỗi bài cực kỳ giá trị, đúng những lỗi người mới hay mắc như quên dấu chấm trước class hay thiếu thẻ viewport.",
+      "Ngắn gọn, đúng trọng tâm, mỗi bài khoảng 15 phút đọc. Học buổi tối sau giờ làm rất vừa sức.",
+      "Thầy trả lời hỏi đáp rất nhanh và kỹ. Câu hỏi về auto-fill và auto-fit của mình được giải thích rõ ràng chỉ sau vài giờ.",
+      "Mình thích việc khóa học nhấn mạnh trợ năng: alt cho ảnh, thẻ ngữ nghĩa, dùng rem cho cỡ chữ. Ít khóa nào để ý những điều này.",
+      "Học xong mình tự dựng được trang giới thiệu bản thân responsive, chạy tốt trên cả điện thoại và laptop. Rất đáng thời gian.",
+      "Phần so sánh Grid và Flexbox giúp mình hết phân vân. Giờ khung trang dùng Grid, chi tiết dùng Flexbox, code gọn hẳn.",
+      "Cách hướng dẫn dùng DevTools xuyên suốt khóa học là điều mình đánh giá cao nhất, giờ mình biết tự tìm lỗi thay vì đoán.",
+      "Nội dung tiếng Việt chuẩn, thuật ngữ tiếng Anh để trong ngoặc nên khi tra thêm tài liệu không bị lạc.",
+      "Trắc nghiệm cuối bài có giải thích cho từng câu, sai câu nào hiểu luôn câu đó. Rất thích.",
+      "Đã học vài nơi nhưng đây là lần đầu mình hiểu thật sự độ ưu tiên của selector và vì sao không nên lạm dụng !important.",
+      "Ví dụ grid-template-areas vẽ bố cục bằng chữ quá trực quan, mình đổi bố cục cho điện thoại chỉ bằng vài dòng.",
+      "Khóa học miễn phí mà chất lượng như vậy thì không còn gì để chê. Cảm ơn đội ngũ Cnow.",
+      "Phần đường dẫn tương đối có sơ đồ thư mục minh họa, nhờ vậy mình hết bị lỗi ảnh không hiện khi tách thư mục.",
+      "Lộ trình rất logic: cấu trúc HTML, thẻ nội dung, CSS cơ bản, rồi Flexbox, Grid và cuối cùng là Responsive. Không bị hổng kiến thức.",
+      "Mình là sinh viên năm nhất, khóa này giúp mình làm bài tập lớn môn thiết kế web tự tin hơn nhiều.",
+      "Phần clamp() cho cỡ chữ là mẹo mình chưa từng biết, áp dụng vào trang thấy tiêu đề co giãn rất mượt.",
+      "Cộng đồng trong phần hỏi đáp rất nhiệt tình, nhiều bạn chia sẻ mẹo hay như giả lập mạng chậm để xem ảnh giữ chỗ.",
+      "Giải thích flex: 1 1 220px chi tiết từng giá trị, trước đây mình chỉ copy chứ không hiểu.",
+      "Bài viết có ví dụ đời thường như kệ sách, tờ giấy kẻ ô, nước đổ vào cốc, giúp nhớ khái niệm rất lâu.",
+      "Nền tảng HTML CSS vững chắc, mình đã sẵn sàng sang khóa JavaScript. Rất khuyến khích người mới bắt đầu ở đây."
+    ]
+  },
+  "chat": [
+    "Chào mọi người, mình mới vào khóa hôm nay, mong được học hỏi cùng mọi người.",
+    "Mọi người đang học tới bài nào rồi?",
+    "Mình đang ở bài Flexbox, vừa hiểu ra trục chính trục phụ, sướng ghê.",
+    "Có ai cũng bị lỗi chữ tiếng Việt như mình không, hóa ra quên meta charset.",
+    "Mẹo nhỏ: bấm Ctrl + Shift + M trong DevTools để bật chế độ điện thoại nhé.",
+    "Tối nay 8 giờ có ai muốn học nhóm bài Grid không?",
+    "Mình tham gia với, bài Grid mình đọc hai lần vẫn còn rối phần đường kẻ.",
+    "Chào buổi sáng cả nhà, hôm nay mình quyết tâm xong bài Responsive.",
+    "Ai làm xong bài tập footer rồi cho mình xem thử cách xử lý dòng bản quyền với.",
+    "Dòng bản quyền thì đặt flex-basis: 100% là xuống hàng riêng bạn ạ.",
+    "Cảm ơn bạn nhiều, được rồi nè.",
+    "Mình vừa hoàn thành cả khóa, giờ qua học JavaScript đây.",
+    "Chúc mừng bạn nha, mình còn đang kẹt ở bài 3.",
+    "Bài 3 phần box model mọi người nhớ thêm box-sizing: border-box ở đầu file là đỡ khổ.",
+    "Có ai dùng Firefox không, công cụ xem grid trong đó cũng dễ dùng lắm.",
+    "Mình dùng Chrome, bấm vào nhãn grid cạnh phần tử là hiện đường kẻ luôn.",
+    "Mọi người thường học vào giờ nào? Mình hay học lúc 10 giờ tối.",
+    "Mình học sáng sớm trước khi đi làm, đầu óc tỉnh táo hơn.",
+    "Ai có mẹo nhớ thứ tự padding 4 giá trị không?",
+    "Cứ nhớ theo chiều kim đồng hồ bắt đầu từ trên: trên, phải, dưới, trái.",
+    "Hay quá, giờ mình nhớ luôn rồi.",
+    "Cuối tuần này có ai rảnh làm chung một trang landing page để luyện không?",
+    "Mình đăng ký, mình lo phần responsive cho.",
+    "Mình lo phần header với menu bằng flex nhé.",
+    "Trắc nghiệm bài Grid có câu repeat(4, 1fr) mình suýt chọn sai.",
+    "Mình sai câu tính width 250px ở bài 3, giờ thì nhớ đời.",
+    "Hôm nay mình làm lại trang cá nhân bằng Grid, đẹp hơn hẳn bản cũ.",
+    "Chia sẻ thật: đọc phần Lỗi hay gặp trước khi làm bài tập đỡ mất thời gian lắm.",
+    "Có ai thấy auto-fill với auto-fit dễ nhầm không, mình phải thử cả hai mới hiểu.",
+    "Thử với ít ảnh là thấy khác nhau ngay đó bạn.",
+    "Chúc mọi người học tốt, mình đi ngủ đây, mai học tiếp bài 6.",
+    "Bạn nào cần bạn học cùng tiến độ bài 2 thì nhắn trong đây nhé.",
+    "Mình đang bài 2 nè, đang vật lộn với đường dẫn ảnh ../ đây.",
+    "Mở tab Network là thấy ảnh lỗi 404 ở đường dẫn nào, dò nhanh lắm.",
+    "Cảm ơn mẹo của bạn, tìm ra lỗi rồi, thiếu một cấp thư mục.",
+    "Tuần này mình đặt mục tiêu xong 2 bài, ai muốn cùng đặt mục tiêu không?",
+    "Ok, mình cũng 2 bài, cuối tuần báo cáo nhé mọi người.",
+    "Mình thấy nên đọc lại phần tóm tắt mỗi sáng, nhớ lâu hơn hẳn.",
+    "Lâu rồi mới vào lại, vẫn thấy phòng chat sôi nổi, vui ghê.",
+    "Học xong khóa này rồi mà vẫn hay quay lại đọc bài Flexbox để tra cứu :)"
+  ]
+}

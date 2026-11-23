@@ -1,0 +1,40 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="section-head">
+      <h1>Quản lý người học</h1>
+      <a class="btn btn-ghost btn-sm" href="/admin/export/learners.csv<%= qs({ page: '' }) %>" download>⬇ Xuất CSV (theo bộ lọc)</a>
+    </div>
+    <form method="get" class="filters filters-admin" role="search">
+      <label class="f-q">Tìm học viên<input type="search" name="q" value="<%= f.q %>" maxlength="80" placeholder="Tên, email, tên đăng nhập"></label>
+      <label>Khóa học
+        <select name="course"><option value="">Tất cả khóa<%= me.role === 'admin' ? '' : ' của tôi' %></option><% courses.forEach(c => { %><option value="<%= c._id %>" <%= f.course === String(c._id) ? 'selected' : '' %>><%= c.title %></option><% }) %></select>
+      </label>
+      <label>Sắp xếp
+        <select name="sort"><option value="new" <%= f.sort === 'new' ? 'selected' : '' %>>Ghi danh mới nhất</option><option value="old" <%= f.sort === 'old' ? 'selected' : '' %>>Cũ nhất</option></select>
+      </label>
+      <div class="f-actions"><button class="btn btn-sm">Lọc</button><% if (f.q || f.course || f.sort !== 'new') { %><a class="small" href="/admin/learners">Xóa lọc</a><% } %></div>
+    </form>
+    <%- include('_pager', { list, qs }) %>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Học viên</th><th>Email</th><th>Khóa học</th><th>Ngày ghi danh</th><th>Tiến độ</th></tr></thead>
+        <tbody>
+          <% if (!rows.length) { %><tr><td colspan="5" class="muted">Không có người học phù hợp.</td></tr><% } %>
+          <% rows.forEach(({ e, s }) => { %>
+            <tr>
+              <td><%= e.user.name %><%- include('../partials/demo-label', { u: e.user }) %><% if (e.user.locked) { %> <span class="pill">bị khóa</span><% } %><br><span class="muted small">@<%= e.user.username %></span></td>
+              <td><%= e.user.email %></td>
+              <td><%= e.course.title %></td>
+              <td><%= e.createdAt.toLocaleDateString('vi-VN') %></td>
+              <td><progress max="100" value="<%= s.pct %>" aria-label="Tiến độ <%= s.pct %>%"></progress> <span class="small"><%= s.pct %>%</span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <%- include('_pager', { list, qs }) %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

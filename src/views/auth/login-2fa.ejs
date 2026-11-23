@@ -1,0 +1,18 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <div class="auth-card">
+    <h1>Xác thực hai lớp</h1>
+    <p class="muted center">Mở ứng dụng xác thực trên điện thoại và nhập mã 6 số cho tài khoản Cnow.</p>
+    <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+    <form method="post" action="/login/2fa">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Mã xác thực
+        <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="12" required autofocus>
+      </label>
+      <button class="btn btn-block">Xác nhận</button>
+    </form>
+    <p class="small muted center">Mất điện thoại? Nhập một <b>mã khôi phục</b> (dạng <span class="mono">abcd-ef23</span>) vào ô trên.</p>
+    <p class="small center"><a href="/login">← Đăng nhập lại</a></p>
+  </div>
+</section>
+<%- include('../partials/footer') %>

@@ -1,0 +1,172 @@
+<%- include('../partials/header') %>
+<section class="course-hero">
+  <div class="wrap course-hero-in">
+    <div>
+      <a class="crumb" href="/courses">← Tất cả khóa học</a>
+      <h1><%= course.title %></h1>
+      <p class="lead"><%= course.summary %></p>
+      <div class="meta-row">
+        <span class="pill"><%= course.level %></span>
+        <span><%= course.lessons.length %> bài học</span>
+        <span><%= course.totalMinutes %> phút</span>
+        <% if (course.ratingCount) { %><a class="rating-link" href="#reviews"><span class="stars" aria-hidden="true"><%= stars(course.ratingAvg) %></span> <%= course.ratingAvg.toFixed(1) %> (<%= course.ratingCount %> đánh giá)</a><% } %>
+        <% if (course.author) { %><span>Giảng viên: <%= course.author.name %></span><% } %>
+      </div>
+    </div>
+    <aside class="buybox">
+      <div class="thumb thumb-lg" data-color="<%= course.color %>"><span class="thumb-tag"><%= course.tag || course.title %></span><span class="thumb-logo"><span class="brand-c">C</span>now</span></div>
+      <% if (me) { const wished = (me.wishlist || []).some(id => String(id) === String(course._id)); %>
+        <form method="post" action="/wishlist/<%= course._id %>" class="wish heart-inline">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="back" value="<%= currentUrl %>">
+          <button class="heart <%= wished ? 'on' : '' %>" aria-pressed="<%= wished ? 'true' : 'false' %>"><%= wished ? '♥ Đã yêu thích' : '♡ Yêu thích' %></button>
+        </form>
+      <% } %>
+      <% if (enrolled) { %>
+        <p class="price big owned">✓ Bạn đã sở hữu khóa học</p>
+        <a class="btn btn-block" href="/learn/<%= course.slug %>">Vào học ngay</a>
+      <% } else { %>
+        <% const okCoupon = couponView && !couponView.error; %>
+        <% if (okCoupon) { %>
+          <p class="price big"><span class="old-price"><%= usd(couponView.original) %></span> <%= Number(couponView.final) === 0 ? 'Miễn phí' : usd(couponView.final) %></p>
+          <% if (Number(couponView.final) > 0) { %><p class="muted small price-vnd">≈ <%= vnd(couponView.final) %></p><% } %>
+          <p class="flash flash-success small">Đã áp dụng mã <b><%= couponView.code %></b>: giảm <%= usd(couponView.discount) %>.</p>
+        <% } else { %>
+          <p class="price big"><%= course.price === 0 ? 'Miễn phí' : usd(course.price) %></p>
+          <% if (course.price > 0) { %><p class="muted small price-vnd">≈ <%= vnd(course.price) %></p><% } %>
+        <% } %>
+        <% if (couponView && couponView.error) { %><p class="flash flash-warn small" role="alert"><%= couponView.error %></p><% } %>
+        <% if (course.price > 0) { %>
+          <form method="get" action="/courses/<%= course.slug %>" class="coupon-form">
+            <label class="sr-only" for="coupon">Mã giảm giá</label>
+            <input id="coupon" name="coupon" value="<%= couponView ? couponView.code : '' %>" placeholder="Mã giảm giá" maxlength="32" autocomplete="off">
+            <button class="btn btn-ghost btn-sm">Áp dụng</button>
+          </form>
+        <% } %>
+        <% if (me) { %>
+          <form method="post" action="/pay">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="courseId" value="<%= course._id %>">
+            <% if (okCoupon) { %><input type="hidden" name="coupon" value="<%= couponView.code %>"><% } %>
+            <% if (course.price === 0) { %>
+              <button class="btn btn-block">Đăng ký học miễn phí</button>
+            <% } else { %>
+              <button class="btn btn-block">Mua khóa học</button>
+              <% if (demoMode) { %>
+                <p class="small muted center">Thanh toán <b>mô phỏng</b> (PayPal / VNPay / MoMo demo) – không trừ tiền thật.</p>
+              <% } else { %>
+                <p class="small muted center">Thanh toán bằng tài khoản PayPal hoặc thẻ Visa/Mastercard. Cnow không lưu thông tin thẻ.</p>
+              <% } %>
+            <% } %>
+          </form>
+        <% } else { %>
+          <a class="btn btn-block" href="/login">Đăng nhập để mua khóa học</a>
+          <p class="small muted center">Chưa có tài khoản? <a href="/register">Đăng ký</a></p>
+        <% } %>
+      <% } %>
+    </aside>
+  </div>
+</section>
+
+<section class="wrap section course-body">
+  <div>
+    <h2>Giới thiệu khóa học</h2>
+    <p class="prewrap"><%= course.description || course.summary %></p>
+
+    <div class="section-head">
+      <h2>Nội dung khóa học</h2>
+      <% if (course.sections.length > 1) { %><button type="button" class="btn btn-ghost btn-xs" data-toggle-all=".curriculum details">Mở rộng tất cả</button><% } %>
+    </div>
+    <p class="muted small"><%= course.sections.length %> chương · <%= course.lessons.length %> bài học · <%= course.totalMinutes %> phút</p>
+    <div class="curriculum">
+      <% let n = 0; course.sections.forEach((s, si) => { const mins = s.lessons.reduce((t, l) => t + (l.minutes || 0), 0); %>
+        <details <%= si === 0 ? 'open' : '' %>>
+          <summary><span><%= s.title %></span><span class="muted small"><%= s.lessons.length %> bài · <%= mins %> phút</span></summary>
+          <ol class="lessons">
+            <% s.lessons.forEach((l) => { const i = n++; %>
+              <li>
+                <span class="lesson-no"><%= String(i + 1).padStart(2, '0') %></span>
+                <span class="lesson-title"><%= l.title %></span>
+                <% if (l.preview && !enrolled) { %><a class="pill pill-ok" href="/learn/<%= course.slug %>?lesson=<%= i %>">Học thử</a><% } %>
+                <span class="muted small"><%= l.minutes %> phút</span>
+                <span aria-hidden="true"><%= enrolled || l.preview ? '▶' : '🔒' %></span>
+              </li>
+            <% }) %>
+          </ol>
+        </details>
+      <% }) %>
+    </div>
+
+    <h2 id="reviews">Đánh giá của học viên</h2>
+    <p><% if (course.ratingCount) { %><span class="stars big" aria-hidden="true"><%= stars(course.ratingAvg) %></span> <b><%= course.ratingAvg.toFixed(1) %>/5</b> · <%= course.ratingCount %> đánh giá<% } else { %><span class="muted">Chưa có đánh giá nào.</span><% } %></p>
+    <% if (enrolled) { %>
+      <form method="post" action="/courses/<%= course.slug %>/review" class="review-form card-pad">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <fieldset class="star-input">
+          <legend><%= myReview ? 'Sửa đánh giá của bạn' : 'Đánh giá khóa học' %></legend>
+          <% [5, 4, 3, 2, 1].forEach(n => { %>
+            <input type="radio" id="star<%= n %>" name="rating" value="<%= n %>" required <%= myReview && myReview.rating === n ? 'checked' : '' %>>
+            <label for="star<%= n %>" title="<%= n %> sao"><span aria-hidden="true">★</span><span class="sr-only"><%= n %> sao</span></label>
+          <% }) %>
+        </fieldset>
+        <label for="review-content" class="sr-only">Nhận xét</label>
+        <textarea id="review-content" name="content" rows="3" maxlength="1000" placeholder="Bạn thấy khóa học thế nào? (không bắt buộc)"><%= myReview ? myReview.content : '' %></textarea>
+        <button class="btn btn-sm"><%= myReview ? 'Cập nhật đánh giá' : 'Gửi đánh giá' %></button>
+      </form>
+    <% } else if (me) { %>
+      <p class="muted small">Chỉ học viên đã ghi danh mới được đánh giá.</p>
+    <% } %>
+    <ul class="reviews">
+      <% reviews.forEach(rv => { %>
+        <li>
+          <%- include('../partials/avatar', { u: rv.user }) %>
+          <div>
+            <b><%= rv.user ? rv.user.name : 'Người dùng' %></b><%- include('../partials/demo-label', { u: rv.user }) %>
+            <span class="stars" aria-label="<%= rv.rating %> sao"><%= stars(rv.rating) %></span>
+            <span class="muted small"> · <%= rv.updatedAt.toLocaleDateString('vi-VN') %></span>
+            <% if (rv.content) { %><p class="prewrap"><%= rv.content %></p><% } %>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+
+    <% if (course.ratingCount > reviews.length) { %><p class="muted small">Đang hiển thị <%= reviews.length %> đánh giá mới nhất.</p><% } %>
+
+    <h2 id="comments">Bình luận <span class="muted small">(<%= comments.total %>)</span></h2>
+    <% if (enrolled || staff) { %>
+      <form method="post" action="/courses/<%= course.slug %>/comments" class="comment-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label for="comment-new" class="sr-only">Bình luận của bạn</label>
+        <textarea id="comment-new" name="content" rows="2" minlength="2" maxlength="500" required placeholder="Cảm nhận, góp ý hoặc câu hỏi nhanh về khóa học…"></textarea>
+        <button class="btn btn-sm">Gửi bình luận</button>
+      </form>
+    <% } else if (me) { %>
+      <p class="muted small">Chỉ học viên đã ghi danh mới được bình luận.</p>
+    <% } %>
+    <% if (!comments.total) { %><p class="muted small">Chưa có bình luận nào.</p><% } %>
+    <ul class="reviews comments">
+      <% comments.items.forEach(cm => { %>
+        <li>
+          <%- include('../partials/avatar', { u: cm.user }) %>
+          <div>
+            <b><%= cm.user ? cm.user.name : 'Người dùng' %></b><%- include('../partials/demo-label', { u: cm.user }) %>
+            <span class="muted small"> · <%= cm.createdAt.toLocaleDateString('vi-VN') %></span>
+            <p class="prewrap"><%= cm.content %></p>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+    <% if (comments.pages > 1) { %>
+      <nav class="pager" aria-label="Trang bình luận">
+        <% if (comments.page > 1) { %><a href="?cpage=<%= comments.page - 1 %>#comments" rel="prev">‹ Mới hơn</a><% } %>
+        <span class="muted small">Trang <%= comments.page %>/<%= comments.pages %></span>
+        <% if (comments.page < comments.pages) { %><a href="?cpage=<%= comments.page + 1 %>#comments" rel="next">Cũ hơn ›</a><% } %>
+      </nav>
+    <% } %>
+
+    <h2 id="qa">Hỏi – Đáp</h2>
+    <p class="muted">Khóa học có <b><%= questions %></b> câu hỏi. Hỏi đáp diễn ra ngay trong từng bài học: học viên đặt câu hỏi, trả lời và vote câu trả lời hữu ích; giảng viên đánh dấu câu trả lời hay nhất.</p>
+    <% if (enrolled) { %><a class="btn btn-ghost btn-sm" href="/learn/<%= course.slug %>#qa">Vào bài học để hỏi đáp</a> <a class="btn btn-ghost btn-sm" href="/courses/<%= course.slug %>/chat">🗨️ Phòng chat</a><% } %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

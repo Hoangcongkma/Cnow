@@ -1,0 +1,18 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <form class="auth-card" method="post" action="/login" novalidate>
+    <h1>Đăng nhập</h1>
+    <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Tên đăng nhập hoặc email
+      <input name="login" value="<%= form.login || '' %>" autocomplete="username" required maxlength="120" placeholder="Nhập tên đăng nhập">
+    </label>
+    <label>Mật khẩu
+      <span class="pw"><input type="password" name="password" autocomplete="current-password" required maxlength="72" placeholder="Nhập mật khẩu"><button type="button" class="pw-toggle" aria-label="Hiện mật khẩu">👁</button></span>
+    </label>
+    <button class="btn btn-block">Đăng nhập</button>
+    <p class="center small muted">Chưa có tài khoản? <a href="/register">Đăng ký thành viên</a></p>
+    <p class="center small muted">Để bảo vệ tài khoản, đăng nhập sai 5 lần sẽ bị tạm khóa 15 phút.</p>
+  </form>
+</section>
+<%- include('../partials/footer') %>

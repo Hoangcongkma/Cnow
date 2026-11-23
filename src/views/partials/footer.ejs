@@ -1,0 +1,24 @@
+</main>
+<footer class="foot">
+  <div class="wrap foot-in">
+    <div>
+      <a class="brand" href="/"><span class="brand-c">C</span>now</a>
+      <p class="muted">Website học lập trình trực tuyến<%= demoMode ? ' – bản demo, thanh toán mô phỏng' : ' tích hợp thanh toán PayPal' %>.<br>Đồ án tốt nghiệp – Học viện Kỹ thuật Mật mã.<br>Tác giả: Hoàng Mạnh Công.</p>
+    </div>
+    <div>
+      <h4>Khám phá</h4>
+      <a href="/courses">Tất cả khóa học</a>
+      <a href="/register">Tạo tài khoản</a>
+      <a href="/verify">Kiểm tra chứng nhận</a>
+      <a href="/gioi-thieu">Giới thiệu</a>
+    </div>
+    <div>
+      <h4>Thanh toán</h4>
+      <p class="muted"><%= demoMode ? 'Cổng thanh toán mô phỏng: không nhập số thẻ, không phát sinh giao dịch thật.' : 'Thông tin thẻ được PayPal xử lý – Cnow không lưu số thẻ của bạn.' %></p>
+    </div>
+  </div>
+  <div class="wrap copy muted small">© <%= new Date().getFullYear() %> Hoàng Mạnh Công · Cnow · Node.js · MongoDB<%= demoMode ? '' : ' · PayPal' %></div>
+</footer>
+<script src="<%= asset('/js/app.js') %>"></script>
+</body>
+</html>

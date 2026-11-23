@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · Cnow</title>
+  <%
+    const _desc = (typeof description !== 'undefined' && description) ? String(description).slice(0, 160) : 'Cnow – cộng đồng học lập trình online: bài học tự biên soạn, trắc nghiệm, chứng nhận' + (demoMode ? ' (bản demo đồ án).' : ', thanh toán học phí an toàn qua PayPal.');
+    const _base = typeof baseUrl !== 'undefined' ? baseUrl : '';
+    const _canon = typeof canonical !== 'undefined' ? canonical : _base + '/';
+    const _img = _base + ((typeof ogImage !== 'undefined' && ogImage) ? ogImage : '/img/hero.jpg');
+  %>
+  <meta name="description" content="<%= _desc %>">
+  <% if (typeof noindex !== 'undefined' && noindex) { %><meta name="robots" content="noindex, nofollow"><% } else { %><link rel="canonical" href="<%= _canon %>"><% } %>
+  <meta property="og:site_name" content="Cnow">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>">
+  <meta property="og:title" content="<%= title %>">
+  <meta property="og:description" content="<%= _desc %>">
+  <meta property="og:url" content="<%= _canon %>">
+  <meta property="og:image" content="<%= _img %>">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#111318">
+  <link rel="icon" href="<%= asset('/img/favicon.svg') %>" type="image/svg+xml">
+  <script src="<%= asset('/js/theme.js') %>"></script>
+  <link rel="stylesheet" href="<%= asset('/vendor/highlight/github.min.css') %>">
+  <link rel="stylesheet" href="<%= asset('/css/style.css') %>">
+</head>
+<body>
+<a class="skip-link" href="#main">Bỏ qua, tới nội dung chính</a>
+<header class="nav">
+  <div class="wrap nav-in">
+    <button type="button" class="nav-btn nav-toggle" aria-controls="main-menu" aria-expanded="false" aria-label="Mở menu" data-nav-toggle>☰</button>
+    <a class="brand" href="/" aria-label="Cnow – trang chủ"><span class="brand-c">C</span>now</a>
+    <nav class="menu" id="main-menu" aria-label="Điều hướng chính">
+      <a href="/" class="<%= path === '/' ? 'on' : '' %>">Trang chủ</a>
+      <a href="/courses" class="<%= path.startsWith('/courses') ? 'on' : '' %>">Khóa học</a>
+      <% if (me) { %><a href="/my-courses" class="<%= path === '/my-courses' ? 'on' : '' %>">Khóa học của tôi</a><% } %>
+      <% if (me && me.role !== 'user') { %><a href="/admin" class="<%= path.startsWith('/admin') ? 'on' : '' %>">Quản trị</a><% } %>
+      <% if (!me) { %><a href="/login" class="only-mobile">Đăng nhập</a><a href="/register" class="only-mobile">Đăng ký</a><% } %>
+    </nav>
+    <div class="nav-right">
+      <button type="button" class="nav-btn" data-theme-toggle aria-pressed="false" aria-label="Bật chế độ tối" title="Chế độ sáng/tối">◐</button>
+      <% if (me) { const _n = typeof unread !== 'undefined' ? unread : 0; %>
+        <a class="nav-btn bell" href="/notifications" aria-label="Thông báo<%= _n ? ` – ${_n} chưa đọc` : '' %>">🔔<% if (_n) { %><span class="bell-count" aria-hidden="true"><%= _n > 99 ? '99+' : _n %></span><% } %></a>
+        <details class="usermenu">
+          <summary aria-label="Tài khoản <%= me.name %>"><%- include('avatar', { u: me }) %><span class="uname"><%= me.name %></span></summary>
+          <div class="dropdown">
+            <span class="muted small">@<%= me.username %> · <%= { user: 'Người học', collaborator: 'Cộng tác viên', admin: 'Quản trị viên' }[me.role] %></span>
+            <a href="/profile">Hồ sơ của tôi</a>
+            <a href="/my-courses">Khóa học của tôi</a>
+            <a href="/wishlist">♡ Yêu thích</a>
+            <a href="/orders">Lịch sử thanh toán</a>
+            <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="linkbtn">Đăng xuất</button></form>
+          </div>
+        </details>
+      <% } else { %>
+        <a class="nav-link hide-mobile" href="/login">Đăng nhập</a>
+        <a class="btn btn-sm hide-mobile" href="/register">Đăng ký</a>
+      <% } %>
+    </div>
+  </div>
+</header>
+<% if (demoMode) { %><div class="devbar demo-banner" role="note">Website demo đồ án – thanh toán là mô phỏng, không phát sinh giao dịch thật</div><% } %>
+<% if (flash) { %><div class="wrap"><div class="flash flash-<%= flash.type %>" role="status"><%= flash.text %></div></div><% } %>
+<main id="main" tabindex="-1">

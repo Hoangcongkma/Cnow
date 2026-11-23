@@ -1,0 +1,16 @@
+<div class="qa-actions">
+  <% if (enrolled && !p.mine) { %>
+    <form method="post" action="/qa/<%= p.id %>/vote" class="inline">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="vote <%= p.voted ? 'on' : '' %>" aria-pressed="<%= p.voted ? 'true' : 'false' %>">👍 Hữu ích · <%= p.votes %></button>
+    </form>
+  <% } else { %>
+    <span class="vote static" title="Số lượt hữu ích">👍 <%= p.votes %></span>
+  <% } %>
+  <% if (isAnswer && instructor) { %>
+    <form method="post" action="/qa/<%= p.id %>/best" class="inline">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="btn btn-ghost btn-xs"><%= p.best ? 'Bỏ chọn hay nhất' : '★ Chọn là câu trả lời hay nhất' %></button>
+    </form>
+  <% } %>
+</div>

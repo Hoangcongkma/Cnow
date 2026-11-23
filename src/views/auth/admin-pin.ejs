@@ -1,0 +1,18 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <div class="auth-card">
+    <h1>Nhập mã quản trị</h1>
+    <p class="muted center">Tài khoản quản trị cần thêm một bước xác thực. Nhập <b>mã quản trị</b> của bạn để tiếp tục.</p>
+    <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+    <form method="post" action="/login/admin-pin">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Mã quản trị
+        <input type="password" name="pin" autocomplete="off" maxlength="200" required autofocus>
+      </label>
+      <button class="btn btn-block">Xác nhận</button>
+    </form>
+    <p class="small muted center">Quên mã? Người có quyền truy cập máy chủ chạy <span class="mono">npm run set:admin-pin</span> để đặt mã mới.</p>
+    <p class="small center"><a href="/login">← Đăng nhập lại</a></p>
+  </div>
+</section>
+<%- include('../partials/footer') %>

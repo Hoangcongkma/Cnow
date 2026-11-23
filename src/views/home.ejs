@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+<section class="hero">
+  <div class="wrap hero-in">
+    <p class="eyebrow">Học lập trình với các khóa học chất lượng</p>
+    <h1>CỘNG ĐỒNG HỌC<br>LẬP TRÌNH ONLINE</h1>
+    <p class="lead">Học mọi lúc, mọi nơi với bài học tự biên soạn, trắc nghiệm và chứng nhận. <%= demoMode ? 'Thanh toán học phí qua cổng mô phỏng (bản demo) – mở khóa học ngay sau khi thanh toán.' : 'Thanh toán học phí trực tuyến an toàn qua PayPal – mở khóa học ngay sau khi thanh toán.' %></p>
+    <div class="hero-cta">
+      <a class="btn" href="/courses">Khóa học</a>
+      <% if (!me) { %><a class="btn btn-ghost" href="/register">Đăng ký</a><% } else { %><a class="btn btn-ghost" href="/my-courses">Vào học</a><% } %>
+    </div>
+    <div class="hero-stats">
+      <div><b><%= stats.courses %></b><span>Khóa học</span></div>
+      <div><b><%= stats.learners %></b><span>Học viên</span></div>
+      <div><b><%= stats.enrollments %></b><span>Lượt ghi danh</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap section">
+  <div class="section-head">
+    <h2>Khóa học nổi bật</h2>
+    <a href="/courses" class="more">Xem tất cả →</a>
+  </div>
+  <div class="grid">
+    <% courses.forEach(c => { %><%- include('partials/course-card', { c }) %><% }) %>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap band-in">
+    <img src="/img/payment.jpg" alt="Thanh toán học phí trực tuyến" loading="lazy">
+    <div>
+      <h2>Thanh toán học phí trong 5 bước</h2>
+      <ol class="steps">
+        <li><b>Chọn khóa học</b> và bấm “Mua khóa học”.</li>
+        <% if (demoMode) { %>
+          <li>Cnow <b>tạo đơn hàng</b> (giá tính ở máy chủ, áp dụng mã giảm giá nếu có).</li>
+          <li>Bạn <b>chọn cổng mô phỏng</b>: PayPal, VNPay hoặc MoMo (demo).</li>
+          <li>Cổng demo <b>trả kết quả</b> thành công / thất bại / hủy về Cnow để đối chiếu.</li>
+        <% } else { %>
+          <li>Cnow <b>tạo đơn hàng</b> và chuyển bạn sang PayPal.</li>
+          <li>Bạn <b>đăng nhập PayPal</b> (hoặc dùng thẻ) và xác nhận.</li>
+          <li>PayPal <b>trả kết quả giao dịch</b> về Cnow.</li>
+        <% } %>
+        <li>Cnow <b>lưu hóa đơn và mở quyền học</b> ngay lập tức.</li>
+      </ol>
+      <div class="badges"><span>⚡ Nhanh chóng</span><span>✔ Hiệu quả</span><span>🔒 An toàn, bảo mật</span><span>☺ Dễ sử dụng</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap section">
+  <h2 class="center">Dành cho mọi đối tượng</h2>
+  <div class="roles">
+    <div class="role"><div class="role-ic">🎓</div><h3>Người học</h3><p class="muted">Đăng ký, mua khóa học, học theo tiến độ riêng và thảo luận trong từng khóa học.</p></div>
+    <div class="role"><div class="role-ic">🧑‍🏫</div><h3>Cộng tác viên</h3><p class="muted">Xây dựng, cập nhật khóa học và theo dõi người học của mình.</p></div>
+    <div class="role"><div class="role-ic">🛡️</div><h3>Quản trị viên</h3><p class="muted">Quản lý thành viên, phân quyền, hóa đơn, đơn hàng và xử lý vi phạm.</p></div>
+  </div>
+</section>
+<%- include('partials/footer') %>

@@ -1,0 +1,2 @@
+<% const _u = typeof u !== 'undefined' ? u : null; const _cls = typeof cls !== 'undefined' ? cls : ''; %>
+<% if (_u && _u.avatar) { %><img class="avatar <%= _cls %>" src="/avatars/<%= _u.avatar %>" alt="" width="34" height="34" loading="lazy" decoding="async"><% } else { %><span class="avatar <%= _cls %>" aria-hidden="true"><%= _u && _u.name ? _u.name.charAt(0).toUpperCase() : '?' %></span><% } %>

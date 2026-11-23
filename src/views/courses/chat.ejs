@@ -1,0 +1,21 @@
+<%- include('../partials/header') %>
+<section class="wrap section chat-page">
+  <a class="small" href="/learn/<%= course.slug %>">← Quay lại bài học</a>
+  <div class="section-head">
+    <h1>💬 Phòng chat: <%= course.title %></h1>
+    <span class="small muted" data-chat-status role="status">Đang kết nối…</span>
+  </div>
+  <div class="chat card-pad" data-chat="<%= course.slug %>">
+    <ol class="chat-list" data-chat-list aria-live="polite" aria-label="Tin nhắn"></ol>
+    <p class="flash flash-error" data-chat-error hidden></p>
+    <form class="chat-form" data-chat-form>
+      <label class="sr-only" for="chat-text">Tin nhắn</label>
+      <input id="chat-text" name="text" maxlength="500" autocomplete="off" placeholder="Nhập tin nhắn… (Enter để gửi)" required disabled>
+      <button class="btn btn-sm" disabled>Gửi</button>
+    </form>
+    <p class="small muted">Lưu 200 tin gần nhất · tối đa 5 tin/10 giây · giữ lịch sự, không chia sẻ thông tin cá nhân.<% if (teacher) { %> Bạn là giảng viên: có thể xóa tin vi phạm.<% } %></p>
+  </div>
+</section>
+<script src="/socket.io/socket.io.js"></script>
+<script src="<%= asset('/js/chat.js') %>"></script>
+<%- include('../partials/footer') %>

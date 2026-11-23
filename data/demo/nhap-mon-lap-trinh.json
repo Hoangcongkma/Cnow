@@ -1,0 +1,476 @@
+{
+  "slug": "nhap-mon-lap-trinh",
+  "lessons": {
+    "01-lap-trinh-la-gi": [
+      {
+        "q": "Mọi người ơi, mình gõ node chao.js mà báo Cannot find module, trong khi file chao.js rõ ràng có trên máy. Mình sai chỗ nào vậy?",
+        "answers": [
+          "Bạn kiểm tra xem terminal đang đứng ở thư mục nào nhé. Mình cũng bị y hệt, hóa ra file nằm trong Desktop mà terminal lại mở ở thư mục người dùng.",
+          "Gõ dir (Windows) hoặc ls (macOS/Linux) để xem trong thư mục hiện tại có chao.js không là biết ngay."
+        ],
+        "instructor": "Lỗi này gần như luôn do terminal đang ở sai thư mục chứ không phải do code. Node.js tìm file theo thư mục hiện tại của terminal. Bạn dùng cd để chuyển tới đúng thư mục chứa chao.js rồi chạy lại. Mẹo trong VS Code: mở cả thư mục dự án rồi dùng terminal tích hợp, nó sẽ tự đứng sẵn ở thư mục đó."
+      },
+      {
+        "q": "Gõ node -v báo 'node' is not recognized as an internal or external command là sao ạ? Em vừa cài xong.",
+        "answers": ["Tắt cửa sổ terminal đi rồi mở lại thử bạn, terminal mở từ trước khi cài sẽ chưa nhận Node đâu."],
+        "instructor": "Thông báo này nghĩa là hệ điều hành chưa tìm thấy chương trình node. Thường gặp nhất là do terminal được mở trước khi cài, nên chưa nhận đường dẫn mới: bạn đóng hẳn rồi mở terminal mới. Nếu vẫn lỗi, hãy cài lại bản LTS và để nguyên tùy chọn thêm Node.js vào PATH trong trình cài đặt, sau đó khởi động lại máy."
+      },
+      {
+        "q": "console.log('Xin chào); báo SyntaxError: Invalid or unexpected token. Em nhìn mãi không thấy sai gì :(",
+        "answers": [
+          "Thiếu dấu nháy đóng sau chữ chào kìa bạn, phải là 'Xin chào'.",
+          "VS Code tô màu chuỗi khác với code thường, nếu thấy cả phần sau bị tô cùng màu chuỗi là biết quên đóng nháy."
+        ],
+        "instructor": "Đúng như các bạn nói, chuỗi mở bằng dấu nháy nhưng chưa đóng nên máy không biết chuỗi kết thúc ở đâu và báo lỗi cú pháp. Quy tắc cần nhớ: dấu nháy, ngoặc tròn, ngoặc nhọn luôn đi theo cặp. Khi gặp SyntaxError, hãy nhìn số dòng trong thông báo rồi soát từng cặp dấu ở dòng đó."
+      },
+      {
+        "q": "Tại sao console.log(2 + 3) in ra 5 mà console.log('2 + 3') lại in nguyên chữ 2 + 3 ạ?",
+        "answers": [],
+        "instructor": "Khi đặt trong dấu nháy, '2 + 3' là một chuỗi chữ, máy chỉ coi nó là ba ký tự cần in ra, không tính toán gì. Còn 2 + 3 không có nháy là một biểu thức, máy tính ra 5 trước rồi mới đưa cho console.log in. Bạn có thể nhớ: có nháy là chữ, không có nháy là phép tính hoặc tên biến."
+      },
+      {
+        "q": "Em viết console.log('Chờ ' + 3 + 2 + ' phút') thì in ra Chờ 32 phút chứ không phải 5 phút. Tại sao vậy?",
+        "answers": ["Vì nó nối từ trái qua phải á bạn, 'Chờ ' + 3 thành chuỗi rồi nên + 2 cũng là nối luôn."],
+        "instructor": "Bạn kia giải thích đúng. Phép + được tính lần lượt từ trái sang phải: 'Chờ ' + 3 cho ra chuỗi 'Chờ 3', sau đó chuỗi cộng với 2 lại là nối, thành 'Chờ 32'. Muốn cộng số trước, hãy đặt chúng trong ngoặc: 'Chờ ' + (3 + 2) + ' phút' sẽ in Chờ 5 phút."
+      },
+      {
+        "q": "Quên dấu chấm phẩy ở cuối dòng thì có sao không mn? Em thấy chạy vẫn được.",
+        "answers": ["Mình cũng hay quên mà vẫn chạy bình thường, chắc không bắt buộc."],
+        "instructor": "JavaScript có cơ chế tự chèn dấu chấm phẩy nên trong đa số trường hợp code vẫn chạy. Tuy vậy có vài tình huống hiếm khiến máy hiểu sai ý bạn, nên khóa học khuyên tập thói quen ghi đủ dấu chấm phẩy. Sau này dùng công cụ định dạng code như Prettier, nó sẽ tự thêm cho bạn."
+      },
+      {
+        "q": "Code trong bài này chạy trong Console của trình duyệt (F12) được không, hay bắt buộc phải cài Node?",
+        "answers": ["Được nha, mình thử console.log trong tab Console của trình duyệt vẫn ra như thường."],
+        "instructor": "Các ví dụ của bài này chạy được ở cả hai nơi vì console.log có sẵn trong mọi trình chạy JavaScript. Khác biệt nằm ở môi trường: trình duyệt có thêm những thứ để làm việc với trang web, còn Node.js có thể đọc ghi file, chạy máy chủ. Khóa học dùng Node để bạn quen với terminal và chạy file .js một cách ổn định, nên bạn vẫn nên cài nhé."
+      },
+      {
+        "q": "Em chép code từ file Word sang VS Code thì báo lỗi ở dấu nháy, nhìn bằng mắt thì giống hệt mà.",
+        "answers": [],
+        "instructor": "Phần mềm soạn văn bản thường tự đổi dấu nháy thẳng thành dấu nháy cong cho đẹp, mà JavaScript chỉ hiểu dấu nháy thẳng. Hai loại nhìn rất giống nhau nên khó phát hiện. Cách sửa là xóa các dấu nháy đó và gõ lại trực tiếp trong VS Code. Tốt nhất bạn luôn soạn code trong trình soạn thảo code ngay từ đầu."
+      },
+      {
+        "q": "Lỗi console.lg is not a function nghĩa là gì ạ, sao máy không báo luôn là em gõ sai chính tả cho dễ hiểu :)",
+        "answers": ["Máy đâu biết bạn định gõ log đâu, nó chỉ biết là không có cái gì tên lg thôi haha."],
+        "instructor": "Máy không đoán ý định, nó chỉ thấy bạn yêu cầu gọi thứ tên console.lg như một hàm, mà thứ đó không tồn tại nên báo TypeError. Mẹo đọc lỗi: phần trước dấu hai chấm là loại lỗi, phần sau là mô tả, kèm theo là tên file và số dòng. Gặp is not a function, hãy kiểm tra lại chính tả tên hàm ở đúng dòng được chỉ ra."
+      },
+      {
+        "q": "Bài 2 em viết console.log('Một năm có ' + 365 * 24 + ' giờ') không có ngoặc mà vẫn ra 8760. Vậy ngoặc trong lời giải có cần không ạ?",
+        "answers": [
+          "Mình nghĩ vì nhân được làm trước cộng giống toán lớp 3 á bạn.",
+          "Nhưng nếu đổi thành cộng thì phải có ngoặc nha, không là bị nối chuỗi như câu hỏi ở trên."
+        ],
+        "instructor": "Bạn làm đúng. Phép nhân được ưu tiên hơn phép cộng, nên 365 * 24 được tính ra 8760 trước rồi mới nối vào chuỗi. Ngoặc trong lời giải không bắt buộc ở đây nhưng giúp người đọc thấy rõ ý đồ. Với phép cộng thì ngoặc là bắt buộc, vì + gặp chuỗi sẽ nối chứ không cộng."
+      }
+    ],
+    "02-bien-va-kieu-du-lieu": [
+      {
+        "q": "let với const khác nhau sao ạ? Em dùng let hết cho tiện có được không?",
+        "answers": ["Dùng let hết vẫn chạy, nhưng mình thấy để const thì lỡ tay gán đè là bị báo lỗi ngay, đỡ mất công tìm bug."],
+        "instructor": "const khai báo biến không được gán lại, let thì cho phép gán lại. Dùng let cho mọi thứ vẫn chạy được, nhưng bạn mất đi một lớp bảo vệ: khi lỡ gán đè một giá trị lẽ ra cố định, const sẽ báo lỗi ngay. Thói quen tốt là mặc định dùng const, chỉ chuyển sang let khi biết chắc biến đó sẽ thay đổi, ví dụ biến đếm hoặc biến cộng dồn."
+      },
+      {
+        "q": "Mọi người giải thích giúp: '10' + 5 ra '105' mà '10' - 5 lại ra 5, sao kỳ vậy?",
+        "answers": [
+          "Hình như dấu trừ không dùng được cho chuỗi nên nó tự đổi sang số luôn.",
+          "Đúng rồi, nhưng đừng dựa vào cái này, cứ Number() cho chắc."
+        ],
+        "instructor": "Dấu + có hai nghĩa: cộng số và nối chuỗi, nên chỉ cần một vế là chuỗi thì JavaScript chọn nối. Còn -, * và / chỉ có nghĩa với số, nên JavaScript tự chuyển '10' thành 10 rồi trừ. Hành vi tự đổi kiểu này dễ gây nhầm, vì vậy khi dữ liệu là chuỗi, bạn hãy chủ động chuyển bằng Number() trước khi tính toán."
+      },
+      {
+        "q": "typeof null ra 'object' là sao thầy, bài học nói null là một kiểu riêng mà?",
+        "answers": [],
+        "instructor": "Câu hỏi rất tinh ý. Đây là một lỗi có từ phiên bản JavaScript đầu tiên, được giữ lại để không làm hỏng các trang web cũ, nên typeof null trả về 'object'. Về mặt khái niệm null vẫn là giá trị đặc biệt mang nghĩa cố ý để trống. Muốn kiểm tra một biến có phải null không, bạn so sánh trực tiếp: x === null."
+      },
+      {
+        "q": "let 2diem = 8; bị báo SyntaxError: Invalid or unexpected token ạ",
+        "answers": ["Tên biến không được bắt đầu bằng số đâu bạn, đổi thành diem2 là được."],
+        "instructor": "Đúng vậy, tên biến chỉ được bắt đầu bằng chữ cái, dấu _ hoặc $, không được bắt đầu bằng chữ số. Bạn có thể đặt diem2, hoặc tốt hơn là đặt tên nói rõ ý nghĩa như diemLan2, diemGiuaKy. Tên có nghĩa giúp chính bạn đọc lại code sau vài tuần vẫn hiểu."
+      },
+      {
+        "q": "Number('mười hai') ra NaN thì em hiểu, nhưng sao Number('') lại ra 0 chứ không phải NaN ạ?",
+        "answers": [],
+        "instructor": "Đúng là Number('') và cả Number('   ') (chỉ có khoảng trắng) đều cho 0, đây là quy tắc chuyển đổi của JavaScript. Điều này nguy hiểm khi xử lý ô nhập: người dùng bỏ trống mà chương trình lại hiểu là số 0. Vì vậy trước khi chuyển, bạn nên kiểm tra chuỗi có rỗng không, rồi sau khi chuyển thì kiểm tra kết quả có phải NaN không."
+      },
+      {
+        "q": "Em viết const gia; định gán giá sau, mà nó báo Missing initializer in const declaration?",
+        "answers": ["const phải gán giá trị ngay lúc khai báo, muốn gán sau thì dùng let nha."],
+        "instructor": "Chính xác. Vì const không cho gán lại, nên JavaScript bắt buộc bạn đưa giá trị ngay khi khai báo, nếu không biến đó sẽ không bao giờ có giá trị được. Nếu thật sự chưa biết giá trị lúc khai báo, hãy dùng let gia; khi đó gia tạm thời là undefined cho tới khi bạn gán."
+      },
+      {
+        "q": "Template string em viết 'Bạn đã gọi ${soLy} ly' mà nó in ra nguyên chữ ${soLy} luôn, không thay số vào.",
+        "answers": [
+          "Phải dùng dấu backtick ` (phím cạnh số 1) chứ không phải nháy đơn bạn ơi.",
+          "Mình cũng bị y chang, nhìn dấu ` với ' trên màn hình gần giống nhau."
+        ],
+        "instructor": "Chỉ khi chuỗi được bao bằng dấu backtick ` thì phần ${...} mới được thay bằng giá trị. Với nháy đơn hay nháy kép, ${soLy} chỉ là những ký tự bình thường. Bạn sửa thành `Bạn đã gọi ${soLy} ly` là được. Trên bàn phím phổ biến, phím ` nằm bên trái phím số 1."
+      },
+      {
+        "q": "undefined với null khác nhau thực sự ở chỗ nào? Lúc nào mình mới tự gán null vậy mọi người?",
+        "answers": ["Mình hiểu là undefined là máy tự để, còn null là mình chủ động để trống."],
+        "instructor": "Bạn trên tóm tắt đúng. undefined thường xuất hiện tự động: biến khai báo mà chưa gán, hàm không return. null là giá trị bạn chủ động gán để nói rằng ô này cố ý trống, ví dụ người dùng chưa chọn ảnh đại diện thì anhDaiDien = null. Phân biệt như vậy giúp người đọc code biết đâu là quên gán, đâu là chủ ý."
+      },
+      {
+        "q": "Bài 2 em ra 11.5 chứ không phải 7.75. Code: const trungBinh = Number(giuaKy) + cuoiKy / 2;",
+        "answers": [],
+        "instructor": "Phép chia được ưu tiên hơn phép cộng, nên máy tính cuoiKy / 2 = 4 trước, rồi mới lấy 7.5 + 4 = 11.5. Bạn cần ngoặc để cộng trước: (Number(giuaKy) + cuoiKy) / 2 sẽ cho 7.75. Bạn đã nhớ chuyển chuỗi sang số, đó là phần khó nhất của bài này rồi."
+      },
+      {
+        "q": "Em thử console.log(0.1 + 0.2) thì ra 0.30000000000000004, máy tính tính sai hả mn?",
+        "answers": ["Không phải sai đâu, ngôn ngữ nào cũng bị vậy hết, do cách lưu số thập phân."],
+        "instructor": "Máy không tính sai mà do cách lưu số thập phân ở dạng nhị phân: nhiều số như 0.1 không biểu diễn chính xác được, nên phép cộng có sai số rất nhỏ. Hầu hết ngôn ngữ đều như vậy. Khi làm việc với tiền, bạn nên dùng số nguyên (tính bằng đồng), còn khi chỉ cần hiển thị thì có thể làm tròn, ví dụ (0.1 + 0.2).toFixed(2) cho '0.30'."
+      }
+    ],
+    "03-cau-lenh-dieu-kien": [
+      {
+        "q": "Em khai báo let diem = 5; rồi if (diem = 10) mà nó vẫn in 'Điểm tối đa', không lỗi gì cả. Sao vậy ạ?",
+        "answers": ["Một dấu = là gán á bạn, phải ba dấu === mới là so sánh."],
+        "instructor": "diem = 10 là phép gán: nó đặt 10 vào biến rồi trả về chính giá trị 10. Số 10 khác 0 nên được coi là đúng, vì vậy nhánh if luôn chạy, và từ đó diem cũng đã bị đổi thành 10. Với const thì máy báo lỗi ngay, nhưng với let thì lỗi âm thầm như bạn gặp. Hãy luôn dùng === khi so sánh."
+      },
+      {
+        "q": "== với === khác nhau ra sao? Em thấy dùng == cũng ra kết quả đúng mà.",
+        "answers": ["== nó tự đổi kiểu, kiểu 5 == '5' là true luôn, dễ dính bug lắm.", "Mình đọc thấy người ta khuyên cứ === cho lành."],
+        "instructor": "=== so sánh cả giá trị lẫn kiểu, còn == tự chuyển kiểu trước khi so sánh. Vì vậy 5 == '5' là true nhưng 5 === '5' là false. Các quy tắc tự chuyển kiểu của == khá rắc rối và dễ cho kết quả bất ngờ, nên khóa học thống nhất dùng === và !==. Nếu cần so sánh chuỗi với số, hãy chuyển kiểu rõ ràng bằng Number() trước."
+      },
+      {
+        "q": "Em viết if (diem >= 6.5) lên đầu rồi mới tới if (diem >= 9), giờ bạn 9.5 điểm lại bị xếp Khá huhu",
+        "answers": [],
+        "instructor": "Chuỗi if – else if dừng ở nhánh đúng đầu tiên. 9.5 >= 6.5 đã đúng ngay nhánh đầu nên chương trình in Khá và bỏ qua hết các nhánh sau. Hãy sắp từ điều kiện chặt nhất xuống: >= 9 trước, rồi >= 8, rồi >= 6.5. Mẹo kiểm tra: thử chương trình với một giá trị ở mỗi mức, ví dụ 9.5, 8.2, 7 và 4."
+      },
+      {
+        "q": "Dữ liệu ô nhập trả về '0' mà if ('0') vẫn chạy vào nhánh đúng, em tưởng 0 là sai chứ?",
+        "answers": ["Số 0 mới là falsy, còn '0' là chuỗi có 1 ký tự nên vẫn là truthy nha."],
+        "instructor": "Đúng như bạn trả lời. Các giá trị bị coi là sai trong if chỉ gồm false, 0, chuỗi rỗng '', null, undefined và NaN. Chuỗi '0' có một ký tự nên được coi là đúng. Với dữ liệu từ ô nhập, hãy chuyển sang số trước: if (Number(giaTri) === 0) sẽ đúng ý bạn hơn."
+      },
+      {
+        "q": "if chỉ có một lệnh bên trong thì có cần dấu ngoặc nhọn {} không ạ?",
+        "answers": ["Mình thấy lời giải bài 1 cũng bỏ ngoặc mà vẫn chạy."],
+        "instructor": "Không bắt buộc: nếu thân if chỉ có đúng một câu lệnh thì có thể bỏ ngoặc nhọn, như lời giải bài 1. Nhưng khi bạn thêm lệnh thứ hai mà quên thêm ngoặc, lệnh đó sẽ luôn chạy chứ không nằm trong if nữa. Khi mới học, bạn nên luôn viết ngoặc nhọn để tránh bẫy này."
+      },
+      {
+        "q": "Viết if (18 <= tuoi <= 30) được không mọi người? Em thử tuoi = 50 mà nó vẫn báo đúng.",
+        "answers": ["JS không hiểu kiểu viết toán học đó đâu, phải tách ra bằng && nha."],
+        "instructor": "JavaScript tính từ trái sang: 18 <= 50 cho ra true, sau đó so sánh true <= 30. Khi so sánh với số, true được đổi thành 1, và 1 <= 30 luôn đúng, nên với bất kỳ tuổi nào điều kiện cũng đúng. Cách viết chính xác là tuoi >= 18 && tuoi <= 30."
+      },
+      {
+        "q": "Toán tử ba ngôi lồng nhau được không thầy? Kiểu a ? 'x' : b ? 'y' : 'z', em đọc thấy rối quá.",
+        "answers": [],
+        "instructor": "Lồng được và chạy đúng, nhưng như bạn cảm nhận, rất khó đọc. Toán tử ba ngôi hợp nhất khi chỉ chọn giữa hai giá trị. Khi có từ ba trường hợp trở lên, hãy dùng if – else if – else, người đọc sau này (kể cả chính bạn) sẽ cảm ơn bạn."
+      },
+      {
+        "q": "Em viết if (tuoi > 18) mà bạn vừa đủ 18 tuổi lại không vào rạp được",
+        "answers": ["Dùng >= nha bạn, > là phải lớn hơn hẳn."],
+        "instructor": "> nghĩa là lớn hơn hẳn, nên 18 > 18 là false. Đề nói đủ 18 tuổi tức là từ 18 trở lên, phải viết tuoi >= 18. Khi viết điều kiện, bạn nên thử ngay với giá trị nằm đúng ranh giới (ở đây là 18), vì lỗi thường xảy ra ở đó."
+      },
+      {
+        "q": "Bài 2: tongDon >= 300000 || laVip ? 'Miễn phí giao hàng' : '...' có cần ngoặc quanh phần điều kiện không ạ?",
+        "answers": ["Mình hay thêm ngoặc cho dễ nhìn, chạy vẫn y vậy."],
+        "instructor": "Không bắt buộc, vì toán tử ? : có độ ưu tiên thấp hơn || và >=, nên toàn bộ tongDon >= 300000 || laVip được tính xong rồi mới đến phần chọn giá trị. Tuy vậy, viết (tongDon >= 300000 || laVip) ? ... : ... giúp người đọc nhìn ra ngay đâu là điều kiện, nên mình khuyến khích thêm ngoặc."
+      },
+      {
+        "q": "Sao 'Hà Nội' === 'hà nội' lại ra false ạ?",
+        "answers": [],
+        "instructor": "So sánh chuỗi bằng === phân biệt chữ hoa và chữ thường, nên H và h là hai ký tự khác nhau. Nếu muốn so sánh không phân biệt hoa thường, hãy đưa cả hai về cùng dạng trước, ví dụ a.toLowerCase() === b.toLowerCase(). Bạn sẽ gặp kỹ hơn các hàm xử lý chuỗi này ở khóa JavaScript."
+      }
+    ],
+    "04-vong-lap": [
+      {
+        "q": "for (let i = 0; i <= 5; i++) in ra 6 dòng chứ không phải 5 dòng như em muốn",
+        "answers": ["Bắt đầu từ 0 thì dùng i < 5, bắt đầu từ 1 thì dùng i <= 5 bạn nhé.", "Lỗi lệch một kinh điển, mình cũng dính hoài."],
+        "instructor": "i nhận các giá trị 0, 1, 2, 3, 4, 5, tức là 6 lần. Đây là lỗi lệch một (off-by-one). Muốn đúng 5 lần, bạn chọn một trong hai: bắt đầu từ 0 với i < 5, hoặc bắt đầu từ 1 với i <= 5. Mẹo là viết ra giấy giá trị đầu và giá trị cuối của i rồi đếm."
+      },
+      {
+        "q": "Vòng while của em chạy hoài không dừng, terminal in số liên tục. Tắt kiểu gì ạ???",
+        "answers": ["Bấm Ctrl + C trong terminal là dừng nha."],
+        "instructor": "Nhấn Ctrl + C để dừng chương trình. Sau đó xem lại thân vòng lặp: phải có một lệnh làm điều kiện dần trở thành sai, ví dụ while (n > 0) thì bên trong cần n-- hoặc n = n - 1. Hãy tự hỏi ba câu: bắt đầu từ đâu, mỗi vòng thay đổi gì, khi nào dừng."
+      },
+      {
+        "q": "break với continue khác nhau sao ạ, em đọc ví dụ vẫn chưa thấm lắm.",
+        "answers": [
+          "break là nghỉ hẳn luôn, continue là bỏ qua vòng này rồi học tiếp vòng sau. Mình nhớ kiểu vậy.",
+          "Thử bỏ break trong ví dụ tìm số chia hết cho 7 sẽ thấy nó in ra cả 56, 63, 70..."
+        ],
+        "instructor": "break kết thúc toàn bộ vòng lặp ngay lập tức, chương trình nhảy xuống lệnh nằm sau vòng lặp. continue chỉ bỏ qua phần còn lại của lần lặp hiện tại rồi chuyển sang lần kế tiếp. Gợi ý của bạn thứ hai rất hay: bỏ break đi, vòng lặp sẽ in ra tất cả bội của 7 từ 50 đến 100 là 56, 63, 70, 77, 84, 91, 98."
+      },
+      {
+        "q": "Em để let tong = 0 bên trong for...of, kết quả tổng giỏ hàng ra đúng 60000, bằng giá món cuối luôn. Em sai chỗ nào?",
+        "answers": [],
+        "instructor": "Mỗi vòng lặp, dòng let tong = 0 chạy lại và đặt tổng về 0, nên cuối cùng tong chỉ chứa giá món cuối cùng là 60000. Biến cộng dồn phải khai báo trước vòng lặp, bên trong chỉ cộng thêm. Ngoài ra, nếu bạn khai báo tong trong vòng lặp thì bên ngoài vòng lặp cũng không đọc được biến đó."
+      },
+      {
+        "q": "Sao for (const i = 0; i < 3; i++) báo lỗi mà for (const gia of giaCacMon) lại chạy ngon vậy mn?",
+        "answers": ["Vì i++ là gán lại i, mà const thì không cho gán lại."],
+        "instructor": "Với for có biến đếm, cùng một biến i được tăng lên sau mỗi vòng, tức là bị gán lại, nên const gây TypeError: Assignment to constant variable. Với for...of, mỗi vòng JavaScript tạo một biến gia mới nhận phần tử tiếp theo, không có phép gán lại nào, nên const dùng được và còn được khuyến khích."
+      },
+      {
+        "q": "i++ với i += 1 có khác gì nhau không ạ?",
+        "answers": ["Mình thấy giống nhau, i++ viết ngắn hơn thôi."],
+        "instructor": "Khi đứng một mình như trong phần bước nhảy của for, i++, i += 1 và i = i + 1 đều tăng i thêm 1, kết quả như nhau. Khác biệt nhỏ chỉ xuất hiện khi dùng i++ bên trong một biểu thức khác, trường hợp này bạn chưa cần quan tâm. += còn tiện vì cộng được số bất kỳ, ví dụ tienDaCo += tietKiemMoiThang."
+      },
+      {
+        "q": "Bài 1 đếm ngược em viết for (let i = 10; i >= 1; i++) thì máy đứng hình luôn",
+        "answers": ["Đếm ngược thì phải i-- chứ bạn."],
+        "instructor": "i bắt đầu từ 10 và cứ tăng lên 11, 12, 13..., nên điều kiện i >= 1 không bao giờ sai và vòng lặp chạy mãi. Đếm ngược thì bước nhảy phải là i--. Nhấn Ctrl + C để dừng, sửa lại rồi chạy. Đây là ví dụ điển hình cho câu hỏi mỗi vòng thay đổi gì, và thay đổi đó có đưa điều kiện về sai không."
+      },
+      {
+        "q": "Ví dụ tiết kiệm mua laptop sao lại ra 16000000 đồng chứ không phải đúng 15 triệu ạ?",
+        "answers": [],
+        "instructor": "Mỗi tháng tiền tăng 2 triệu. Sau 7 tháng bạn có 14 triệu, vẫn nhỏ hơn 15 triệu nên vòng lặp chạy thêm một lần, lên 16 triệu. Lúc này 16 triệu không còn nhỏ hơn giá laptop nên vòng lặp dừng. while chỉ kiểm tra điều kiện trước mỗi vòng, nên giá trị cuối có thể vượt quá mốc, và điều đó đúng với thực tế: tháng thứ 8 bạn mới đủ tiền."
+      },
+      {
+        "q": "diem.length trong bài 2 là gì vậy mọi người?",
+        "answers": ["Là số phần tử trong danh sách á, [7, 9, 4, 8, 5] thì length là 5."],
+        "instructor": "length cho biết danh sách có bao nhiêu phần tử. Với [7, 9, 4, 8, 5] thì diem.length là 5, tổng là 33, nên trung bình là 33 / 5 = 6.6. Dùng length thay vì gõ cứng số 5 giúp code vẫn đúng khi bạn thêm hoặc bớt điểm trong danh sách."
+      },
+      {
+        "q": "Mình muốn in bảng cửu chương 7 đủ từ 1 đến 10 thì sửa chỗ nào ạ?",
+        "answers": ["Đổi i <= 5 thành i <= 10 là xong.", "Muốn in hết bảng 2 đến 9 thì lồng thêm một vòng for bên ngoài nữa, vui lắm."],
+        "instructor": "Chỉ cần đổi điều kiện thành i <= 10, các phần còn lại giữ nguyên. Gợi ý của bạn thứ hai là bài luyện tập rất tốt: vòng ngoài cho số bảng từ 2 đến 9, vòng trong cho i từ 1 đến 10. Nhớ dùng hai tên biến khác nhau cho hai vòng, ví dụ bang và i."
+      }
+    ],
+    "05-ham": [
+      {
+        "q": "Hàm của em in ra đúng mà gán vào biến lại ra undefined: function cong(a, b) { console.log(a + b) } rồi const k = cong(2, 3); console.log(k)",
+        "answers": ["Bạn thiếu return, console.log chỉ in ra chứ không trả về gì cả."],
+        "instructor": "Hàm của bạn in 5 ra màn hình nhưng không trả giá trị nào, nên lời gọi cong(2, 3) cho kết quả undefined và k nhận undefined. Sửa thành return a + b; rồi để nơi gọi quyết định có in hay không. Ghi nhớ: console.log là cho người xem, return là cho chương trình dùng tiếp."
+      },
+      {
+        "q": "Tham số với đối số khác nhau thế nào ạ? Em đọc mãi vẫn lẫn.",
+        "answers": ["Mình nhớ là lúc định nghĩa thì là tham số, lúc gọi truyền vào thì là đối số."],
+        "instructor": "Tham số là tên đặt chỗ trong phần định nghĩa hàm, ví dụ gia và phanTramGiam trong tinhTienSauGiam(gia, phanTramGiam). Đối số là giá trị thật bạn đưa vào khi gọi, ví dụ 200000 và 10. Khi gọi, đối số được gán lần lượt vào tham số theo thứ tự. Nhiều người dùng lẫn hai từ này trong giao tiếp, quan trọng là bạn hiểu cơ chế."
+      },
+      {
+        "q": "Em quên dấu () nên viết console.log(chao) thì nó in ra [Function: chao]. Cái đó là gì vậy mn?",
+        "answers": [],
+        "instructor": "Viết chao không có ngoặc là bạn đang nhắc tới chính cái hàm, giống như đưa ra tờ công thức chứ chưa nấu. Node.js in nó ra dưới dạng [Function: chao]. Muốn chạy hàm và lấy kết quả, phải viết chao() kể cả khi không có đối số."
+      },
+      {
+        "q": "Code em viết sau return không chạy. Em muốn vừa in thông báo vừa trả kết quả thì làm sao ạ?",
+        "answers": ["Đặt console.log lên trước return là được bạn."],
+        "instructor": "return kết thúc hàm ngay, nên mọi lệnh phía sau trong cùng hàm bị bỏ qua. Bạn đặt lệnh in trước return. Tuy vậy, thường thì hàm tính toán không nên tự in; hãy return kết quả, rồi ở nơi gọi bạn in ra, cách này giúp hàm dùng lại được ở nhiều chỗ."
+      },
+      {
+        "q": "Em gọi tinhTienSauGiam(200000) quên truyền phần trăm giảm thì ra NaN, sao không báo lỗi luôn ạ?",
+        "answers": ["Thiếu đối số thì tham số đó là undefined, nhân với undefined ra NaN.", "Đặt mặc định phanTramGiam = 0 là hết bị."],
+        "instructor": "JavaScript cho phép gọi hàm thiếu đối số, tham số thiếu sẽ nhận undefined. Phép 200000 * undefined cho NaN, và mọi phép tính tiếp theo với NaN đều ra NaN, nên không có lỗi nào được báo. Cách chữa là đặt giá trị mặc định: function tinhTienSauGiam(gia, phanTramGiam = 0), khi không truyền thì coi như không giảm."
+      },
+      {
+        "q": "Biến tong khai báo trong hàm tinhTong, ra ngoài em console.log(tong) thì bị ReferenceError: tong is not defined",
+        "answers": [],
+        "instructor": "Biến khai báo bên trong hàm chỉ tồn tại trong hàm đó (phạm vi cục bộ). Bên ngoài không thấy nó nên báo ReferenceError. Trong bài, ví dụ dùng typeof tong nên chỉ ra undefined mà không lỗi, còn truy cập trực tiếp thì lỗi như bạn gặp. Muốn dùng kết quả bên ngoài, hãy lấy giá trị return: const tong = tinhTong(4, 6)."
+      },
+      {
+        "q": "Hàm mũi tên (x) => x * 2 với function bình thường khác nhau gì, nên dùng cái nào ạ?",
+        "answers": ["Mình thấy mũi tên ngắn gọn hơn, nhưng đọc function dễ hiểu hơn lúc mới học."],
+        "instructor": "Ở mức khóa này, hai cách cho kết quả như nhau: hàm mũi tên có thân là một biểu thức sẽ tự trả về giá trị đó. Hai cách có vài khác biệt nâng cao mà bạn sẽ học sau. Lúc mới học, viết function giúp nhìn rõ tên hàm, tham số và return; khi đã quen, hàm mũi tên rất tiện cho các hàm ngắn."
+      },
+      {
+        "q": "Gọi hàm trước khi khai báo được không mọi người? Em gọi soNgayTrongNam(2024) ở dòng đầu, function viết ở dưới mà vẫn chạy.",
+        "answers": ["Mình thử với const f = () => ... thì lại lỗi, lạ ghê."],
+        "instructor": "Hàm khai báo bằng từ khóa function được JavaScript chuẩn bị sẵn trước khi chạy code, nên gọi trước dòng khai báo vẫn được. Còn hàm mũi tên gán vào const thì chỉ dùng được sau dòng gán, gọi trước sẽ gặp ReferenceError: Cannot access before initialization. Dù vậy, để dễ đọc, bạn nên khai báo hàm trước rồi mới gọi."
+      },
+      {
+        "q": "Trong hàm xepLoai sao không cần else sau mỗi return vậy thầy?",
+        "answers": [],
+        "instructor": "Khi if (diem >= 8) đúng, return 'Giỏi' kết thúc hàm ngay, các dòng sau không bao giờ chạy. Vì vậy dòng if tiếp theo chỉ được tới khi điều kiện trước đã sai, giống hệt tác dụng của else. Kiểu viết trả về sớm này giúp code phẳng, ít thụt lề, đúng như mẹo trong bài câu lệnh điều kiện."
+      },
+      {
+        "q": "Hai hàm khác nhau mà cùng dùng biến tên tong bên trong thì có bị đè lên nhau không ạ?",
+        "answers": ["Không đâu, mỗi hàm một phạm vi riêng."],
+        "instructor": "Không bị đè. Mỗi lần hàm chạy, các biến khai báo bên trong nó là của riêng lần chạy đó, hàm khác không nhìn thấy. Đây chính là lợi ích của phạm vi cục bộ: bạn đặt tên biến trong hàm thoải mái mà không lo ảnh hưởng chỗ khác. Chỉ cần tránh việc hàm sửa biến khai báo bên ngoài nó."
+      }
+    ]
+  },
+  "comments": [
+    "Khóa nhập môn mà giải thích dễ hiểu thật, ví dụ nấu mì làm mình nhớ luôn chương trình chạy từ trên xuống.",
+    "Cảm ơn thầy cô đã làm khóa miễn phí, mình mới học xong bài biến.",
+    "Phần lỗi hay gặp ở cuối mỗi bài là phần mình thích nhất.",
+    "Bài vòng lặp hơi nhiều kiến thức một lúc, mình phải đọc hai lần mới hiểu break với continue.",
+    "Mong có thêm bài về mảng và đối tượng nữa ạ.",
+    "Lần đầu tiên mình chạy được node chao.js, vui ghê.",
+    "Ví dụ tính tiền trà sữa dễ hình dung lắm.",
+    "Có ai học xong khóa này rồi qua khóa JavaScript chưa, cho mình xin nhận xét với.",
+    "Câu hỏi trắc nghiệm cuối bài hay, có giải thích nên sai cũng hiểu vì sao sai.",
+    "Mình nghĩ nên có video quay màn hình phần cài Node.js, đọc chữ hơi khó theo với người chưa từng mở terminal.",
+    "Khóa ngắn gọn, hợp để bắt đầu.",
+    "Bài hàm phần return với console.log giải thích rất trúng chỗ mình hay nhầm.",
+    "Đã hoàn thành 5/5 bài, giờ đi làm lại bài tập không xem lời giải.",
+    "Bảng các kiểu dữ liệu ở bài 2 nên in ra dán bàn học.",
+    "Mình là dân kế toán chuyển ngành, khóa này giúp mình bớt sợ code nhiều.",
+    "Lời giải để trong mục ẩn là ý hay, đỡ bị nhìn trộm.",
+    "Có thể thêm bài tập khó hơn một chút cho ai muốn thử sức không ạ?",
+    "Ví dụ tiết kiệm mua laptop đúng tâm trạng sinh viên quá :)",
+    "Mình thích cách bài học khuyên đọc thông báo lỗi thay vì hoảng.",
+    "Thời gian đọc ghi 15 phút nhưng mình mất gần 40 phút vì gõ lại hết code, chắc do mình chậm.",
+    "Phần toán tử ba ngôi hơi ngắn, mong có thêm ví dụ.",
+    "Học xong bài điều kiện mình viết được chương trình xếp loại điểm cho em gái.",
+    "Khóa gì mà dễ ợt, ai học cái này chắc chưa từng đụng vào máy tính à.",
+    "Cảm ơn đội ngũ Cnow, giao diện đọc bài dễ chịu.",
+    "Mẹo dò code bằng tay ở bài biến rất hữu ích.",
+    "Bài 3 có phần lồng điều kiện giữ code phẳng, mình thấy hay nhưng hơi trừu tượng với người mới.",
+    "Nên thêm sơ đồ minh họa cho vòng lặp for, chữ không thôi hơi khó hình dung thứ tự chạy.",
+    "Mọi người nhớ tự gõ code chứ đừng chép, mình thấy nhớ lâu hơn hẳn.",
+    "Bài 1 mình mất cả buổi chỉ vì terminal đứng sai thư mục, may có mục lỗi hay gặp.",
+    "Khóa này đáng học hơn nhiều khóa trả phí mình từng thử.",
+    "Không hiểu sao typeof null lại là object, may có phần hỏi đáp.",
+    "Có chứng nhận hoàn thành không ạ?",
+    "Đọc xong phần off-by-one mới biết vì sao code của mình hay thừa một dòng.",
+    "Mình góp ý: bài vòng lặp nên tách for...of ra bài riêng vì chưa học mảng mà đã dùng.",
+    "Ví dụ năm nhuận ở bài hàm hay, chia hàm nhỏ nhìn sạch hẳn.",
+    "Cảm ơn thầy đã trả lời câu hỏi của mình rất nhanh.",
+    "Mình học trên điện thoại vẫn đọc tốt, nhưng chạy code thì phải mở máy tính.",
+    "Phần đọc thêm đều dẫn về tài liệu chính thức, rất tin cậy.",
+    "Bài tập bài 2 về điểm trung bình hay, bẫy chuỗi '7.5' làm mình sai lần đầu.",
+    "Lần đầu biết tới template string, tiện hơn nối chuỗi bằng dấu + nhiều.",
+    "Mong khóa có thêm phần ôn tập tổng hợp sau bài 5.",
+    "Mình 15 tuổi, học thử và hiểu được, cảm ơn khóa học.",
+    "Ước gì hồi học tin học ở trường cũng được giải thích kiểu này.",
+    "Bài 5 hơi dài so với các bài trước, phần hàm mũi tên có thể để khóa sau.",
+    "Thông báo lỗi giờ không còn đáng sợ với mình nữa.",
+    "Có nhóm học chung nào không mọi người, mình muốn tìm bạn cùng tiến độ.",
+    "Hay nhưng mong có thêm bài về cách debug bằng VS Code.",
+    "Cách giải thích const là chiếc hộp không cho thay đồ dễ nhớ ghê.",
+    "Admin xem lại giúp, mình làm trắc nghiệm bài 4 xong mà tiến độ chưa cập nhật ngay, tải lại trang mới thấy.",
+    "Mình đã giới thiệu khóa này cho mấy bạn cùng lớp.",
+    "Ví dụ đi xem phim với điều kiện && và || rất đời thường.",
+    "Học xong mới hiểu sao người ta nói lập trình là tư duy chứ không phải học thuộc.",
+    "Bạn nào hay quên return thì đọc kỹ phần lỗi hay gặp bài 5 nhé.",
+    "Mình thích việc mọi con số trong bài đều khớp khi tự chạy lại.",
+    "Có ai cài Node trên máy Mac gặp lỗi gì không, mình cài trơn tru.",
+    "Bài học văn bản nhưng dễ theo hơn mình nghĩ.",
+    "Đề xuất: thêm một bài nhỏ hướng dẫn dùng terminal cơ bản như cd, dir, ls.",
+    "Cảm ơn khóa học, mình sẽ học tiếp khóa JavaScript.",
+    "Phần câu hỏi trắc nghiệm có thể thêm vài câu đọc code đoán kết quả thì hay hơn.",
+    "Bài 2 có NaN, lúc đầu mình tưởng máy hỏng :)",
+    "Mỗi bài 15 phút vừa sức sau giờ làm.",
+    "Mình thấy bài 1 hơi nhiều lý thuyết, vào code sớm hơn chút sẽ cuốn hơn.",
+    "Mẹo tự hỏi ba câu khi viết vòng lặp mình dán lên màn hình luôn.",
+    "Học hết rồi, giờ thử viết chương trình đổi độ C sang độ F cho cả bảng nhiệt độ.",
+    "Khóa này giúp mình chọn được ngành học, cảm ơn nhiều.",
+    "Mong thầy cô làm thêm khóa nhập môn cho Python nữa.",
+    "Ví dụ chia hàm nhỏ ở bài cuối làm mình thấy code đọc như tiếng Việt thật."
+  ],
+  "spam": [
+    "Nhận làm đồ án, bài tập lập trình thuê giá rẻ, ai cần nhắn riêng cho mình nhé, cam kết điểm cao!!!",
+    "Khuyến mãi khủng tại trang bán khóa học khác, rẻ hơn ở đây gấp nhiều lần, vào xem ngay kẻo lỡ!!!",
+    "Ai dở thì mới cần học khóa nhập môn, biết code rồi vào đây chỉ phí thời gian, chán."
+  ],
+  "reviews": {
+    "1": [
+      "Mình mất hai buổi vẫn không cài được Node.js trên máy công ty bị khóa quyền, khóa học không có lựa chọn chạy code trực tiếp trên trang. Rất mong có trình chạy code ngay trong bài.",
+      "Quá ít nội dung, chỉ 5 bài đọc không có video, không có dự án. Bài vòng lặp nhồi quá nhiều thứ, mình đọc ba lần vẫn chưa hiểu continue và for...of.",
+      "Không có cách nào hỏi trực tiếp khi bí, phần hỏi đáp phải chờ trả lời. Bài tập không có chấm tự động nên mình không biết code mình đúng hay chỉ tình cờ ra kết quả."
+    ],
+    "2": [
+      "Tốc độ quá nhanh với người chưa từng dùng máy tính nhiều như mình. Bài 1 giả định mình đã biết terminal, thư mục, đường dẫn là gì. Cần một bài chuẩn bị riêng về các thứ này.",
+      "Bài tập bài 4 và bài 5 nhảy độ khó đột ngột, đề không có ví dụ kết quả mong đợi cho từng bước nên mình không biết mình đang sai ở đâu.",
+      "Khóa hoàn toàn là chữ, không có video hay hình động. Với người học bằng mắt như mình thì rất khó tập trung quá 10 phút.",
+      "Phần phạm vi biến trong bài hàm được giải thích quá ngắn, chỉ một ví dụ với typeof. Mình gặp ReferenceError ngoài thực tế mà không liên hệ được với bài.",
+      "Thiếu bài tổng hợp. Học xong 5 bài mình vẫn không biết ghép các kiến thức lại để làm một chương trình nhỏ như máy tính tiền hay trò đoán số.",
+      "Lời giải đưa ra ngay đáp án hoàn chỉnh, không có gợi ý từng bước. Mình xem lời giải thì hiểu nhưng tự làm lại vẫn không ra.",
+      "Ví dụ chủ yếu là in ra màn hình, không có phần nhận dữ liệu người dùng nhập vào nên học xong thấy chương trình chưa có gì tương tác, hơi hụt hẫng."
+    ],
+    "3": [
+      "Nội dung đúng nhưng khá ngắn. Năm bài chưa đủ để tự viết một chương trình nhỏ hoàn chỉnh, nên có thêm một bài dự án cuối khóa kết hợp biến, điều kiện, vòng lặp và hàm.",
+      "Bài 1 và 2 rất ổn nhưng bài 4 dồn for, while, for...of, break, continue vào một bài, với người mới là quá tải. Nên chia thành hai bài.",
+      "Mình cần video. Đọc chữ phần cài Node.js và mở terminal trên Windows khó theo, mất cả tiếng mới chạy được file đầu tiên.",
+      "Bài tập ít, mỗi bài chỉ hai câu. Muốn luyện thêm phải tự nghĩ đề, mong khóa bổ sung thêm bài tập theo mức độ.",
+      "Giải thích ổn nhưng for...of được dùng ở bài 3 và bài 4 trong khi mảng chưa được dạy, làm mình bị rối khá lâu.",
+      "Khóa phù hợp người hoàn toàn mới, còn mình đã học qua ở trường nên thấy chậm. Nên có bài kiểm tra đầu vào để bỏ qua phần đã biết.",
+      "Phần hàm mũi tên chỉ giới thiệu vài dòng rồi bỏ đó, đọc xong vẫn không biết khi nào nên dùng. Hoặc giải thích kỹ hoặc để khóa sau.",
+      "Trắc nghiệm chỉ có 4 câu mỗi bài và khá dễ, làm xong không chắc mình đã thật sự hiểu. Nên thêm câu đọc code đoán kết quả.",
+      "Ví dụ hay nhưng thiếu hình minh họa. Vòng lặp và if else rất cần sơ đồ luồng để người mới thấy thứ tự chạy.",
+      "Nội dung ổn nhưng không có hướng dẫn xử lý khi cài Node.js bị lỗi trên máy cũ, mình phải tự tìm cách khá vất vả."
+    ],
+    "4": [
+      "Nội dung rất dễ hiểu, ví dụ gần gũi. Trừ một sao vì mình mong có video minh họa phần cài đặt Node.js và mở terminal.",
+      "Khóa tốt cho người mới. Bài vòng lặp hơi dày, nếu tách break và continue ra phần riêng có thêm bài tập thì sẽ tốt hơn.",
+      "Mình học khá nhanh, bài tập hơi dễ với người đã biết chút ít. Nên có thêm một bài nâng cao ở mỗi bài.",
+      "Giải thích kỹ, code chạy đúng. Chỉ tiếc là khóa kết thúc ở hàm, mình muốn có thêm phần mảng.",
+      "Bài hàm rất hay, đặc biệt phần return và phạm vi biến. Hàm mũi tên giới thiệu hơi nhanh, đọc chưa thấm lắm.",
+      "Tổng thể rất ổn. Mong có thêm câu hỏi trắc nghiệm dạng đọc code đoán kết quả, hiện mỗi bài chỉ có 4 câu.",
+      "Bài 1 cho người chưa biết gì là vừa vặn. Có điều phần hướng dẫn terminal hơi ít, mình phải tự tìm hiểu lệnh cd.",
+      "Mình thích cách viết thân thiện. Có vài chỗ for...of được dùng trước khi học mảng nên lúc đầu hơi lạ.",
+      "Rất đáng thời gian bỏ ra. Nếu có sơ đồ luồng chạy cho if và vòng lặp thì người học bằng hình ảnh như mình sẽ dễ hơn.",
+      "Phần hỏi đáp có thầy trả lời chu đáo. Bài tập ổn nhưng mình mong có thêm bài tự kiểm tra cuối khóa.",
+      "Bốn sao vì nội dung chuẩn và dễ theo, một sao còn lại chờ khóa bổ sung bài ôn tập tổng hợp.",
+      "Ví dụ trà sữa và giỏ hàng rất hay. Bài 2 phần NaN có thể nói thêm cách kiểm tra NaN.",
+      "Mình học xong trong một cuối tuần. Hợp lý, rõ ràng, nhưng hơi ngắn so với mong đợi.",
+      "Cách giải thích tham số và đối số rất rõ. Giá mà có thêm ví dụ hàm gọi hàm phức tạp hơn một chút.",
+      "Khóa chất lượng. Đề xuất thêm phần hướng dẫn dùng trình gỡ lỗi trong VS Code để xem giá trị biến từng bước.",
+      "Nội dung tốt, trình bày gọn. Thời gian đọc ghi trong bài hơi ít so với thực tế nếu tự gõ code theo.",
+      "Mình là sinh viên năm nhất, khóa này giúp mình theo kịp môn tin học đại cương. Mong có thêm bài tập về chuỗi.",
+      "Rất hài lòng với phần lỗi hay gặp. Chỉ muốn bài điều kiện có thêm ví dụ về switch.",
+      "Tốt cho người tự học. Phần ẩn lời giải hay nhưng nên có thêm gợi ý từng bước trước khi xem đáp án đầy đủ.",
+      "Dễ hiểu, ví dụ thực tế. Mong sau này có bản bài học dạng video ngắn đi kèm để ôn lại nhanh."
+    ],
+    "5": [
+      "Khóa nhập môn tốt nhất mình từng học. Mỗi khái niệm đều có ví dụ đời thường như nấu mì, gọi trà sữa, tiết kiệm mua laptop, nên mình không thấy khô khan. Phần lỗi hay gặp giúp mình tự sửa được lỗi mà không phải hỏi ai.",
+      "Mình chưa từng viết dòng code nào trước đây. Sau 5 bài mình đã viết được hàm xếp loại điểm và vòng lặp tính tổng. Cách giải thích return khác console.log cực kỳ rõ.",
+      "Miễn phí mà chất lượng. Bài nào cũng có bài tập kèm lời giải ẩn, code mẫu chạy đúng y như kết quả in trong bài.",
+      "Thích nhất là bài câu lệnh điều kiện, phần sắp xếp điều kiện từ chặt đến lỏng giải đáp đúng lỗi mình mắc khi tự học trước đây.",
+      "Ngắn gọn, đúng trọng tâm, không lan man. Mỗi bài khoảng 15 phút đọc, hợp với người đi làm như mình.",
+      "Giải thích biến là chiếc hộp có nhãn rất dễ nhớ. Bảng kiểu dữ liệu và ví dụ '10' + 5 giúp mình hiểu tại sao code cũ của mình cộng ra số dính liền.",
+      "Thầy trả lời hỏi đáp nhanh và kỹ. Mình hỏi về vòng lặp vô hạn, được giải thích cả cách dừng bằng Ctrl + C lẫn cách sửa.",
+      "Rất hợp cho học sinh cấp 3 muốn thử lập trình. Ngôn ngữ thân thiện, thuật ngữ tiếng Anh có ghi trong ngoặc nên sau này đọc tài liệu cũng dễ.",
+      "Mình đánh giá cao việc mọi con số trong bài đều chạy thật. Tự gõ lại thấy khớp từng dòng nên rất tin tưởng.",
+      "Phần trắc nghiệm cuối bài có giải thích cho từng đáp án, sai câu nào hiểu ngay câu đó.",
+      "Bài vòng lặp có mẹo tự hỏi ba câu: bắt đầu từ đâu, mỗi vòng đổi gì, khi nào dừng. Từ đó mình gần như không còn viết vòng lặp vô hạn nữa.",
+      "Khóa học giúp mình bớt sợ thông báo lỗi. Giờ thấy TypeError hay ReferenceError là biết đọc tên lỗi và số dòng trước.",
+      "Ví dụ năm nhuận ở bài hàm cho mình thấy cách chia bài toán thành hàm nhỏ. Rất đáng học.",
+      "Nội dung tự viết, không giống mấy khóa dịch máy. Đọc trôi chảy, xưng hô gần gũi.",
+      "Mình là phụ huynh học cùng con, cả hai đều hiểu bài. Cảm ơn đội ngũ.",
+      "Hướng dẫn cài Node.js ngắn gọn, làm theo là chạy được ngay. Bài đầu tiên đã có cảm giác thành công.",
+      "Template string, toán tử ba ngôi, giá trị mặc định của tham số đều được giới thiệu đúng lúc, không quá sớm.",
+      "Phần falsy ở bài 3 cứu mình khỏi một lỗi khi xử lý dữ liệu ô nhập là chuỗi '0'.",
+      "Học xong khóa này mình tự tin đăng ký khóa JavaScript tiếp theo. Nền tảng chắc chắn.",
+      "Lời giải bài tập viết gọn, có chú thích, đọc xong hiểu cách nghĩ chứ không chỉ đáp án.",
+      "Giao diện đọc bài sạch, code được tô màu rõ ràng, học buổi tối không mỏi mắt.",
+      "Bài biến có phần dò code bằng tay bằng bảng nhỏ, mình áp dụng và thấy hiểu chương trình sâu hơn hẳn.",
+      "Khóa học vừa sức, có tính sư phạm, mỗi bài đều có mục tiêu rõ ràng ở đầu.",
+      "Mình hay nhầm = với ===, bài 3 giải thích kèm ví dụ lỗi thật nên nhớ luôn.",
+      "Năm sao xứng đáng. Ước gì có thêm nhiều khóa nhập môn như thế này."
+    ]
+  },
+  "chat": [
+    "Chào mọi người, mình mới vào khóa hôm nay.",
+    "Hello cả nhà, mọi người đang học tới bài mấy rồi?",
+    "Mình đang ở bài 2, biến và kiểu dữ liệu.",
+    "Bài vòng lặp hơi khó nhỉ, có ai muốn học chung tối nay không?",
+    "Mẹo nhỏ: gặp lỗi thì đọc dòng có tên file và số dòng trước nha.",
+    "Có ai bị lỗi Cannot find module không, nhớ cd vào đúng thư mục nhé.",
+    "Mình vừa chạy được node chao.js lần đầu, vui quá :)",
+    "Ai lập nhóm ôn tập cuối tuần không, mình tham gia với.",
+    "Mọi người dùng VS Code hay trình soạn thảo nào vậy?",
+    "Mình dùng VS Code, mở terminal bằng Ctrl + ` tiện lắm.",
+    "Vừa xong bài 3, phần = với === đúng là bẫy kinh điển.",
+    "Chúc mọi người học vui nha.",
+    "Bạn nào làm xong bài tập năm nhuận chưa, so đáp án với mình không?",
+    "Treo máy vì vòng lặp vô hạn thì bấm Ctrl + C là thoát nhé.",
+    "Tối nay 8 giờ mình học bài hàm, ai rảnh vào cùng đọc nhé.",
+    "Mình thấy tự gõ lại code mẫu nhớ lâu hơn nhiều so với chỉ đọc.",
+    "Có ai đang học từ điện thoại không, chạy code kiểu gì vậy?",
+    "Điện thoại thì đọc lý thuyết thôi, chạy code nên dùng máy tính.",
+    "Xong 5/5 bài rồi, giờ làm lại bài tập không xem lời giải.",
+    "Ai giải thích giúp mình continue với, mình đọc chưa hiểu lắm.",
+    "continue là bỏ qua phần còn lại của vòng hiện tại, nhảy sang vòng kế tiếp á bạn.",
+    "Cảm ơn bạn nha, hiểu rồi.",
+    "Mọi người ơi typeof null ra object là bình thường nhé, không phải máy lỗi.",
+    "Hôm nay mới học được 1 bài, mai cố thêm 2 bài.",
+    "Ai học xong rồi qua khóa JavaScript chưa?",
+    "Mình đang tính học tiếp khóa JavaScript sau khi xong khóa này.",
+    "Có ai làm bảng cửu chương từ 2 đến 9 bằng hai vòng lặp chưa, khó mà vui.",
+    "Mẹo: đặt tên biến có nghĩa, đọc lại code sau vài ngày vẫn hiểu.",
+    "Chào buổi sáng mọi người, học trước giờ đi làm nào.",
+    "Mình bị nhầm '10' + 5 ra 105 hoài, giờ nhớ dùng Number() rồi.",
+    "Ai cần bạn học chung tiến độ chậm thì rủ mình nhé, mình học buổi tối.",
+    "Bài hàm phần return hay lắm mọi người, đọc kỹ nha.",
+    "Có ai thi trắc nghiệm bài 4 được điểm tối đa chưa?",
+    "Mình sai câu falsy, cứ tưởng '0' là sai.",
+    "Lời khuyên: đừng sợ lỗi, lỗi là cách máy nói chuyện với mình.",
+    "Cuối tuần này có ai muốn cùng làm một chương trình nhỏ đổi độ C sang độ F không?",
+    "Mình tham gia với, tối thứ bảy được không?",
+    "Ok thứ bảy nha, ai muốn vào thì để lại tin nhắn ở đây.",
+    "Chúc mừng mọi người đã hoàn thành khóa, cố lên ở các khóa tiếp theo.",
+    "Mình chào mọi người, hẹn gặp lại ở khóa sau nhé."
+  ]
+}

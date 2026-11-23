@@ -1,0 +1,26 @@
+<%- include('../partials/header') %>
+<section class="wrap section">
+  <h1>Lịch sử thanh toán</h1>
+  <% if (orders.some(o => orderView.isDemo(o))) { %><p class="muted small"><span class="demo-pill">DEMO</span> Đơn đánh dấu DEMO thanh toán qua cổng mô phỏng – <%= orderView.DEMO_NOTE.replace('DEMO – ', '') %>.</p><% } %>
+  <% if (!orders.length) { %><div class="empty">Chưa có giao dịch nào.</div><% } else { %>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Thời gian</th><th>Khóa học</th><th>Số tiền</th><th>Hình thức</th><th>Trạng thái</th><th>Mã giao dịch</th><th>Hóa đơn</th></tr></thead>
+      <tbody>
+        <% orders.forEach(o => { %>
+          <tr>
+            <td><%= o.createdAt.toLocaleString('vi-VN') %></td>
+            <td><%= o.course ? o.course.title : '(đã xóa)' %></td>
+            <td><%= usd(o.amount) %><% if (o.amountVnd) { %><br><span class="muted small">≈ <%= fmtVnd(o.amountVnd) %></span><% } %><% if (o.couponCode) { %><br><span class="muted small">mã <%= o.couponCode %> −<%= usd(o.discount) %></span><% } %></td>
+            <td><%= orderView.methodLabel(o) %><% if (orderView.isDemo(o)) { %> <span class="demo-pill" title="<%= orderView.DEMO_NOTE %>">DEMO</span><% } %></td>
+            <td><span class="status st-<%= o.status %>"><%= orderView.STATUS[o.status] %></span></td>
+            <td><code><%= o.captureId || '—' %></code></td>
+            <td><% if (orderView.billable(o)) { %><a class="btn btn-ghost btn-xs" href="/orders/<%= o._id %>/invoice.pdf" download>⬇ PDF</a><% } else { %>—<% } %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+<%- include('../partials/footer') %>

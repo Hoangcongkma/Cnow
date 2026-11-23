@@ -1,0 +1,473 @@
+{
+  "slug": "web-design",
+  "lessons": {
+    "01-nguyen-tac-thi-giac": [
+      {
+        "q": "Mình nheo mắt nhìn trang mình làm thì thấy tiêu đề với nút chính nhòe như nhau. Vậy là thiếu phân cấp đúng không ạ? Nên sửa cái nào trước?",
+        "answers": ["Mình hay tăng cỡ tiêu đề trước, rồi đổi nút chính sang màu nhấn, nheo mắt nhìn lại là khác hẳn."],
+        "instructor": "Đúng vậy, nheo mắt mà mọi thứ nhòe như nhau là dấu hiệu thiếu phân cấp. Bạn hãy chọn một thứ quan trọng nhất trên màn hình (thường là tiêu đề hoặc hành động chính) rồi tạo khác biệt bằng kích thước, độ đậm, màu nhấn và khoảng trắng quanh nó. Đồng thời làm dịu phần phụ (mô tả nhỏ hơn, xám hơn) thay vì chỉ làm cái chính to thêm mãi."
+      },
+      {
+        "q": "Khoảng cách trong thẻ của em là 16px, giữa các thẻ cũng 16px. Nhìn cứ dính thành một mảng. Em nên để bao nhiêu ạ?",
+        "answers": ["Thử gap giữa các thẻ 32px xem, mình làm vậy thấy tách nhóm rõ hơn hẳn."],
+        "instructor": "Theo nguyên tắc gần nhau, khoảng cách giữa các nhóm phải lớn hơn rõ rệt khoảng cách bên trong nhóm. Bạn có thể để 8px giữa các dòng trong thẻ và 24–32px giữa các thẻ. Điều quan trọng là độ chênh đủ lớn để mắt nhận ra ranh giới nhóm, chứ không phải một con số cố định."
+      },
+      {
+        "q": "Trang landing của mình có 3 nút: Đăng ký, Học thử, Liên hệ. Người hướng dẫn đồ án muốn cả ba đều to và đỏ. Làm sao thuyết phục ạ?",
+        "answers": [],
+        "instructor": "Bạn có thể giải thích bằng nguyên tắc tương phản: khi mọi thứ đều nổi bật thì không gì nổi bật, người dùng sẽ chần chừ không biết bấm gì. Hãy thống nhất mục tiêu chính của trang (thường là Đăng ký), cho nút đó dạng đặc màu nhấn, Học thử dạng viền, Liên hệ dạng liên kết chữ. Trình bày theo mẫu Vấn đề – Nguyên tắc – Đề xuất sẽ thuyết phục hơn tranh luận theo sở thích."
+      },
+      {
+        "q": "Khoảng trắng có bắt buộc là màu trắng không mn?",
+        "answers": ["Không nhé, nền tối thì phần trống vẫn gọi là khoảng trắng."],
+        "instructor": "Không. Khoảng trắng (white space) là không gian trống quanh và giữa các phần tử, nền màu gì cũng được. Nó giúp nhóm nội dung, tạo nhịp đọc và làm phần tử quan trọng nổi bật, không phải chỗ lãng phí cần lấp đầy."
+      },
+      {
+        "q": "Đoạn giới thiệu dài khoảng 5 dòng, em đang để text-align: center cho cân đối. Có sao không ạ?",
+        "answers": ["Mình từng bị góp ý y chang, đọc đoạn dài căn giữa mỏi mắt lắm.", "Tiêu đề ngắn thì căn giữa vẫn ổn nha bạn."],
+        "instructor": "Đoạn văn nhiều dòng nên căn trái. Khi căn giữa, mỗi dòng bắt đầu ở một vị trí khác nhau nên mắt phải tìm lại điểm đầu dòng, đọc lâu rất mệt. Căn giữa chỉ hợp với tiêu đề ngắn, khẩu hiệu hoặc một nút đứng riêng."
+      },
+      {
+        "q": "Biến CSS kiểu --mau-nhan thì liên quan gì đến nguyên tắc lặp lại vậy thầy?",
+        "answers": [],
+        "instructor": "Biến CSS giúp bạn dùng lại đúng một giá trị ở mọi nơi: cùng màu nhấn, cùng khoảng cách. Đó chính là lặp lại có chủ đích, tạo sự nhất quán. Khi cần đổi, bạn chỉ sửa một chỗ trong :root và cả trang đổi theo, tránh tình trạng mỗi trang lệch một chút."
+      },
+      {
+        "q": "Gestalt là gì vậy ạ, có cần học sâu không?",
+        "answers": ["Mình hiểu nôm na là não tự gom các thứ gần nhau, giống nhau thành một nhóm."],
+        "instructor": "Gestalt là một hướng của tâm lý học nói về việc não nhìn tổng thể và tự nhóm các phần tử theo sự gần nhau, giống nhau, cùng hướng hay cùng nằm trong một khung. Bạn không cần học sâu lý thuyết; chỉ cần dùng nó để dự đoán người dùng sẽ hiểu cái gì đi với cái gì, rồi sắp xếp cho đúng ý."
+      },
+      {
+        "q": "Nhãn ô nhập của em đang nằm giữa hai ô, cách ô trên 12px và ô dưới cũng 12px. Bạn em bảo nhìn không biết nhãn thuộc ô nào.",
+        "answers": ["Đẩy nhãn sát ô của nó, tầm 4–8px thôi, còn giữa các cụm để 24px."],
+        "instructor": "Bạn của bạn nói đúng. Nhãn phải gần ô nhập của nó hơn hẳn so với ô khác. Ví dụ nhãn cách ô của nó 4–8px, còn mỗi cụm nhãn + ô cách cụm kế tiếp 20–24px. Khi đó nguyên tắc gần nhau tự cho người dùng biết nhãn đi với ô nào."
+      },
+      {
+        "q": "Góp ý cho bài của bạn cùng nhóm thế nào để không bị kiểu chê theo cảm tính ạ?",
+        "answers": [],
+        "instructor": "Hãy dùng mẫu Vấn đề – Nguyên tắc – Đề xuất. Ví dụ: tên khóa học và giá cùng cỡ chữ (vấn đề), thiếu phân cấp thị giác (nguyên tắc), tăng cỡ tên và làm mô tả nhạt hơn (đề xuất). Tránh câu chung chung như trông chưa đẹp; góp ý gắn với mục tiêu của người dùng sẽ dễ được tiếp nhận hơn."
+      },
+      {
+        "q": "Website của em mỗi trang một kiểu nút, trang chủ bo tròn màu cam, trang thanh toán vuông màu xanh. Có nghiêm trọng không ạ?",
+        "answers": ["Có đó bạn, người dùng dễ nghĩ mình bấm nhầm sang trang khác."],
+        "instructor": "Có ảnh hưởng. Thiếu nhất quán buộc người dùng học lại giao diện ở mỗi trang và làm giảm niềm tin, nhất là ở bước thanh toán. Bạn nên thống nhất một kiểu nút chính và một kiểu nút phụ, viết thành class dùng biến CSS chung cho toàn website."
+      }
+    ],
+    "02-mau-sac-va-typography": [
+      {
+        "q": "Em dùng chữ #9ca3af trên nền trắng, kiểm tra ra 2.54:1. Vậy là không đạt AA đúng không ạ?",
+        "answers": ["Đúng rồi, chữ thường phải từ 4.5:1. Đổi sang #4b5563 là ổn."],
+        "instructor": "Đúng, 2.54:1 không đạt kể cả ngưỡng dành cho chữ lớn (3:1). Chữ thường cần ít nhất 4.5:1. Bạn có thể dùng #4b5563 (khoảng 7.56:1 trên nền trắng) cho chữ phụ, còn sắc xám nhạt thì giữ cho viền hoặc nền."
+      },
+      {
+        "q": "Nút cam #f05123 chữ trắng chỉ được 3.56:1. Nếu em để chữ trên nút 24px thì có tính là chữ lớn không ạ?",
+        "answers": [
+          "Theo mình hiểu 24px trở lên là chữ lớn, nên 3:1 là đủ.",
+          "Nhưng nút chữ to vậy nhìn hơi kỳ, mình thì đổi sang cam đậm hơn cho chắc."
+        ],
+        "instructor": "Đúng, từ khoảng 24px (hoặc khoảng 18.66px nếu chữ đậm) được tính là chữ lớn, ngưỡng AA là 3:1 nên 3.56:1 đạt. Tuy nhiên nút thường dùng chữ 14–16px, nên cách bền vững hơn là chọn sắc cam đậm như #c2410c (khoảng 5.18:1), đạt AA cho cả chữ thường."
+      },
+      {
+        "q": "Thang 1.25 từ 16px thì h2 là 31.25px, lẻ quá. Em làm tròn thành 31px hoặc 32px được không?",
+        "answers": ["Mình làm tròn 32 cho dễ, nhìn bằng mắt không khác mấy."],
+        "instructor": "Được, làm tròn nhẹ không phá sự hài hòa của thang. Điều quan trọng là các cấp tăng theo một tỉ lệ nhất quán và bạn dùng đúng các giá trị đó ở mọi nơi. Nếu viết bằng rem thì 1.953rem trình duyệt tự xử lý, bạn giữ nguyên cũng không sao."
+      },
+      {
+        "q": "Sao phải dùng rem mà không dùng px cho cỡ chữ vậy mọi người?",
+        "answers": ["rem tính theo cỡ chữ gốc, người dùng chỉnh cỡ chữ trong trình duyệt thì trang to theo."],
+        "instructor": "rem tính theo cỡ chữ của phần tử gốc (html). Khi người dùng tăng cỡ chữ mặc định trong cài đặt trình duyệt, mọi kích thước viết bằng rem phóng theo, còn px cố định thì không. Vì vậy rem tôn trọng lựa chọn của người dùng, đặc biệt là người thị lực kém."
+      },
+      {
+        "q": "line-height cho đoạn văn tiếng Việt nên để bao nhiêu ạ? Em để 1.2 thấy dấu gần chạm dòng trên.",
+        "answers": [],
+        "instructor": "1.2 hợp với tiêu đề lớn, còn đoạn văn nên khoảng 1.5–1.7. Tiếng Việt có dấu ở cả phía trên và dưới chữ nên khoảng cách dòng thoáng một chút càng quan trọng. Bạn thử 1.6 rồi tinh chỉnh theo phông đang dùng."
+      },
+      {
+        "q": "Phông em chọn hiển thị chữ ơ, ư khác hẳn các chữ còn lại. Lỗi gì vậy ạ?",
+        "answers": ["Phông đó thiếu ký tự tiếng Việt nên trình duyệt lấy phông dự phòng cho mấy chữ đó."],
+        "instructor": "Phông đó không hỗ trợ đầy đủ bộ ký tự tiếng Việt, nên trình duyệt phải mượn phông dự phòng cho những ký tự thiếu, khiến chữ bị lệch kiểu. Trước khi chốt phông, hãy thử với một câu có đủ các dấu. Nếu chưa chắc, system-ui là lựa chọn an toàn và tải nhanh."
+      },
+      {
+        "q": "Quy tắc 60–30–10 là tính theo diện tích hay số lượng màu ạ?",
+        "answers": ["Diện tích nha bạn."],
+        "instructor": "Theo diện tích. Khoảng 60% là nền trung tính, 30% là màu phụ cho khối, thẻ, và 10% là màu nhấn cho hành động chính. Đây là quy tắc kinh nghiệm giúp màu nhấn giữ được sức nặng, không phải công thức phải đo chính xác."
+      },
+      {
+        "q": "Form của em báo lỗi bằng viền đỏ thôi. Thầy bảo vậy là chưa đủ, tại sao ạ?",
+        "answers": [],
+        "instructor": "Vì không nên truyền đạt thông tin chỉ bằng màu. Khá nhiều người khó phân biệt đỏ và xanh lá, chỉ có viền đỏ thì họ có thể không nhận ra ô bị lỗi. Hãy thêm dòng chữ giải thích lỗi ngay dưới ô (có thể kèm biểu tượng); viền đỏ chỉ là tín hiệu bổ sung."
+      },
+      {
+        "q": "max-width: 65ch là gì vậy, ch là đơn vị gì mn?",
+        "answers": ["ch là độ rộng ký tự số 0 của phông đang dùng, coi như khoảng một ký tự."],
+        "instructor": "ch bằng độ rộng của ký tự 0 trong phông hiện tại, dùng gần đúng như độ rộng một ký tự. max-width: 65ch giữ mỗi dòng khoảng 65 ký tự, nằm trong vùng 45–75 ký tự dễ đọc, nên dòng không bị kéo dài trên màn hình rộng."
+      },
+      {
+        "q": "Em định dùng 3 họ phông: một cho tiêu đề, một cho nội dung, một riêng cho nút. Có ổn không ạ?",
+        "answers": ["Mình nghĩ 2 là đủ, nút dùng chung phông nội dung cho đồng bộ."],
+        "instructor": "Nên giới hạn 1–2 họ phông. Ba họ phông dễ làm trang lộn xộn và tải chậm hơn. Nút có thể dùng phông nội dung với độ đậm 600–700 để nổi bật; khác biệt nên tạo bằng cỡ chữ và độ đậm thay vì thêm phông mới."
+      }
+    ],
+    "03-bo-cuc-luoi": [
+      {
+        "q": "Gutter với margin khác nhau thế nào ạ, em hay bị lẫn.",
+        "answers": ["Gutter nằm giữa các cột, margin ở hai mép ngoài cùng."],
+        "instructor": "Gutter là khoảng trống giữa hai cột liền kề, còn margin là lề ở hai bên ngoài cùng của lưới, giữ nội dung không chạm mép màn hình. Trong CSS Grid, gutter thường là gap, còn margin thường là padding-inline của khung lưới."
+      },
+      {
+        "q": "Màn hình 1440px, max-width 1200, margin 32, gutter 24, 12 cột thì cột rộng 78px. Em tính lại không ra, em lấy 1440 trừ luôn.",
+        "answers": ["Phải lấy min(1440 - 2*32, 1200) = 1200 trước đã bạn ơi."],
+        "instructor": "Bạn cần tính vùng nội dung trước: min(1440 − 2 × 32, 1200) = 1200px vì bị giới hạn bởi chiều rộng tối đa. Sau đó trừ 11 gutter: 1200 − 11 × 24 = 936, chia 12 được 78px. Khối 4 cột là 4 × 78 + 3 × 24 = 384px."
+      },
+      {
+        "q": "Sao lưới hay dùng 12 cột mà không phải 10 cột ạ?",
+        "answers": [],
+        "instructor": "Vì 12 chia hết cho 2, 3, 4 và 6, nên bạn dễ chia bố cục thành 2, 3, 4 hoặc 6 khối bằng nhau, hay kiểu 8 + 4 cho nội dung chính và thanh bên. Lưới 10 cột chỉ chia đều cho 2 và 5, kém linh hoạt hơn nhiều."
+      },
+      {
+        "q": "Em đặt padding 13px, margin 18px theo cảm giác. Có cần đổi hết sang bội số 8 không mn?",
+        "answers": [
+          "Mình đổi sang thang 8 rồi, giao diện đều hẳn, mà quyết định cũng nhanh hơn.",
+          "Chỗ nào cần nhỏ thì dùng 4 là nửa bước nha."
+        ],
+        "instructor": "Nên đổi. Thang bội số 8 (4, 8, 16, 24, 32, 48…) giúp khoảng cách đồng đều và bạn không phải cân nhắc từng pixel. Hãy khai báo thành biến như --khoang-1, --khoang-2 rồi thay dần; 13px thường đổi thành 12 hoặc 16, 18px thành 16 hoặc 24 tùy quan hệ nhóm."
+      },
+      {
+        "q": "grid-column: span 8 với grid-column: 1 / 9 khác gì nhau ạ?",
+        "answers": [],
+        "instructor": "Cả hai đều chiếm 8 cột. span 8 nghĩa là chiếm 8 cột bắt đầu từ vị trí tự động kế tiếp, còn 1 / 9 cố định từ đường kẻ 1 đến đường kẻ 9. Với bố cục nội dung chính + thanh bên, span 8 và span 4 gọn hơn vì các phần tử tự xếp nối tiếp nhau."
+      },
+      {
+        "q": "Trên điện thoại em vẫn để grid 12 cột rồi cho mỗi khối span 12, được không hay phải đổi sang 4 cột?",
+        "answers": ["Vẫn chạy được, nhưng 12 cột trên màn nhỏ thì cột với gutter bé xíu."],
+        "instructor": "Về kỹ thuật vẫn được nếu mọi khối trải hết. Nhưng màn nhỏ thường dùng 4 cột vì 12 cột cộng 11 gutter trên 375px gần như không còn chỗ cho cột. Theo hướng mobile-first, hãy bắt đầu với repeat(4, 1fr) và grid-column: 1 / -1, lên màn lớn mới đổi sang 12 cột."
+      },
+      {
+        "q": "Kiểu đọc chữ Z áp dụng cho trang nào vậy ạ? Trang danh sách khóa học của em thì sao?",
+        "answers": ["Trang đích ít chữ thì Z, còn trang danh sách nhiều chữ thì mình nghĩ giống F hơn."],
+        "instructor": "Chữ Z hợp với trang ít chữ, nhiều hình như trang đích, trang giới thiệu: mắt đi từ logo sang menu, chéo xuống góc dưới trái rồi sang phải; điểm cuối là chỗ tốt cho nút chính. Trang danh sách khóa học nhiều chữ nên người dùng quét gần kiểu F hơn, vì vậy tên khóa và thông tin chính nên nằm ở đầu mỗi thẻ."
+      },
+      {
+        "q": "Màn hình 2560px thì lưới của em giãn hết cỡ, thẻ bè ra xấu lắm. Khắc phục sao ạ?",
+        "answers": [],
+        "instructor": "Hãy đặt chiều rộng tối đa cho khung lưới, ví dụ max-width: 1200px kèm margin-inline: auto để lưới đứng giữa. Phần thừa hai bên trở thành khoảng trống, thẻ không bị kéo bè và dòng chữ không dài quá mức."
+      },
+      {
+        "q": "Thiết kế có ảnh bìa tràn viền ra ngoài lưới, vậy có bị coi là phá lưới không thầy?",
+        "answers": ["Mình nghĩ có chủ đích thì ok."],
+        "instructor": "Đó là phá lưới, nhưng phá lưới rõ ràng và có chủ đích thì hoàn toàn ổn, như ảnh bìa tràn hết chiều rộng màn hình. Điều nên tránh là một khối lệch vài pixel khỏi đường kẻ chung, trông như lỗi chứ không phải ý đồ."
+      },
+      {
+        "q": "Bài tập quán cà phê phần giới thiệu 7 cột chữ + 5 cột ảnh, em để span 7 và span 5 mà trên điện thoại bị tràn ngang. Em sai chỗ nào ạ?",
+        "answers": [
+          "Chắc bạn để span ở ngoài media query rồi.",
+          "Đặt .luoi > * { grid-column: 1 / -1; } trước, rồi mới span trong min-width 1024px."
+        ],
+        "instructor": "Có lẽ bạn khai báo span 7 và span 5 ở ngoài media query. Trên lưới 4 cột, span 7 khiến trình duyệt tạo thêm cột ngầm và bố cục bị vỡ. Hãy để mặc định mọi khối grid-column: 1 / -1, rồi chỉ khai báo span 7 và span 5 bên trong @media (min-width: 1024px)."
+      }
+    ],
+    "04-thiet-ke-responsive": [
+      {
+        "q": "Mobile-first là thiết kế bản điện thoại trước rồi mới làm máy tính đúng không ạ? Hay chỉ là viết CSS min-width?",
+        "answers": ["Theo mình là cả cách nghĩ luôn, chọn nội dung quan trọng trước."],
+        "instructor": "Cả hai, nhưng cốt lõi là cách nghĩ. Bắt đầu từ màn hình nhỏ buộc bạn xác định nội dung và hành động quan trọng nhất; màn hình lớn là nơi bổ sung. Viết CSS mặc định cho màn nhỏ rồi thêm @media (min-width: …) là cách hiện thực tư duy đó trong code."
+      },
+      {
+        "q": "Icon của em chỉ 20px, làm to lên 48px thì xấu. Làm sao vẫn đạt vùng chạm 48px ạ?",
+        "answers": ["Giữ icon 20px, thêm padding hoặc min-height cho nút là được nha."],
+        "instructor": "Bạn giữ biểu tượng 20px, nhưng cho phần tử bao (button hoặc a) min-width và min-height 48px, dùng inline-flex để căn biểu tượng vào giữa. Vùng bấm lớn trong khi hình hiển thị vẫn gọn. Nhớ chừa ít nhất 8px giữa các vùng chạm để tránh bấm nhầm."
+      },
+      {
+        "q": "Menu con của em mở bằng :hover, trên điện thoại bấm vào không ra. Sửa thế nào ạ?",
+        "answers": [],
+        "instructor": "Màn hình cảm ứng không có trạng thái rê chuột ổn định nên menu dựa vào hover rất khó dùng. Hãy mở menu bằng thẻ button khi bấm (JS bật tắt class), có nhãn cho trình đọc màn hình và dùng được bằng bàn phím. Hiệu ứng hover chỉ nên đặt trong @media (hover: hover)."
+      },
+      {
+        "q": "srcset em ghi 400w, 800w, 1600w nhưng không ghi sizes thì sao ạ?",
+        "answers": ["Không có sizes thì trình duyệt mặc định ảnh rộng 100vw đó bạn."],
+        "instructor": "Khi dùng mô tả w mà thiếu sizes, trình duyệt coi như ảnh hiển thị rộng 100vw, nên có thể tải ảnh lớn hơn cần thiết nếu thực tế ảnh chỉ chiếm nửa màn hình. Bạn nên khai báo sizes, ví dụ (min-width: 768px) 50vw, 100vw, để trình duyệt chọn đúng phiên bản."
+      },
+      {
+        "q": "Khi nào dùng picture thay cho img srcset vậy mn?",
+        "answers": ["Khi muốn ảnh khác bố cục trên điện thoại, kiểu ảnh dọc cận cảnh."],
+        "instructor": "Dùng img với srcset khi chỉ cần cùng một ảnh ở nhiều kích thước. Dùng picture với các source media khi cần nội dung ảnh khác nhau theo màn hình, ví dụ ảnh ngang toàn cảnh trên máy tính và ảnh dọc cận cảnh trên điện thoại (art direction). Bên trong picture vẫn phải có img làm dự phòng và mang alt."
+      },
+      {
+        "q": "Em chạy taoClamp(28, 48, 360, 1280) ra 1.261rem + 2.174vw. Số 2.174vw ở đâu ra vậy ạ?",
+        "answers": [],
+        "instructor": "Cỡ chữ tăng 48 − 28 = 20px khi màn hình tăng 1280 − 360 = 920px, tức khoảng 0.02174px cho mỗi px chiều rộng. Vì 1vw bằng 1% chiều rộng màn hình, nhân với 100 ra 2.174vw. Phần cố định là 28 − 0.02174 × 360 ≈ 20.17px, chia 16 được khoảng 1.261rem."
+      },
+      {
+        "q": "Có cần thêm breakpoint cho máy tính bảng nữa không hay chỉ điện thoại với máy tính là đủ?",
+        "answers": ["Mình hay thêm 768px, vì máy tính bảng dọc mà để bố cục điện thoại thì trống quá."],
+        "instructor": "Breakpoint nên đặt theo nội dung: khi bố cục bắt đầu chật hoặc trống quá thì thêm mốc. Thực tế hay có một mốc khoảng 768px cho máy tính bảng, ví dụ chuyển từ 4 sang 8 cột hoặc từ menu thu gọn sang thanh ngang. Không cần chạy theo từng mẫu thiết bị cụ thể."
+      },
+      {
+        "q": "Bảng giá 6 cột của em trên điện thoại co lại chữ bé tí, có cách nào không ạ?",
+        "answers": [
+          "Chuyển mỗi hàng thành một thẻ, mình làm vậy dễ đọc hơn nhiều.",
+          "Hoặc bọc bảng trong div overflow-x: auto cho cuộn ngang."
+        ],
+        "instructor": "Thay vì thu nhỏ, hãy sắp xếp lại: mỗi hàng thành một thẻ chỉ hiện các cột quan trọng, kèm nút Xem chi tiết. Cuộn ngang trong khung overflow-x: auto là phương án tạm chấp nhận được với bảng dữ liệu lớn, nhưng không nên là cách duy nhất."
+      },
+      {
+        "q": "Bản điện thoại chật quá, em định ẩn giá khóa học đi cho gọn. Có nên không ạ?",
+        "answers": [],
+        "instructor": "Không nên. Giá là thông tin cốt lõi để người dùng quyết định; ẩn đi trên điện thoại là bỏ rơi phần lớn người dùng. Hãy rút gọn cách trình bày, như bớt mô tả dài hay rút gọn nhãn, nhưng giữ giá và nút hành động chính."
+      },
+      {
+        "q": "Em chỉ kéo hẹp cửa sổ trình duyệt để test responsive, như vậy đủ chưa thầy?",
+        "answers": ["Chế độ giả lập thiết bị cũng tiện nhưng mình vẫn hay test thêm máy thật."],
+        "instructor": "Chưa đủ. Kéo hẹp cửa sổ hay giả lập giúp kiểm tra bố cục, nhưng không cho cảm giác cầm máy một tay, độ chính xác của ngón cái hay việc đọc ngoài nắng. Hãy thử trên điện thoại thật, dùng ngón cái bấm cả các nút ở góc trên lẫn nửa dưới màn hình."
+      }
+    ],
+    "05-prototype-voi-figma": [
+      {
+        "q": "Wireframe với mockup khác nhau sao ạ? Em toàn làm mockup luôn.",
+        "answers": ["Wireframe là khung xám thôi, mockup mới có màu với ảnh thật."],
+        "instructor": "Wireframe là bản phác bố cục đơn giản, thường chỉ khung xám và chữ, tập trung vào cái gì nằm ở đâu. Mockup là bản hoàn chỉnh với màu, chữ, ảnh thật. Làm wireframe trước giúp bạn chốt cấu trúc nhanh, không tốn công tô màu cho một bố cục có thể phải đổi sau buổi kiểm thử."
+      },
+      {
+        "q": "Auto layout trong Figma em vẫn chưa hiểu lắm, nó giống cái gì trong CSS ạ?",
+        "answers": ["Giống flexbox á, có hướng ngang dọc, có gap với padding."],
+        "instructor": "Auto layout gần nhất với Flexbox: frame xếp phần tử con theo hàng hoặc cột, có khoảng cách giữa các phần tử và padding, tự co giãn theo nội dung. Ví dụ auto layout ngang, padding 12/20, khoảng cách 8 tương ứng display: inline-flex; padding: 12px 20px; gap: 8px."
+      },
+      {
+        "q": "Em sửa component nút gốc mà mấy nút ở màn hình khác không đổi theo. Sao vậy mn?",
+        "answers": [
+          "Có thể bạn đã detach instance, nó thành layer thường rồi.",
+          "Hoặc bạn đang sửa trên một instance chứ không phải bản gốc."
+        ],
+        "instructor": "Thường có hai nguyên nhân: những nút đó không phải instance (bạn vẽ lại hoặc đã tách khỏi component), hoặc bạn đang sửa trên một instance thay vì component gốc. Chỉ khi sửa component gốc thì các instance mới cập nhật; riêng thuộc tính nào đã bị ghi đè trên instance thì sẽ giữ giá trị ghi đè."
+      },
+      {
+        "q": "Variant với component khác nhau thế nào ạ?",
+        "answers": [],
+        "instructor": "Component là thành phần định nghĩa một lần để dùng lại nhiều nơi. Variant là các phiên bản của cùng một component, ví dụ nút có thuộc tính Kiểu: Chính hoặc Phụ, Trạng thái: Thường hoặc Vô hiệu hóa. Gom thành variant giúp bạn đổi phiên bản chỉ bằng cách chọn thuộc tính."
+      },
+      {
+        "q": "Kiểm thử prototype cần bao nhiêu người ạ? Em chỉ nhờ được 3 bạn cùng lớp.",
+        "answers": ["3 người cũng phát hiện được kha khá lỗi rồi bạn."],
+        "instructor": "3–5 người là đủ để phát hiện phần lớn vấn đề nghiêm trọng. Với 3 người, hãy giao nhiệm vụ cụ thể, đề nghị họ nói to suy nghĩ, quan sát và không gợi ý. Sau đó ưu tiên sửa những chỗ nhiều người cùng vấp rồi thử lại ở vòng sau."
+      },
+      {
+        "q": "Lúc kiểm thử bạn em hỏi nút này để làm gì, em có nên giải thích không ạ?",
+        "answers": [],
+        "instructor": "Hạn chế giải thích. Câu hỏi đó chính là dữ liệu quý: nó cho thấy nút chưa tự thể hiện được chức năng. Bạn có thể hỏi lại bạn nghĩ nó làm gì, rồi ghi chép. Chỉ gợi ý khi người dùng bế tắc hẳn, và đánh dấu chỗ đó là cần sửa."
+      },
+      {
+        "q": "Mình hỏi người test bạn thấy giao diện đẹp không, ai cũng bảo đẹp. Vậy là ổn rồi phải không?",
+        "answers": ["Kiểu hỏi đó người ta hay trả lời cho lịch sự thôi."],
+        "instructor": "Chưa chắc. Câu hỏi xin ý kiến thường nhận được câu trả lời lịch sự, không giúp tìm ra vấn đề. Hãy giao nhiệm vụ như tìm và đăng ký một khóa học miễn phí, rồi quan sát họ có chần chừ, bấm nhầm hay không. Hành vi đáng tin hơn lời khen."
+      },
+      {
+        "q": "Design token là gì vậy ạ, có khác biến CSS không?",
+        "answers": ["Token là tên chung cho màu, khoảng cách bên thiết kế, xuất ra code thì thành biến CSS."],
+        "instructor": "Design token là các giá trị thiết kế có tên như màu chính, khoảng cách 3, bo góc vừa, dùng chung giữa thiết kế và code. Biến CSS là một cách hiện thực token trong code, ví dụ token mau.chinh thành --mau-chinh. Điểm chính là hai bên dùng cùng bộ tên và cùng một nguồn giá trị."
+      },
+      {
+        "q": "Chế độ cho lập trình viên trong Figma có sẵn mã CSS, em copy dùng luôn được không?",
+        "answers": ["Mình từng copy, ra toàn width cố định với vị trí tuyệt đối, sửa responsive mệt lắm."],
+        "instructor": "Chỉ nên tham khảo. Mã gợi ý mô tả từng phần tử riêng lẻ, thường với kích thước cố định, không nắm được cấu trúc tổng thể hay hành vi responsive. Bạn nên lấy các giá trị (màu, khoảng cách, cỡ chữ) qua token và tự viết CSS theo cấu trúc hợp lý với flex, grid và biến CSS."
+      },
+      {
+        "q": "Bàn giao thiết kế thì ngoài các màn hình chính còn cần gửi những gì nữa ạ?",
+        "answers": [],
+        "instructor": "Nên có thêm: các trạng thái của component (hover, focus cho bàn phím, vô hiệu hóa, lỗi, đang tải, danh sách rỗng), cách từng khối thay đổi ở các kích thước màn hình, và bản thử với nội dung thật như tên rất dài hay thiếu ảnh. Kèm bộ design token để lập trình viên không phải đo bằng mắt."
+      }
+    ]
+  },
+  "comments": [
+    "Khóa học giúp mình hiểu vì sao trang của mình trước giờ nhìn rối, cảm ơn thầy nhiều.",
+    "Mẹo nheo mắt để kiểm tra phân cấp hay thật, mình áp dụng ngay cho đồ án.",
+    "Bài màu sắc có hàm tính tương phản rất thực tế, giờ mình không chọn màu theo cảm giác nữa.",
+    "Mong có thêm bài về thiết kế form đăng ký và thanh toán.",
+    "Phần lưới 12 cột giải thích dễ hiểu, cuối cùng mình cũng biết gutter là gì.",
+    "Cho mình hỏi khóa này có cần biết CSS trước không ạ?",
+    "Ví dụ vali nhỏ cho mobile-first dễ nhớ ghê.",
+    "Bài Figma hơi ngắn so với lượng kiến thức, mong thầy làm thêm video thao tác.",
+    "Mình là dân backend, học xong thấy tự tin dựng giao diện hơn hẳn.",
+    "Cảm ơn khóa học, phần design token nối thiết kế với code rất đáng giá.",
+    "Quy tắc 60–30–10 đơn giản mà hiệu quả, áp dụng phát thấy trang dịu mắt hơn.",
+    "Có thể bổ sung thêm phần chế độ tối (dark mode) được không ạ?",
+    "Bài tập quán cà phê vui, mình làm xong khoe cả nhóm.",
+    "Mình thích cách mỗi bài đều có phần lỗi hay gặp, đọc thấy mình dính gần hết.",
+    "Đoạn kiểm tra WCAG làm mình sửa lại toàn bộ màu chữ xám trên web cá nhân.",
+    "Khóa học hơi thiên về lý thuyết, mình mong có một dự án thiết kế hoàn chỉnh từ đầu đến cuối.",
+    "Ai học xong rồi cho mình xin kinh nghiệm làm bài tập bài 5 với.",
+    "Bài responsive có phần clamp() mình đọc hai lần mới hiểu, nhưng hiểu rồi thì thấy hay.",
+    "Cảm ơn thầy đã giải thích rem với px rõ ràng.",
+    "Phần kiểm thử với người dùng làm mình đổi cách hỏi bạn bè góp ý.",
+    "Nội dung ngắn gọn, đọc tầm 15 phút một bài là vừa sức.",
+    "Mong có thêm ví dụ trang thật được phân tích trước và sau khi sửa.",
+    "Học xong bài 1 mình thấy nút trên đồ án của mình nhiều quá, phải bỏ bớt.",
+    "Câu hỏi trắc nghiệm hơi dễ, có thể thêm câu tình huống khó hơn không ạ?",
+    "Mình đã thử thang khoảng cách 8 cho dự án nhóm, đồng đội khen gọn hẳn.",
+    "Khóa này nên học trước khi học các framework CSS.",
+    "Phần ảnh đáp ứng srcset giúp trang của mình nhẹ hơn trên điện thoại.",
+    "Cảm ơn đội ngũ Cnow, khóa học ngắn mà chất lượng.",
+    "Có tài liệu tham khảo thêm về chọn phông chữ tiếng Việt không ạ?",
+    "Mình thấy phần typography rất cần cho ai làm blog.",
+    "Bài 3 có công thức tính độ rộng cột, mình áp vào bản thiết kế thấy khớp từng pixel.",
+    "Học viên mới đây, chào mọi người.",
+    "Mong thầy có thêm bài về hệ thống thiết kế cho dự án lớn.",
+    "Đọc xong bài prototype mình mới biết phải làm wireframe trước, trước giờ toàn tô màu luôn.",
+    "Ví dụ biển báo sân bay ở bài 1 rất dễ hình dung.",
+    "Ai ở cùng khu vực muốn lập nhóm học thì bình luận nhé.",
+    "Màu cam đậm đạt AA mà vẫn đẹp, mình mượn ý tưởng này cho web của mình.",
+    "Bài học hay nhưng giá có thêm hình minh họa trực quan thì tốt hơn.",
+    "Phần vùng chạm 48px mình chưa từng để ý, giờ mới thấy nút trên web mình bé quá.",
+    "Thầy ơi cho em hỏi breakpoint 1024px có bắt buộc không ạ?",
+    "Mình đã hoàn thành khóa, cảm ơn thầy và mọi người trong phần hỏi đáp.",
+    "Đọc phần kiểu chữ F xong mình sửa lại thứ tự thông tin trên thẻ sản phẩm.",
+    "Thích cách khóa học dùng số liệu thật thay vì nói chung chung.",
+    "Phần bàn giao cho lập trình viên rất hữu ích cho ai làm việc nhóm.",
+    "Bài 2 hơi dài, chia nhỏ phần màu và phần chữ thành hai bài sẽ dễ theo hơn.",
+    "Lần đầu mình hiểu vì sao không nên chỉ dùng màu đỏ để báo lỗi.",
+    "Cho mình hỏi có chứng chỉ sau khi hoàn thành không ạ?",
+    "Mình làm theo bài tập thư viện sách cũ, ra bảng màu nâu đỏ rất có không khí.",
+    "Bài học dễ hiểu kể cả với người chưa từng học thiết kế.",
+    "Mong có buổi chữa bài tập trực tiếp cho học viên.",
+    "Giải thích auto layout giống Flexbox làm mình hiểu Figma nhanh hơn hẳn.",
+    "Cảm ơn thầy, khóa học giúp mình qua được vòng phỏng vấn thực tập giao diện.",
+    "Bài responsive nên có thêm phần điều hướng đáy màn hình làm mẫu bằng code.",
+    "Mình thấy phần Đọc thêm toàn tài liệu chính thống, rất đáng tin.",
+    "Mỗi bài đều có lời giải mẫu, tiện tự kiểm tra.",
+    "Mọi người ơi bài tập bài 4 có cần nộp không hay tự làm thôi?",
+    "Đọc khóa này xong mới thấy thiết kế không phải chỉ là chọn màu đẹp.",
+    "Hơi tiếc là chưa có phần nói về hiệu ứng chuyển động trong giao diện.",
+    "Thầy giảng hay, ví dụ đời thường nhiều nên nhớ lâu.",
+    "Mình in phần tóm tắt các bài ra dán bàn học luôn :)",
+    "Có ai dùng thử clamp() cho cả khoảng cách chứ không chỉ cỡ chữ chưa?",
+    "Mong khóa có thêm bài về thiết kế bảng dữ liệu cho trang quản trị.",
+    "Khóa này ngắn nhưng đủ ý, rất hợp người bận rộn.",
+    "Cảm ơn thầy đã trả lời câu hỏi của em rất chi tiết.",
+    "Bài 5 nếu có file mẫu để mở ra xem cấu trúc component thì tuyệt.",
+    "Mình học lại lần hai vẫn thấy có cái mới.",
+    "Chúc khóa học ngày càng nhiều học viên, mong ra thêm phần nâng cao."
+  ],
+  "spam": [
+    "Ai cần mua tài khoản game giá rẻ thì nhắn mình nhé, uy tín số một!!!",
+    "Khóa này chẳng có gì, người soạn chắc cũng không biết thiết kế, đọc phí thời gian.",
+    "Nhận thiết kế logo, làm web trọn gói giá siêu rẻ, nhắn ngay để được giảm 50%!!!"
+  ],
+  "reviews": {
+    "1": [
+      "Không như kỳ vọng. Mình cần học thao tác công cụ thiết kế nhưng bài Figma chỉ giới thiệu khái niệm, không có hướng dẫn từng bước hay file mẫu.",
+      "Quá lý thuyết và quá ngắn. Không có dự án thực tế, không hình minh họa, không chấm bài tập; học xong mình vẫn không tự làm được một trang hoàn chỉnh.",
+      "Khóa học nên ghi rõ cần biết HTML, CSS và một chút JavaScript trước. Mình mới bắt đầu nên các đoạn code và công thức clamp() làm mình bỏ cuộc."
+    ],
+    "2": [
+      "Khóa quá lý thuyết với mình. Năm bài chủ yếu là khái niệm, không có dự án nào làm từ đầu đến cuối nên học xong vẫn lúng túng khi tự thiết kế.",
+      "Bài prototype với Figma gần như chỉ là danh sách thuật ngữ. Không có ảnh chụp màn hình, không có các bước thao tác, mình phải tự mò rất lâu.",
+      "Một khóa về thiết kế nhưng hầu như không có hình ảnh minh họa giao diện. Đọc mô tả nguyên tắc căn lề, tương phản bằng chữ rất khó hình dung.",
+      "Nội dung quá ngắn so với tên khóa. Thiếu thiết kế form, bảng dữ liệu, trạng thái lỗi, dark mode, những thứ thực tế cần nhiều nhất.",
+      "Phần code tính tương phản và clamp() hay nhưng không phù hợp người chỉ muốn học thiết kế, không giải thích đủ cho ai chưa biết JavaScript.",
+      "Không có phản hồi cho bài tập. Mình làm bài quán cà phê nhưng không biết đúng sai thế nào ngoài việc so với lời giải mẫu rất ngắn.",
+      "Mình mong học cách thiết kế trên công cụ nhưng khóa chủ yếu dạy CSS. Bài Figma cần dài gấp ba và có bài tập thao tác thực tế."
+    ],
+    "3": [
+      "Kiến thức đúng nhưng khá thiên về lý thuyết. Mình mong có một dự án thực tế xuyên suốt khóa, từ wireframe đến trang hoàn chỉnh.",
+      "Bài Figma quá ngắn so với độ quan trọng. Chỉ liệt kê khái niệm frame, component, variant mà thiếu hướng dẫn thao tác, người mới khó làm theo.",
+      "Nội dung ổn nhưng ít hình minh họa. Một khóa thiết kế mà chủ yếu là chữ và code thì hơi khó hình dung các nguyên tắc thị giác.",
+      "Phần responsive và clamp() nhảy hơi nhanh, công thức nội suy chưa được giải thích từng bước nên mình phải tự tìm hiểu thêm.",
+      "Khóa học cơ bản, phù hợp người mới. Người đã làm front-end một thời gian sẽ thấy phần lớn nội dung đã biết, ít kiến thức nâng cao.",
+      "Bài tập chỉ có lời giải mẫu, không có ai chấm hay góp ý. Với môn thiết kế, thiếu phản hồi thì khó biết mình làm đúng chưa.",
+      "Bài màu sắc tốt nhưng thiếu phần dark mode và cách xây bảng màu cho cả hai chế độ, thứ bây giờ dự án nào cũng cần.",
+      "Thời lượng mỗi bài ngắn nên nhiều chủ đề chỉ chạm tới bề mặt, ví dụ hệ thống thiết kế chỉ được nhắc qua chứ không có bài riêng.",
+      "Trắc nghiệm quá dễ, chỉ hỏi định nghĩa. Nên có câu hỏi dạng nhìn một bố cục và chỉ ra lỗi để kiểm tra khả năng áp dụng.",
+      "Nội dung đúng nhưng thiếu ví dụ trước và sau. Mình muốn thấy một giao diện xấu được sửa dần theo từng nguyên tắc."
+    ],
+    "4": [
+      "Nội dung chắc và dễ hiểu, đặc biệt bài màu sắc. Trừ một sao vì bài Figma hơi ngắn, mình mong có thêm hướng dẫn thao tác từng bước.",
+      "Khóa học tốt, nhiều ví dụ có số liệu cụ thể. Giá có thêm một dự án thiết kế hoàn chỉnh để làm theo thì sẽ trọn vẹn hơn.",
+      "Mình học được nhiều về lưới và khoảng cách. Phần clamp() hơi khó với người mới, nên có thêm hình minh họa cỡ chữ thay đổi theo màn hình.",
+      "Bài học súc tích, đọc nhanh. Mong có thêm ví dụ phân tích một trang thật trước và sau khi áp dụng nguyên tắc.",
+      "Rất hữu ích cho người làm front-end. Phần design token chuyển thành biến CSS là điểm mình thích nhất. Chỉ tiếc chưa có phần dark mode.",
+      "Kiến thức nền tảng vững, trình bày gọn. Bài tập hơi ít, mỗi bài nên có thêm một bài tập nhỏ để luyện tay.",
+      "Mình thích phần kiểm tra tương phản bằng code. Tuy nhiên bài 2 khá dài, nên tách màu sắc và typography thành hai bài riêng.",
+      "Khóa học tốt cho người mới bắt đầu. Người đã có kinh nghiệm có thể thấy một số phần hơi cơ bản, nhưng vẫn đáng để ôn lại.",
+      "Phần responsive rất thực tế, nhất là vùng chạm và ảnh đáp ứng. Mong có thêm mẫu code thanh điều hướng đáy màn hình.",
+      "Giải thích nguyên tắc thị giác rõ ràng. Nếu có thêm hình chụp minh họa cho từng nguyên tắc thì dễ hình dung hơn.",
+      "Mình áp dụng thang khoảng cách 8 ngay vào dự án và thấy hiệu quả. Trừ một sao vì chưa có phần nói về hiệu ứng chuyển động.",
+      "Nội dung chính xác, nguồn tham khảo uy tín. Phần kiểm thử người dùng nên có thêm mẫu phiếu ghi chép để tải về dùng.",
+      "Khóa học dễ theo, mỗi bài khoảng 15 phút vừa sức. Mong thầy làm thêm phần nâng cao về hệ thống thiết kế.",
+      "Học xong mình tự tin hơn khi chọn phông và màu. Phần typography hay nhưng nên có thêm gợi ý cặp phông tiếng Việt cụ thể.",
+      "Mình thích lời giải mẫu chi tiết. Câu hỏi trắc nghiệm hơi dễ, nên thêm câu tình huống để thử thách hơn.",
+      "Kiến thức áp dụng được ngay. Bài lưới rất hay nhưng phần CSS Grid có thể giải thích kỹ hơn cú pháp grid-column cho người mới.",
+      "Bài prototype có quy trình rõ ràng từ luồng người dùng đến bàn giao. Chỉ mong phần Figma có thêm ví dụ variant phức tạp hơn.",
+      "Khóa học chất lượng so với thời lượng. Mình muốn có thêm phần chữa bài của học viên để thấy lỗi thực tế.",
+      "Rất thích phong cách dùng số liệu chạy thật. Trừ một sao vì thiếu phần thiết kế form, thứ mình làm nhiều nhất.",
+      "Nội dung tốt, dễ hiểu. Nếu có bảng tổng hợp các con số quan trọng (4.5:1, 48px, 65ch, thang 8) ở cuối khóa thì tiện tra cứu."
+    ],
+    "5": [
+      "Khóa học ngắn gọn mà đủ ý. Mẹo nheo mắt và mẫu góp ý Vấn đề – Nguyên tắc – Đề xuất mình dùng mỗi ngày khi review giao diện với nhóm.",
+      "Bài màu sắc có hàm tính tỉ lệ tương phản theo WCAG, mình chạy thử với bảng màu đồ án và phát hiện ba cặp màu không đạt. Rất thực tế.",
+      "Lần đầu mình hiểu lưới 12 cột một cách bài bản: cột, gutter, margin, cách tính độ rộng cột. Giờ đọc bản thiết kế không còn bỡ ngỡ.",
+      "Là lập trình viên backend, mình luôn sợ làm giao diện. Khóa này cho mình bộ nguyên tắc rõ ràng để tự tin quyết định thay vì đoán mò.",
+      "Phần mobile-first với ví dụ chiếc vali nhỏ rất dễ nhớ. Mình đã sắp xếp lại trang đồ án, đưa nút chính lên trên và bản điện thoại gọn hơn hẳn.",
+      "Bài prototype giải thích auto layout tương đương Flexbox giúp mình chuyển từ thiết kế sang code trơn tru. Phần design token rất đáng giá.",
+      "Mỗi bài đều có lỗi hay gặp và lời giải mẫu, tự học rất tiện. Mình thích việc mọi con số đều có cách tính cụ thể.",
+      "Khóa học thay đổi cách mình nhìn một trang web. Giờ mình nhận ra ngay chỗ thiếu khoảng trắng hay quá nhiều điểm nhấn.",
+      "Thang cỡ chữ tỉ lệ 1.25 và thang khoảng cách 8 giúp giao diện của mình nhất quán hơn rất nhiều. Đồng đội khen bản mới gọn gàng.",
+      "Phần vùng chạm 44–48px và không dựa vào hover là thứ mình chưa từng để ý. Sửa xong, bạn bè dùng thử trên điện thoại không còn bấm nhầm.",
+      "Nội dung dễ hiểu kể cả với người mới. Ví dụ đời thường như biển báo sân bay, phối đồ 60–30–10 làm kiến thức khô khan trở nên gần gũi.",
+      "Bài kiểm thử với người dùng rất thực tế. Mình thử giao nhiệm vụ cho 3 bạn cùng lớp và phát hiện nút đăng ký bị hiểu nhầm là có tính phí.",
+      "Học xong mình làm lại web cá nhân: chữ xám đậm hơn, dòng giới hạn 65ch, line-height 1.6. Đọc dễ chịu hơn hẳn.",
+      "Khóa ngắn nhưng chất. Mình thích cách giải thích vì sao 12 cột phổ biến chứ không chỉ bảo cứ dùng 12 cột.",
+      "Hàm taoClamp ở bài responsive cực hữu ích, mình dùng lại cho cả dự án công ty, không còn phải đổi cỡ chữ ở từng breakpoint.",
+      "Phần ảnh đáp ứng với srcset, sizes và picture được trình bày rõ ràng. Trang của mình nhẹ đi đáng kể trên điện thoại.",
+      "Tài liệu tham khảo đều là nguồn chính thống, nội dung chính xác. Đây là khóa thiết kế web dễ tiếp cận nhất mình từng học.",
+      "Mình thích phần bàn giao: liệt kê đủ trạng thái hover, focus, lỗi, đang tải, danh sách rỗng. Trước giờ mình toàn quên trạng thái rỗng.",
+      "Khóa học giúp mình qua vòng bài test thiết kế khi xin thực tập. Mình trình bày được lý do cho từng quyết định thay vì nói thích.",
+      "Câu hỏi trắc nghiệm cuối bài bám sát nội dung, làm xong là nắm chắc ý chính. Phần hỏi đáp thầy trả lời rất nhanh.",
+      "Bài 1 tưởng đơn giản mà mở mang rất nhiều. Nguyên tắc gần nhau giúp mình sửa form đăng ký mà người dùng hay điền nhầm ô.",
+      "Mình làm bài tập thư viện sách cũ và rất thích cách kiểm tra từng cặp màu đạt 4.5:1 trước khi dùng. Học được thói quen tốt.",
+      "Bố cục bài học logic: nguyên tắc, màu chữ, lưới, responsive, rồi prototype. Học theo thứ tự thấy kiến thức nối nhau rất tự nhiên.",
+      "Thầy giải thích ngắn, rõ, không vòng vo. Phần kiểu đọc chữ F và chữ Z giúp mình sắp xếp lại trang đích của nhóm.",
+      "Rất đáng thời gian bỏ ra. Mình khuyên bạn nào học lập trình front-end nên học khóa này trước khi đụng vào framework."
+    ]
+  },
+  "chat": [
+    "Chào mọi người, mình mới vào khóa hôm nay.",
+    "Có ai đang học bài lưới không, lập nhóm cùng làm bài tập quán cà phê nhé.",
+    "Mình vừa ra bảng màu xanh rêu với nền kem, ai xem góp ý giúp với.",
+    "Màu chính #7c2d12 chữ trắng được hơn 9:1, đẹp mà đạt chuẩn luôn.",
+    "Tối nay 8 giờ ai rảnh học nhóm bài responsive không?",
+    "Mẹo nheo mắt hiệu quả thật, mình vừa phát hiện trang mình có 4 nút cùng nổi.",
+    "Mọi người hay dùng phông gì cho tiếng Việt vậy?",
+    "Mình dùng system-ui cho nhanh, đỡ lo lỗi dấu.",
+    "Ai làm xong bài 5 chưa, chia sẻ cách đặt tên component với.",
+    "Chúc mọi người học vui nhé.",
+    "Mình đổi gap giữa các thẻ lên 32px, nhìn thoáng hẳn.",
+    "Bảng màu cam đậm với xám than của mình đây, mọi người thấy sao?",
+    "Có ai thử clamp() cho padding chưa, kết quả thế nào?",
+    "Cuối tuần này nhóm mình kiểm thử prototype cho nhau, ai tham gia không?",
+    "Mình cần 2 người test luồng đăng ký, chỉ mất 5 phút thôi.",
+    "Tham gia với, mình cũng cần người test lại.",
+    "Bài 2 phần tương phản làm mình sửa lại cả web cá nhân luôn.",
+    "Ai có mẹo nhớ ngưỡng 4.5:1 với 3:1 không?",
+    "Chữ thường 4.5, chữ lớn 3, mình nhớ vậy là đủ.",
+    "Hôm nay mình xong bài 1 rồi, cảm giác nhìn web nào cũng muốn sửa :)",
+    "Mọi người ơi grid-column 1 / -1 nghĩa là trải hết lưới đúng không?",
+    "Đúng rồi, từ đường kẻ đầu tới đường kẻ cuối.",
+    "Mình vừa làm nút có variant chính, phụ, vô hiệu hóa, thấy gọn ghê.",
+    "Chào buổi sáng cả nhà, ai đang học bài mấy rồi?",
+    "Mình đang ở bài 3, công thức tính cột hơi rối nhưng chạy thử là hiểu.",
+    "Ý tưởng bảng màu: nền ngà, chữ nâu đậm, nhấn xanh lá thẫm. Hợp web quán trà không nhỉ?",
+    "Nghe hợp đó, nhớ kiểm tra tương phản chữ nâu trên nền ngà nhé.",
+    "Có ai muốn trao đổi góp ý giao diện đồ án theo mẫu Vấn đề – Nguyên tắc – Đề xuất không?",
+    "Mình đăng ký góp ý chéo với, gửi bản chụp vào đây nhé.",
+    "Thang khoảng cách 8 dùng quen rồi thấy không muốn quay lại số lẻ nữa.",
+    "Mọi người test trên điện thoại thật chưa, mình phát hiện nút góc trên khó bấm quá.",
+    "Mình chuyển menu xuống đáy màn hình, dễ bấm bằng ngón cái hơn hẳn.",
+    "Ai cần file wireframe giấy mình chụp lại cho tham khảo thì nói nhé.",
+    "Học xong khóa này mình định làm lại portfolio, có ai làm cùng không?",
+    "Có, lập nhóm portfolio đi, mỗi tuần góp ý cho nhau một lần.",
+    "Mình thấy max-width 65ch cho bài viết đọc dễ chịu thật.",
+    "Chúc mừng ai vừa hoàn thành khóa nhé.",
+    "Hôm nay hơi bận, mai mình vào học tiếp bài prototype.",
+    "Cảm ơn mọi người đã góp ý bảng màu, mình sửa lại rồi.",
+    "Hẹn gặp mọi người buổi học nhóm tối thứ bảy nhé."
+  ]
+}

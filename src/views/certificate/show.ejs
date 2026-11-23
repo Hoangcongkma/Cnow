@@ -1,0 +1,21 @@
+<%- include('../partials/header') %>
+<section class="wrap section">
+  <div class="cert-tools no-print">
+    <a href="/my-courses">← Khóa học của tôi</a>
+    <button type="button" class="btn btn-sm" data-print>🖨 In / Lưu PDF</button>
+  </div>
+  <article class="certificate" aria-label="Chứng nhận hoàn thành khóa học">
+    <div class="cert-brand"><span class="brand-c">C</span>now</div>
+    <p class="cert-kicker">CHỨNG NHẬN HOÀN THÀNH</p>
+    <p class="cert-small">Chứng nhận rằng</p>
+    <h1 class="cert-name"><%= cert.name %></h1>
+    <p class="cert-small">đã hoàn thành khóa học</p>
+    <h2 class="cert-course"><%= cert.courseTitle %></h2>
+    <div class="cert-foot">
+      <div><span class="cert-small">Ngày cấp</span><b><%= cert.issuedAt.toLocaleDateString('vi-VN') %></b></div>
+      <div><span class="cert-small">Mã xác thực</span><b class="mono"><%= cert.displayCode %></b></div>
+    </div>
+    <p class="cert-verify cert-small">Kiểm tra tính hợp lệ tại <b><%= verifyUrl %></b></p>
+  </article>
+</section>
+<%- include('../partials/footer') %>

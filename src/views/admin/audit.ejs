@@ -1,0 +1,43 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="section-head"><h1>Nhật ký bảo mật</h1><span class="muted small"><%= total %> sự kiện</span></div>
+    <form class="filters filters-audit" method="get" action="/admin/audit">
+      <label>Sự kiện
+        <select name="action"><option value="">Tất cả</option><% Object.entries(actions).forEach(([k, v]) => { %><option value="<%= k %>" <%= f.action === k ? 'selected' : '' %>><%= v %></option><% }) %></select>
+      </label>
+      <label>Người dùng<input name="user" value="<%= f.user %>" placeholder="tên, @username, email" maxlength="80"></label>
+      <label>IP<input name="ip" value="<%= f.ip %>" maxlength="64"></label>
+      <label>Từ ngày<input type="date" name="from" value="<%= f.from %>"></label>
+      <label>Đến ngày<input type="date" name="to" value="<%= f.to %>"></label>
+      <div class="f-actions"><button class="btn btn-sm">Lọc</button> <a class="small" href="/admin/audit">Xóa lọc</a></div>
+    </form>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Thời gian</th><th>Sự kiện</th><th>Người thực hiện</th><th>Tài khoản bị tác động</th><th>Chi tiết</th><th>IP</th></tr></thead>
+        <tbody>
+          <% if (!logs.length) { %><tr><td colspan="6" class="muted">Không có sự kiện nào.</td></tr><% } %>
+          <% logs.forEach(l => { const bad = /failure|failed|locked|rate_limited|lock$/.test(l.action); %>
+            <tr>
+              <td class="nowrap"><%= l.createdAt.toLocaleString('vi-VN') %></td>
+              <td><span class="status <%= bad ? 'st-FAILED' : 'st-COMPLETED' %>"><%= actions[l.action] || l.action %></span></td>
+              <td><%= l.actor ? `${l.actor.name} (@${l.actor.username})` : '—' %></td>
+              <td><%= l.target ? `${l.target.name} (@${l.target.username})` : '—' %></td>
+              <td class="small"><% Object.entries(l.meta || {}).forEach(([k, v]) => { %><span class="kv-pill"><%= k %>: <b><%= v %></b></span> <% }) %></td>
+              <td class="small"><code><%= l.ip %></code><br><span class="muted" title="<%= l.userAgent %>"><%= (l.userAgent || '').slice(0, 40) %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% if (pages > 1) { %>
+      <nav class="pagination" aria-label="Phân trang">
+        <% if (page > 1) { %><a href="<%= qs(page - 1) %>" rel="prev">← Trước</a><% } %>
+        <span class="on" aria-current="page"><%= page %>/<%= pages %></span>
+        <% if (page < pages) { %><a href="<%= qs(page + 1) %>" rel="next">Sau →</a><% } %>
+      </nav>
+    <% } %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

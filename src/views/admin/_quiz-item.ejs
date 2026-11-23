@@ -1,0 +1,15 @@
+<div class="quiz-edit" data-quiz-item>
+  <div class="quiz-edit-head"><b data-quiz-no>Câu hỏi</b><button type="button" class="icon-btn danger" data-quiz-remove aria-label="Xóa câu hỏi">✕</button></div>
+  <label>Câu hỏi<textarea name="question" rows="2" maxlength="500"><%= q.question %></textarea></label>
+  <div class="opts">
+    <% ['A', 'B', 'C', 'D'].forEach((k, j) => { %>
+      <label>Phương án <%= k %><input name="opt<%= k %>" value="<%= (q.options || [])[j] || '' %>" maxlength="300"></label>
+    <% }) %>
+  </div>
+  <label>Đáp án đúng
+    <select name="answer">
+      <% ['A', 'B', 'C', 'D'].forEach((k, j) => { %><option value="<%= j %>" <%= q.answer === j ? 'selected' : '' %>><%= k %></option><% }) %>
+    </select>
+  </label>
+  <label>Giải thích (hiện sau khi nộp bài)<textarea name="explain" rows="2" maxlength="1000"><%= q.explain || '' %></textarea></label>
+</div>

@@ -1,0 +1,488 @@
+{
+  "slug": "php-mysql",
+  "lessons": {
+    "01-cu-phap-php": [
+      {
+        "q": "Mn ơi em viết $ten = 'An' rồi xuống dòng echo $ten; thì bị Parse error: syntax error, unexpected token echo ở dòng 3. Dòng 3 em nhìn mãi thấy đúng mà?",
+        "answers": ["Thiếu dấu ; ở dòng 2 đó bạn. PHP đọc tới chữ echo mới biết câu trước chưa kết thúc nên báo lỗi ở dòng sau."],
+        "instructor": "Bạn trên nói đúng. PHP chỉ nhận ra câu lệnh chưa đóng khi gặp từ tiếp theo, nên số dòng trong thông báo thường là dòng ngay sau chỗ sai. Gặp Parse error, bạn hãy nhìn lên dòng phía trên trước: thiếu dấu ;, thiếu ngoặc đóng hoặc dấu nháy chưa đóng là ba nguyên nhân phổ biến nhất."
+      },
+      {
+        "q": "echo với print khác nhau chỗ nào ạ? Bài chỉ dùng echo.",
+        "answers": ["print trả về 1 nên nhét vào biểu thức được, còn echo in được nhiều thứ cách nhau dấu phẩy."],
+        "instructor": "Cả hai đều là cấu trúc ngôn ngữ dùng để in, không phải hàm thật. echo nhận nhiều đối số (echo $a, $b;) và không trả về gì; print chỉ nhận một đối số và luôn trả về 1. Trong thực tế hầu hết mọi người dùng echo, hoặc dạng rút gọn <?= ?> trong phần HTML, nên bạn cứ dùng echo cho thống nhất."
+      },
+      {
+        "q": "Tại sao 'Xin chào $ten' in ra nguyên chữ $ten vậy thầy?",
+        "answers": [],
+        "instructor": "Chuỗi trong nháy đơn được hiểu theo nghĩa đen nên PHP không thay biến. Muốn chèn biến, bạn đổi sang nháy kép, hoặc nối chuỗi: 'Xin chào ' . $ten. Nhiều người thích nháy đơn kèm dấu chấm vì nhìn vào là biết ngay đâu là biến, đâu là chữ."
+      },
+      {
+        "q": "Em kéo file chao.php vào trình duyệt thì nó hiện nguyên code PHP, không chạy gì cả. Em cài PHP rồi mà.",
+        "answers": [
+          "Phải mở terminal ở thư mục đó, chạy php -S localhost:8000 rồi gõ localhost:8000/chao.php nha bạn.",
+          "Nếu bạn dùng gói cài sẵn có Apache thì chép file vào thư mục web gốc của nó rồi bật Apache lên."
+        ],
+        "instructor": "Trình duyệt không biết chạy PHP. Khi mở file trực tiếp (đường dẫn bắt đầu bằng file://), nó chỉ hiển thị văn bản hoặc tải file về. Mã PHP phải được một server xử lý trước. Bạn làm như hai bạn đã chỉ: chạy server tích hợp hoặc Apache, rồi luôn truy cập qua địa chỉ localhost."
+      },
+      {
+        "q": "strlen('Việt') ra 6, em tưởng phải là 4. Máy em bị lỗi gì không ạ?",
+        "answers": ["Không lỗi đâu, chữ có dấu tốn nhiều byte hơn. Đổi sang mb_strlen là ra 4."],
+        "instructor": "Máy bạn không sao cả. strlen đếm số byte, mà trong UTF-8 chữ ệ chiếm 3 byte, nên 'Việt' có 1 + 1 + 3 + 1 = 6 byte. Với chuỗi tiếng Việt, bạn dùng nhóm hàm mb_* như mb_strlen, mb_substr, mb_strtoupper để làm việc theo ký tự. Điểm này rất hay bị quên khi kiểm tra độ dài họ tên."
+      },
+      {
+        "q": "Em quen bên JS nên viết echo 'Tổng: ' + 5; thế là bị lỗi TypeError gì đó luôn :)",
+        "answers": ["PHP nối chuỗi bằng dấu chấm nha bạn, dấu + chỉ để cộng số thôi."],
+        "instructor": "Trong PHP, dấu + luôn là phép cộng số. PHP sẽ cố đổi 'Tổng: ' thành số; vì đây không phải chuỗi số nên tùy phiên bản bạn sẽ gặp cảnh báo hoặc lỗi TypeError (PHP 8 trở lên). Hãy dùng dấu chấm: 'Tổng: ' . 5. Đây là thói quen cần đổi đầu tiên khi chuyển từ JavaScript sang PHP."
+      },
+      {
+        "q": "Có nên bỏ thẻ đóng ?> ở cuối file không thầy? Em thấy file thì có, file thì không.",
+        "answers": ["Mình đọc thấy file chỉ có PHP thì nên bỏ, tránh dính khoảng trắng thừa."],
+        "instructor": "Với file chỉ chứa PHP (như db.php hay file gom các hàm), nên bỏ ?> ở cuối. Nếu để lại mà lỡ có dấu cách hoặc dòng trống phía sau, khoảng trắng đó sẽ bị gửi ra trình duyệt và có thể gây lỗi headers already sent ở trang require file này. Với file trộn HTML thì vẫn cần ?> để quay về phần HTML."
+      },
+      {
+        "q": "foreach ($diem as $mon => $d) thì $mon là cái gì vậy ạ, em in ra thấy HTML, CSS, PHP.",
+        "answers": [],
+        "instructor": "Với mảng kết hợp, mỗi vòng foreach cho bạn một cặp khóa => giá trị. $mon nhận khóa ('HTML', 'CSS', 'PHP'), còn $d nhận giá trị tương ứng (8.5, 7, 9). Nếu chỉ cần giá trị, bạn viết gọn foreach ($diem as $d). Với mảng chỉ số, khóa sẽ là 0, 1, 2 và cứ thế tăng dần."
+      },
+      {
+        "q": "Em viết function tong(int $a, int $b): int rồi gọi tong('5', 3) thì bị TypeError, nhưng bạn em xóa dòng declare(strict_types=1) đi lại chạy ra 8. Sao lạ vậy ạ?",
+        "answers": ["Tắt strict types thì PHP tự ép '5' thành 5, bật lên thì nó bắt đúng kiểu."],
+        "instructor": "Đúng vậy. Mặc định PHP ép kiểu linh hoạt nên chuỗi số '5' được tự đổi thành int. Khi file gọi hàm có declare(strict_types=1) ở đầu, PHP bắt kiểu chính xác và ném TypeError. Lưu ý chế độ này tính theo file nơi gọi hàm. Bật strict giúp lộ lỗi sớm, nhưng dữ liệu từ form luôn là chuỗi, nên bạn cần tự ép (int) hoặc dùng filter_var trước khi truyền vào hàm."
+      },
+      {
+        "q": "htmlspecialchars có cần ghi ENT_QUOTES không hay để mặc định là đủ?",
+        "answers": ["Hình như từ PHP 8.1 mặc định đã có ENT_QUOTES rồi, nhưng ghi rõ ra cho chắc."],
+        "instructor": "Từ PHP 8.1, cờ mặc định là ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 nên cả nháy đơn lẫn nháy kép đều được escape. Ở các bản cũ hơn, mặc định không escape nháy đơn, dễ bị chèn thuộc tính khi in vào value='...'. Vì vậy hàm e() trong bài ghi rõ ENT_QUOTES và 'UTF-8' để chạy đúng trên mọi phiên bản."
+      }
+    ],
+    "02-form-va-xu-ly-du-lieu": [
+      {
+        "q": "Form em bấm gửi rồi mà var_dump($_POST) ra array(0) {} trống trơn ạ. Ô input em có id='email' đàng hoàng.",
+        "answers": [
+          "Bạn thiếu name đó, id không được gửi lên server đâu.",
+          "Xem luôn thẻ form có method='post' chưa, thiếu là nó gửi bằng GET."
+        ],
+        "instructor": "Trình duyệt chỉ gửi những ô có thuộc tính name; id chỉ phục vụ CSS, JavaScript và thẻ label. Bạn thêm name='email' là được. Ngoài ra như bạn thứ hai nói, form không khai báo method sẽ mặc định dùng GET, khi đó dữ liệu nằm trong $_GET chứ không phải $_POST."
+      },
+      {
+        "q": "Warning: Undefined array key 'email' ngay khi mở trang lần đầu, sửa sao mọi người?",
+        "answers": ["Viết $_POST['email'] ?? '' là hết cảnh báo."],
+        "instructor": "Lần đầu bạn mở trang bằng GET nên $_POST rỗng, truy cập thẳng một khóa không tồn tại sẽ sinh cảnh báo. Hai cách nên dùng cùng nhau: chỉ xử lý khi $_SERVER['REQUEST_METHOD'] === 'POST', và đọc từng ô bằng toán tử ?? để có giá trị mặc định khi ô bị thiếu."
+      },
+      {
+        "q": "Em nhập tuổi 20 mà var_dump ra string(2) '20'. Sao không phải int ạ?",
+        "answers": [],
+        "instructor": "Dữ liệu đi qua HTTP luôn là văn bản, nên mọi giá trị trong $_GET và $_POST đều là chuỗi (hoặc mảng nếu tên ô có dấu []). Bạn tự chuyển và kiểm tra, ví dụ filter_var($_POST['tuoi'] ?? '', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 120]]). Kết quả là một số nguyên hợp lệ hoặc false."
+      },
+      {
+        "q": "Đã có required với type=email ở HTML rồi thì server có cần kiểm tra lại nữa không ạ? Em thấy hơi thừa.",
+        "answers": [
+          "Cần chứ, mình mở DevTools xóa chữ required đi là gửi được ngay.",
+          "Người ta còn gửi request thẳng lên server bằng công cụ khác, chẳng cần form luôn."
+        ],
+        "instructor": "Rất cần. Kiểm tra ở trình duyệt chỉ giúp người dùng thấy lỗi nhanh hơn, còn ai muốn vẫn vượt qua được như hai bạn đã nêu. Server là lớp phòng thủ duy nhất bạn thực sự kiểm soát, nên mọi điều kiện (bắt buộc, độ dài, định dạng) đều phải kiểm tra lại trong PHP."
+      },
+      {
+        "q": "Gửi form thành công xong em bấm F5 thì trình duyệt hỏi có gửi lại dữ liệu không, bấm đồng ý là lưu 2 lần luôn. Tránh kiểu gì ạ?",
+        "answers": ["Làm theo PRG trong bài, xử lý xong thì header Location sang trang khác."],
+        "instructor": "Đây chính là lý do có mẫu Post/Redirect/Get. Sau khi xử lý POST thành công, bạn gọi header('Location: lien-he.php?da-gui=1', true, 303) rồi exit. Trình duyệt chuyển sang một yêu cầu GET, nên F5 lúc này chỉ tải lại trang GET vô hại. Mã 303 nói rõ trang tiếp theo phải được lấy bằng GET."
+      },
+      {
+        "q": "Warning: Cannot modify header information - headers already sent by (output started at lien-he.php:1). Em chưa echo gì hết mà?",
+        "answers": [
+          "Chắc có dấu cách hay dòng trống trước <?php đó, xóa đi thử xem.",
+          "Lưu file dạng UTF-8 không BOM nữa nha, editor của mình từng tự chèn BOM."
+        ],
+        "instructor": "Thông báo cho biết đầu ra bắt đầu ở dòng 1, tức là có thứ gì đó đứng trước <?php: dấu cách, dòng trống hoặc ký tự BOM vô hình. header() chỉ hoạt động khi chưa có byte nào được gửi về trình duyệt. Hãy để <?php là ký tự đầu tiên của file và lưu dạng UTF-8 không BOM."
+      },
+      {
+        "q": "Sao sau header('Location: ...') phải có exit vậy, em bỏ đi vẫn chuyển trang bình thường mà",
+        "answers": [],
+        "instructor": "Trình duyệt vẫn chuyển trang, nhưng ở phía server, header() chỉ ghi thêm một dòng header, còn script vẫn chạy tiếp phần bên dưới. Nếu bên dưới có code lưu dữ liệu, gửi thư hay in thông tin riêng tư thì tất cả vẫn được thực thi. Ở trang kiểm tra đăng nhập, thiếu exit còn có thể làm lộ nội dung trang. Vì vậy luôn exit ngay sau khi chuyển hướng."
+      },
+      {
+        "q": "Checkbox đồng ý điều khoản, em kiểm tra $_POST['dong_y'] == '1' thì bị warning lúc không tick.",
+        "answers": ["Không tick thì nó không có trong $_POST luôn bạn, dùng isset là chuẩn."],
+        "instructor": "Checkbox chưa được chọn sẽ không được gửi lên, nên khóa dong_y vắng mặt hoàn toàn. Bạn kiểm tra bằng isset($_POST['dong_y']) như lời giải bài tập, hoặc ($_POST['dong_y'] ?? '') === '1' nếu muốn chắc chắn cả giá trị."
+      },
+      {
+        "q": "Cho em hỏi khi nào dùng GET, khi nào dùng POST ạ? Form đăng nhập để GET có sao không?",
+        "answers": ["Đăng nhập mà dùng GET là mật khẩu hiện chình ình trên thanh địa chỉ luôn bạn ơi."],
+        "instructor": "Quy tắc chung: GET cho thao tác chỉ đọc như tìm kiếm, lọc, phân trang, vì URL chia sẻ và đánh dấu được. POST cho mọi thao tác thay đổi dữ liệu hoặc gửi thông tin nhạy cảm. Đăng nhập bằng GET sẽ để mật khẩu nằm trên URL, bị lưu trong lịch sử trình duyệt và log server. Nhớ rằng POST cũng không mã hóa gì; muốn bảo vệ dữ liệu trên đường truyền phải có HTTPS."
+      },
+      {
+        "q": "Chỗ value='<?= e($du['ten']) ?>' sao phải escape vậy thầy, dữ liệu là của chính người dùng nhập mà?",
+        "answers": [],
+        "instructor": "Vì dữ liệu đó được in ngược lại vào HTML. Nếu ai đó nhập chuỗi chứa dấu nháy rồi thêm một thuộc tính sự kiện, không escape thì chuỗi sẽ thoát khỏi value và trở thành mã chạy được. Kẻ xấu còn có thể dụ người khác gửi một form điền sẵn chuỗi đó. Hàm e() với ENT_QUOTES biến dấu nháy thành thực thể HTML nên giá trị luôn nằm yên trong thuộc tính."
+      }
+    ],
+    "03-ket-noi-mysql-voi-pdo": [
+      {
+        "q": "SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: YES). Máy em dùng gói cài sẵn, mật khẩu root để trống mà.",
+        "answers": ["Có khi máy bạn có biến môi trường DB_PASS nên code lấy giá trị đó. In getenv('DB_PASS') ra xem thử."],
+        "instructor": "Cụm using password: YES nghĩa là PHP đã gửi một mật khẩu khác rỗng. Trong db.php, mật khẩu lấy từ getenv('DB_PASS'), nên bạn kiểm tra biến môi trường này trước. Ngược lại, nếu tài khoản root của bạn có đặt mật khẩu thì phải truyền đúng. Thử đăng nhập bằng công cụ quản trị MySQL với cùng thông tin để biết lỗi nằm ở tài khoản hay ở code."
+      },
+      {
+        "q": "SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it. Là sao mn?",
+        "answers": [
+          "MySQL chưa bật đó bạn, mở bảng điều khiển bấm Start MySQL.",
+          "Hoặc bị đổi cổng sang 3307 chẳng hạn, thì thêm port=3307 vào DSN."
+        ],
+        "instructor": "Lỗi 2002 nghĩa là PHP không tới được dịch vụ MySQL: dịch vụ chưa chạy, chạy ở cổng khác, hoặc host sai. Bạn bật MySQL, xem cổng trong cấu hình, nếu khác 3306 thì thêm ;port=... vào DSN. Và nhớ là trên website thật không được in nguyên thông báo này ra cho người dùng."
+      },
+      {
+        "q": "could not find driver là lỗi gì ạ?",
+        "answers": [],
+        "instructor": "PHP của bạn chưa bật extension pdo_mysql. Mở file php.ini đang được dùng (xem đường dẫn bằng lệnh php --ini), bỏ dấu ; trước dòng extension=pdo_mysql, lưu lại rồi khởi động lại server. Sau đó chạy php -m để chắc pdo_mysql đã có trong danh sách."
+      },
+      {
+        "q": "Tiếng Việt lưu vào bảng bị biến thành dấu ? hết. Em đã thêm charset=utf8mb4 vào DSN rồi.",
+        "answers": ["Xem lại bảng có tạo với utf8mb4 không, mình bị y vậy vì bảng tạo bằng bộ mã mặc định cũ."],
+        "instructor": "Cần đúng ở cả ba nơi: file PHP lưu UTF-8, kết nối có charset=utf8mb4, và cơ sở dữ liệu, bảng, cột đều dùng utf8mb4. Nếu bảng tạo bằng bộ mã khác thì dữ liệu đã lưu sai sẽ không tự sửa được. Bạn đổi bảng bằng ALTER TABLE ten_bang CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci rồi nhập lại dữ liệu."
+      },
+      {
+        "q": "Em ghép email vào câu SELECT bằng dấu chấm nhưng đã trim() trước rồi, vậy vẫn bị SQL injection hả thầy?",
+        "answers": ["trim chỉ cắt khoảng trắng hai đầu thôi, dấu nháy vẫn còn nguyên mà."],
+        "instructor": "Vẫn bị. trim chỉ bỏ khoảng trắng ở hai đầu, các ký tự như dấu nháy đơn vẫn giữ nguyên, nên chuỗi ' OR '1'='1 vẫn thay đổi được điều kiện WHERE. Cách đúng là prepared statement: prepare('SELECT ... WHERE email = ?') rồi execute([$email]). Dữ liệu được gửi riêng và luôn được coi là giá trị."
+      },
+      {
+        "q": "lastInsertId() trả về chuỗi '3' chứ không phải số, vậy có bình thường không ạ?",
+        "answers": ["Bình thường mà, ép (int) là xong. Bài CRUD cũng làm vậy đó."],
+        "instructor": "Hoàn toàn bình thường. PDO::lastInsertId() luôn trả về chuỗi (hoặc false) vì được thiết kế chung cho nhiều loại CSDL. Bạn ép (int) khi cần dùng như số. Lưu ý hàm này lấy id vừa sinh trên chính kết nối hiện tại, nên phải gọi trên cùng đối tượng PDO vừa chạy INSERT; hàm db() dùng biến static giúp đảm bảo điều đó."
+      },
+      {
+        "q": "Khi nào dùng query() khi nào dùng prepare() vậy mn",
+        "answers": [],
+        "instructor": "query() chạy thẳng một câu SQL cố định, hợp khi câu lệnh không chứa dữ liệu nào từ bên ngoài, như câu đếm khóa học miễn phí trong bài. Chỉ cần có một giá trị đến từ form, URL, cookie hay file, bạn dùng prepare() với chỗ trống ? hoặc :ten rồi truyền dữ liệu qua execute(). Nếu còn phân vân, cứ chọn prepare."
+      },
+      {
+        "q": "Tìm kiếm bằng LIKE, em viết prepare('SELECT ... WHERE ten LIKE %?%') thì bị lỗi cú pháp.",
+        "answers": ["Dấu % phải nằm trong giá trị truyền vào execute, đừng viết trong câu SQL."],
+        "instructor": "Chỗ trống ? đại diện cho nguyên một giá trị, không ghép được với ký tự khác trong câu SQL. Bạn giữ câu lệnh là WHERE ten LIKE ? và đưa ký tự đại diện vào dữ liệu: execute(['%' . $tuKhoa . '%']), giống hệt ví dụ trong bài."
+      },
+      {
+        "q": "Em chạy thử UPDATE khoa_hoc SET gia = 0 mà quên WHERE, giờ khóa nào cũng thành miễn phí :( có hoàn tác được không ạ",
+        "answers": [
+          "Không có nút undo đâu bạn, trừ khi có bản sao lưu. Lần sau chạy SELECT trước cho chắc.",
+          "Nếu đang trong transaction chưa commit thì ROLLBACK được, còn chạy bình thường là xong luôn rồi."
+        ],
+        "instructor": "Ở chế độ tự động commit mặc định, câu lệnh đã chạy thì không hoàn tác được; chỉ có thể khôi phục từ bản sao lưu hoặc chạy lại dữ liệu mẫu. Với bài học thì bạn tạo lại bảng là ổn. Thói quen tốt: viết WHERE trước, chạy SELECT với cùng điều kiện để xem những dòng sẽ bị ảnh hưởng, rồi mới đổi thành UPDATE hay DELETE."
+      },
+      {
+        "q": "PDO::ATTR_EMULATE_PREPARES => false để làm gì vậy thầy? Bỏ dòng đó đi có sao không?",
+        "answers": [],
+        "instructor": "Mặc định PDO với MySQL tự giả lập prepared statement: nó escape và ghép giá trị vào câu SQL ngay ở phía PHP. Đặt false để dùng prepared statement thật của MySQL, khi đó câu lệnh và dữ liệu được gửi riêng, kiểu dữ liệu trả về cũng sát với cột hơn. Bỏ đi vẫn an toàn trong đa số trường hợp, nhưng ví dụ LIMIT/OFFSET ở bài CRUD được viết cho chế độ này nên bạn nên giữ để kết quả giống bài."
+      }
+    ],
+    "04-crud-hoan-chinh": [
+      {
+        "q": "Phân trang em bị lỗi: You have an error in your SQL syntax ... near ''10' OFFSET '0''. Em đang truyền execute([$moiTrang, $offset]).",
+        "answers": ["Dùng bindValue với PDO::PARAM_INT giống trong bài là hết nha."],
+        "instructor": "execute() với mảng truyền mọi giá trị dưới dạng chuỗi, nên MySQL nhận LIMIT '10', mà LIMIT không chấp nhận chuỗi. Bạn gọi bindValue(1, $moiTrang, PDO::PARAM_INT) và bindValue(2, $offset, PDO::PARAM_INT), sau đó gọi execute() không truyền đối số."
+      },
+      {
+        "q": "Trang 4, mỗi trang 5 dòng thì OFFSET là 15 hay 20 ạ?",
+        "answers": ["(4 - 1) × 5 = 15 nhé bạn."],
+        "instructor": "OFFSET = (trang - 1) × số dòng mỗi trang = 3 × 5 = 15. Nghĩa là bỏ qua 15 dòng của trang 1 đến trang 3, rồi lấy 5 dòng tiếp theo."
+      },
+      {
+        "q": "Sao không làm nút xóa bằng thẻ a href='xoa.php?id=5' cho nhanh vậy thầy?",
+        "answers": [],
+        "instructor": "Liên kết GET có thể bị gọi mà người dùng không hề bấm: trình duyệt tải trước trang, công cụ thu thập liên kết, hay một trang khác chèn ảnh trỏ tới đường dẫn đó trong lúc admin đang đăng nhập. Thao tác thay đổi dữ liệu phải đi qua form POST, kèm token CSRF và hộp xác nhận."
+      },
+      {
+        "q": "Mở sua.php?id=abc thì ra trang trắng, còn id=999 thì báo lỗi lung tung trong form. Em nên xử lý thế nào ạ?",
+        "answers": ["Nếu layTheoId trả về null thì cho 404 rồi exit luôn."],
+        "instructor": "Bài dùng filter_var($_GET['id'] ?? '', FILTER_VALIDATE_INT) ?: 0 để id không phải số nguyên trở thành 0. Sau đó mới gọi layTheoId; nếu kết quả là null (không có bản ghi) thì http_response_code(404) và exit kèm thông báo. Chỉ hiển thị form khi chắc chắn đã lấy được dữ liệu."
+      },
+      {
+        "q": "Lưu xong redirect về danh-sach.php thì mất thông báo Đã lưu khóa học. Em gán vào biến $thongBao rồi mà.",
+        "answers": [
+          "Biến mất khi request kết thúc đó, phải cất vào $_SESSION.",
+          "Nhớ unset sau khi hiện, không thì nó hiện mãi ở mọi lần tải."
+        ],
+        "instructor": "Mỗi request chạy độc lập, nên biến của sua.php không còn khi trình duyệt sang danh-sach.php. Bạn lưu vào $_SESSION['thong_bao'] trước khi chuyển hướng, ở trang sau đọc ra, hiển thị rồi unset ngay. Đó là mẫu flash message. Nhớ cả hai trang đều phải có session_start(), ở đây nằm trong ham-chung.php."
+      },
+      {
+        "q": "Sao so sánh token phải dùng hash_equals, dùng === không được à?",
+        "answers": [],
+        "instructor": "=== cho kết quả đúng nhưng có thể dừng lại ngay ở ký tự khác đầu tiên, nên thời gian so sánh vô tình tiết lộ thông tin về chuỗi bí mật. hash_equals so sánh trong thời gian không phụ thuộc nội dung, chống kiểu tấn công đo thời gian. Với token, chữ ký hay mã bí mật, hãy dùng hash_equals."
+      },
+      {
+        "q": "Bị 403 Yêu cầu không hợp lệ mỗi khi bấm Lưu, em có thêm input ẩn _csrf rồi.",
+        "answers": [
+          "Bạn có require ham-chung.php ở đầu không? Không có session thì token đổi liên tục.",
+          "Mình từng bị vì xóa cookie trong lúc đang mở form, tải lại trang là hết."
+        ],
+        "instructor": "Token được giữ trong $_SESSION['csrf'], nên nếu session không duy trì được giữa hai request thì token gửi lên sẽ không khớp. Bạn kiểm tra: ham-chung.php được require ở đầu trang (có session_start), trình duyệt có lưu cookie phiên không, và tên trường ẩn đúng là _csrf. Xem mã nguồn trang để chắc giá trị token không rỗng."
+      },
+      {
+        "q": "Hàm chuyenHuong(string $url): never, kiểu never là gì vậy ạ, em chưa thấy bao giờ",
+        "answers": ["never có từ PHP 8.1, nghĩa là hàm không bao giờ trả về."],
+        "instructor": "never là kiểu trả về có từ PHP 8.1, cho biết hàm không bao giờ kết thúc theo cách bình thường: nó luôn exit hoặc ném ngoại lệ. Nhờ vậy người đọc và công cụ phân tích biết rằng code sau lời gọi chuyenHuong() sẽ không chạy. Nếu bạn dùng phiên bản PHP cũ hơn, đổi thành void."
+      },
+      {
+        "q": "Em nhập giá 0 thì bị báo Giá từ 0 đến 10000 dù 0 là hợp lệ. Em viết if (!$du['gia']) thay cho cách của bài.",
+        "answers": [],
+        "instructor": "Với giá 0, filter_var trả về 0.0, và !0.0 cho kết quả true nên điều kiện của bạn coi đó là lỗi. Phải so sánh chặt với false: $du['gia'] === false, đúng như trong bài. Đây là lỗi kinh điển khi một hàm có thể trả về cả false lẫn số 0 hợp lệ."
+      },
+      {
+        "q": "Tách khoa-hoc-repo.php ra riêng thì được lợi gì vậy ạ? Em để chung một file vẫn chạy ngon.",
+        "answers": ["Mình thấy được cái dễ tái sử dụng, trang thêm với trang sửa dùng chung kiemTraKhoaHoc luôn."],
+        "instructor": "Chạy được chưa có nghĩa là dễ bảo trì. Khi mọi SQL nằm trong khoa-hoc-repo.php, đổi tên một cột chỉ phải sửa một chỗ; trang thêm và trang sửa dùng chung hàm kiểm tra; còn trang hiển thị ngắn gọn, dễ đọc. Cách chia này cũng là bước đệm để bạn hiểu mô hình MVC của các framework sau này."
+      }
+    ],
+    "05-phien-lam-viec-va-cookie": [
+      {
+        "q": "Warning: session_start(): Session cannot be started after headers have already been sent. Em để session_start() sau đoạn <!DOCTYPE html>.",
+        "answers": ["Đưa session_start lên đầu file, trước mọi thẻ HTML là hết."],
+        "instructor": "session_start() cần gửi cookie phiên trong header HTTP, nên phải chạy trước mọi đầu ra, kể cả HTML, khoảng trắng hay BOM. Cách gọn nhất là require phien.php ở dòng đầu của mỗi trang, trước bất kỳ thẻ HTML nào."
+      },
+      {
+        "q": "setcookie xong em var_dump($_COOKIE) ngay dòng dưới thì không thấy cookie đâu cả?",
+        "answers": ["Phải tải lại trang mới có, $_COOKIE là thứ trình duyệt gửi lên trong request hiện tại thôi."],
+        "instructor": "setcookie chỉ thêm header Set-Cookie vào phản hồi. $_COOKIE chứa những cookie trình duyệt gửi kèm yêu cầu hiện tại, nên phải đến yêu cầu sau mới thấy. Vì thế ví dụ trong bài đặt cookie xong là chuyển hướng ngay. Nếu tải lại vẫn không có, kiểm tra tùy chọn secure: bật secure khi chạy http thì trình duyệt sẽ không lưu."
+      },
+      {
+        "q": "Có nên lưu id người dùng trong cookie cho đỡ phải dùng session không thầy?",
+        "answers": [],
+        "instructor": "Không nên. Người dùng sửa được cookie, đổi id thành của người khác là đăng nhập trộm được ngay. Hãy lưu thông tin đăng nhập trong $_SESSION; trình duyệt chỉ giữ mã phiên ngẫu nhiên, rất khó đoán. Cookie chỉ dành cho thông tin không nhạy cảm như chế độ sáng tối, và khi đọc ra vẫn phải kiểm tra giá trị."
+      },
+      {
+        "q": "password_verify luôn trả về false dù em nhập đúng mật khẩu. Cột mat_khau_hash em để VARCHAR(50).",
+        "answers": [
+          "Hash bcrypt dài 60 ký tự, cột 50 là bị cụt mất rồi.",
+          "Sửa cột xong nhớ tạo lại tài khoản nha, hash cũ hỏng rồi không dùng được."
+        ],
+        "instructor": "Chính xác. Hash bcrypt dài 60 ký tự, cột 50 sẽ làm mất phần đuôi (hoặc MySQL báo lỗi nếu bật chế độ strict) nên không bao giờ khớp. Đổi cột thành VARCHAR(255) như bài khuyên rồi tạo lại hash bằng password_hash($matKhau, PASSWORD_DEFAULT). Đừng so sánh hash bằng ===, vì mỗi lần gọi password_hash muối lại khác nên chuỗi hash luôn khác."
+      },
+      {
+        "q": "Em dùng md5 cho mật khẩu được không ạ, thấy nhiều code cũ toàn md5.",
+        "answers": ["md5 tính nhanh quá nên bị dò dễ lắm, trong bài có nói đó."],
+        "instructor": "Không nên. md5 và sha1 tính cực nhanh và không có muối, nên khi lộ CSDL kẻ tấn công thử được hàng tỉ mật khẩu mỗi giây hoặc tra bảng có sẵn. password_hash dùng thuật toán chậm với muối ngẫu nhiên. Nếu dự án cũ đang dùng md5, bạn có thể chuyển dần: khi người dùng đăng nhập đúng, tạo hash mới bằng password_hash và lưu đè lên."
+      },
+      {
+        "q": "session_regenerate_id(true) có cần gọi ở mọi trang không ạ?",
+        "answers": [],
+        "instructor": "Không cần. Bạn gọi khi mức quyền thay đổi: ngay sau đăng nhập thành công, khi nâng quyền, và có thể cả khi đăng xuất. Mục đích là vô hiệu hóa mã phiên cũ mà kẻ xấu có thể đã gài sẵn (session fixation). Gọi ở mọi trang dễ gây lỗi mất phiên khi trình duyệt gửi nhiều yêu cầu cùng lúc."
+      },
+      {
+        "q": "Đăng xuất em chỉ unset($_SESSION['nguoi_dung']) thôi, vậy còn thiếu gì không ạ",
+        "answers": ["Thiếu session_destroy với xóa cookie phiên nữa đó bạn."],
+        "instructor": "Xóa một khóa thì người dùng không còn đăng nhập, nhưng phiên vẫn tồn tại cùng dữ liệu khác như giỏ hàng, token CSRF, và mã phiên cũ vẫn dùng được. Đăng xuất đầy đủ gồm: gán $_SESSION = [], đặt cookie phiên hết hạn, rồi session_destroy() như trong dang-xuat.php. Nên gọi đăng xuất bằng form POST có token CSRF."
+      },
+      {
+        "q": "Mình test đăng nhập trên localhost http mà cứ chuyển trang là mất phiên, có ai bị giống vậy chưa?",
+        "answers": [
+          "Mình từng bị vì để 'secure' => true cứng, localhost không có https nên cookie không được lưu.",
+          "Kiểm tra session_name ở các trang có giống nhau không nữa."
+        ],
+        "instructor": "Hai bạn đã chỉ ra hai nguyên nhân phổ biến nhất. Bài dùng 'secure' => isset($_SERVER['HTTPS']) để chỉ bật khi có HTTPS. Ngoài ra mọi trang phải dùng chung phien.php để có cùng tên phiên và tham số cookie. Bạn mở DevTools, vào phần lưu trữ cookie, xem cookie cnow_php_sid có xuất hiện và giữ nguyên giá trị không."
+      },
+      {
+        "q": "httponly có chặn được người dùng tự sửa cookie không thầy?",
+        "answers": [],
+        "instructor": "Không. httponly chỉ ngăn JavaScript trên trang đọc cookie qua document.cookie, giúp giảm thiệt hại khi trang bị XSS. Người dùng vẫn xem và sửa cookie bằng DevTools bình thường. Vì vậy thông tin quyền như admin luôn phải đọc từ session hoặc CSDL, không bao giờ lấy từ cookie."
+      },
+      {
+        "q": "Bài tập giỏ hàng, sao mình không gửi luôn giá trong input ẩn cho tiện ạ?",
+        "answers": ["Input ẩn vẫn sửa được bằng DevTools, đổi giá còn 1 đồng là toang :)"],
+        "instructor": "Mọi thứ gửi từ trình duyệt đều có thể bị sửa, kể cả input ẩn. Form chỉ nên gửi mã sản phẩm; server kiểm tra mã có trong danh sách rồi lấy giá từ SAN_PHAM (hoặc từ CSDL). Nguyên tắc này đúng với mọi website bán hàng: giá luôn do server quyết định."
+      }
+    ]
+  },
+  "comments": [
+    "Khóa này giải thích PHP chạy ở server bằng ví dụ nhà hàng dễ hiểu ghê, giờ mình mới hết lẫn với JavaScript.",
+    "Cảm ơn thầy, phần prepared statement viết rất kỹ.",
+    "Mình học xong Node.js rồi qua đây, thấy PHP triển khai đơn giản hơn hẳn.",
+    "Phần Lỗi hay gặp là phần mình thích nhất, toàn lỗi mình từng dính.",
+    "Bài 3 hơi dài nhưng đọc kỹ thì rất đáng.",
+    "Có ai làm bài tập bảng cửu chương mà canh bảng cho đẹp chưa, mình làm xấu quá.",
+    "Lần đầu hiểu vì sao phải escape dữ liệu khi in ra HTML. Cảm ơn khóa học.",
+    "Mong có thêm bài về upload file bằng PHP.",
+    "Mẫu Post/Redirect/Get hay quá, trước giờ mình toàn bị lưu trùng mà không biết vì sao.",
+    "Bài CRUD gom đủ mọi thứ của các bài trước, làm xong thấy tự tin hẳn.",
+    "Mình đã làm được trang đăng nhập đầu tiên bằng PHP, vui thật sự.",
+    "Mọi người nhớ chạy php -S trong đúng thư mục nha, mình mất nửa tiếng vì chạy sai chỗ.",
+    "Ví dụ tủ gửi đồ cho session rất dễ nhớ.",
+    "Cho mình hỏi khóa có bài về JOIN nhiều bảng không ạ?",
+    "Phần cài đặt môi trường hơi sơ sài, mình loay hoay mãi mới bật được MySQL.",
+    "Quiz cuối bài ngắn gọn, ôn lại ý chính rất tốt.",
+    "Học bài 5 xong mình đi sửa ngay đồ án cũ đang dùng md5, hú hồn.",
+    "Mình thích cách tách file repo với trang hiển thị, code gọn hơn nhiều.",
+    "Đọc xong bài form mới biết checkbox không tick thì không gửi gì lên.",
+    "Thầy ơi có thể thêm bài về transaction trong PDO không ạ?",
+    "Khóa học ngắn mà chất, 5 bài là đủ để làm một web quản lý nhỏ.",
+    "Bài tập giỏ hàng bằng session vui ghê, mình còn thêm nút giảm số lượng.",
+    "Mình thấy nên có thêm sơ đồ minh họa luồng request và response.",
+    "Cảm ơn khóa học, giờ mình đọc được code PHP của dự án ở chỗ thực tập rồi.",
+    "Có nhóm nào học buổi tối không, mình muốn rủ cùng làm bài CRUD.",
+    "Phần LIMIT OFFSET dùng bindValue cứu mình một bàn thua.",
+    "Bài 1 dễ quá, bài 3 bỗng khó lên một bậc, hơi sốc chút.",
+    "Giải thích lỗi headers already sent quá đúng, mình bị BOM mà không hề biết.",
+    "Rất thích việc mọi ví dụ đều có htmlspecialchars, tạo thói quen tốt.",
+    "Mình đã làm xong cả 5 bài, giờ ôn lại quiz.",
+    "Bài học văn bản đọc nhanh hơn xem video, tra lại cũng tiện.",
+    "Ước gì có thêm video quay màn hình phần cài đặt, đọc chữ hơi khó hình dung.",
+    "Thầy trả lời hỏi đáp nhanh và rõ, cảm ơn thầy nhiều.",
+    "Mình thắc mắc PDO với mysqli thì nên chọn cái nào, mong thầy có thêm một đoạn so sánh.",
+    "Code mẫu chạy được ngay, không phải sửa gì, rất thích.",
+    "Phần CSRF lúc đầu khó hiểu, đọc lại lần hai thì thông.",
+    "Mình là dân trái ngành mà vẫn theo được, cảm ơn cách viết dễ hiểu.",
+    "Bài 2 phần validate rất thực tế, áp dụng luôn cho form liên hệ của mình.",
+    "Ví dụ SQL injection với chuỗi OR 1=1 làm mình giật mình, phải sửa code ngay.",
+    "Cho mình xin gợi ý thêm vài bài tập nâng cao cho người muốn luyện thêm.",
+    "Mình thấy phần phân trang nên có ví dụ hiển thị số trang 1 2 3 thay vì chỉ Trước/Sau.",
+    "Khóa học giúp mình qua môn lập trình web ở trường, cảm ơn nhiều.",
+    "Bạn nào bị lỗi could not find driver thì bật pdo_mysql trong php.ini nha.",
+    "Nên nhắc rõ hơn là phải tạo database trước khi chạy db.php, mình bị lỗi Unknown database.",
+    "Rất hay, mong có khóa PHP nâng cao về hướng đối tượng.",
+    "Bài 5 nhiều kiến thức bảo mật quá, mình phải chia ra học hai buổi.",
+    "Mình đã chia sẻ khóa này cho cả nhóm đồ án.",
+    "Cách giải thích mã 303 sau khi POST mình chưa thấy ở đâu rõ như vậy.",
+    "Hỏi nhỏ: có cần học hết khóa HTML CSS trước khi học khóa này không ạ?",
+    "Phần tóm tắt cuối mỗi bài rất tiện để ôn trước khi thi.",
+    "Thầy viết dễ hiểu, ví dụ đời thường gần gũi.",
+    "Bài tập lần này hơi khó so với nội dung bài, mình phải xem lời giải mới làm được.",
+    "Mình thích việc khóa nói rõ cái gì không được làm, ví dụ lưu quyền admin trong cookie.",
+    "Cảm ơn đội ngũ Cnow, giao diện học dễ chịu.",
+    "Mình muốn có thêm phần triển khai lên hosting thật sau khi làm xong CRUD.",
+    "Đã hoàn thành khóa, giờ thử viết blog nhỏ bằng PHP.",
+    "Học bài 4 xong mình mới hiểu MVC là gì, trước đọc mãi không vào.",
+    "Có ai bị lỗi font tiếng Việt khi lưu vào MySQL không, mình sửa sang utf8mb4 là hết.",
+    "Đề nghị thêm phần kiểm tra quyền chỉnh sửa theo người tạo trong bài CRUD.",
+    "Lời giải trong mục ẩn giúp mình tự làm trước rồi mới xem, rất hợp lý.",
+    "Khóa học bổ ích, đáng thời gian bỏ ra.",
+    "Bài 3 thiếu hướng dẫn dùng công cụ quản trị CSDL, người mới như mình hơi bỡ ngỡ.",
+    "Mình thấy ví dụ giỏ hàng có thể thêm phần tính tổng theo từng món cho rõ hơn.",
+    "Cảm ơn thầy, mình đã sửa xong lỗi đăng nhập nhờ mục hỏi đáp.",
+    "Khóa này nên là khóa bắt buộc cho ai làm web bằng PHP.",
+    "Hay, ngắn, đúng trọng tâm.",
+    "Mong khóa sau có thêm phần viết API trả JSON bằng PHP."
+  ],
+  "spam": [
+    "Bạn nào cần tài liệu ôn PHP thì inbox mình, bán giá rẻ, có cả đề thi các trường.",
+    "Nội dung cũng thường thôi, ai học mấy cái này mà không biết, phí thời gian đọc.",
+    "Ghé trang của mình để nhận khóa học miễn phí trọn đời, nhắn tin riêng để biết thêm chi tiết nhé mọi người."
+  ],
+  "reviews": {
+    "1": [
+      "Không hề giải thích cách tạo database và bảng cho người chưa từng dùng MySQL. Mình kẹt ngay bài 3 và bỏ dở khóa.",
+      "Khóa toàn chữ, không có video, không có bài giảng trực tiếp. Bài tập lại khó, mình không làm được bài nào mà không xem lời giải.",
+      "Môi trường cài đặt không được hướng dẫn, chạy code mẫu báo could not find driver mà bài không nhắc tới. Rất mất thời gian."
+    ],
+    "2": [
+      "Phần chuẩn bị môi trường gần như bỏ trống với người dùng macOS. Mình không biết bật MySQL thế nào và bài không có hướng dẫn.",
+      "Bài tập quá khó so với nội dung. Bài 4 yêu cầu phân trang, flash, xóa có CSRF trong khi ví dụ chỉ có trang sửa.",
+      "Mình cần video hướng dẫn, chỉ đọc văn bản rất khó theo khi mới học. Một số đoạn code dài không có hình minh họa kết quả.",
+      "Tốc độ quá nhanh với người mới. Bài 3 vừa giới thiệu SQL vừa dạy PDO vừa nói về bảo mật, mình bị ngợp.",
+      "Thiếu hẳn phần JOIN và quan hệ giữa các bảng, trong khi đó là nội dung cốt lõi của MySQL. Tên khóa hơi quá so với thực tế.",
+      "Không có hướng dẫn xử lý khi lỗi kết nối, mình gặp lỗi 2002 và phải tự tra mất nhiều thời gian.",
+      "Code dùng cú pháp mới như kiểu never, máy trường cài PHP cũ nên chạy không được. Nên ghi rõ yêu cầu phiên bản PHP ở đầu khóa."
+    ],
+    "3": [
+      "Nội dung đúng nhưng tốc độ hơi nhanh. Từ bài 2 sang bài 3 có quá nhiều khái niệm mới cùng lúc: SQL, PDO, DSN, injection.",
+      "Khóa ổn về lý thuyết nhưng thiếu hướng dẫn cài đặt chi tiết. Mình dùng Windows, mất cả buổi mới chạy được MySQL và bật pdo_mysql.",
+      "Mình mong có video. Đọc chữ về cách tạo bảng trong công cụ quản trị CSDL khó hình dung với người lần đầu làm.",
+      "Bài tập CRUD khó hơn hẳn phần ví dụ, nhất là phần chuyển hướng về đúng trang. Nên có thêm bước gợi ý trung gian.",
+      "Kiến thức bảo mật tốt nhưng ví dụ hơi ít. Mỗi lỗi nên có thêm một ví dụ sai rồi sửa để dễ thấy khác biệt.",
+      "Khóa quá ngắn so với tên gọi PHP và MySQL. Chưa có JOIN, khóa ngoại chỉ nhắc qua, chưa có index.",
+      "Lời giải bài tập dài, nhiều code dồn một chỗ, người mới khó đọc. Nên chia nhỏ và giải thích từng phần.",
+      "Phần session hay nhưng quá nhiều chi tiết bảo mật trong một bài, mình đọc xong vẫn chưa nhớ thứ tự các bước đăng xuất.",
+      "Nội dung được nhưng không có dự án tổng kết. Học xong năm bài rời rạc, mình vẫn lúng túng khi tự ghép thành một website.",
+      "Ví dụ chạy được nhưng không nói rõ cấu trúc thư mục, mình đặt file sai chỗ nên require báo lỗi không tìm thấy file."
+    ],
+    "4": [
+      "Nội dung tốt và an toàn, nhưng mình mong có thêm phần JOIN nhiều bảng vì đồ án cần dùng.",
+      "Khóa hay, giải thích dễ hiểu. Trừ một sao vì phần cài môi trường hơi ngắn, mình phải tự tìm cách bật MySQL.",
+      "Bài CRUD rất đầy đủ. Giá như có thêm ví dụ tìm kiếm kết hợp phân trang thì hoàn hảo.",
+      "Mình học được nhiều về bảo mật. Bài 5 hơi dày, nên tách thành hai bài cho dễ tiêu hóa.",
+      "Code mẫu chạy tốt, quiz hay. Mong có thêm video ngắn minh họa cách chạy php -S lần đầu.",
+      "Phần PDO rõ ràng. Mình muốn có thêm một đoạn so sánh PDO với mysqli để biết vì sao chọn PDO.",
+      "Khóa ổn, ví dụ dễ hiểu. Bài tập bảng cửu chương hơi đơn giản so với các bài sau.",
+      "Rất hữu ích cho người mới. Mong khóa bổ sung phần transaction khi thêm nhiều bảng một lúc.",
+      "Hỏi đáp được trả lời nhanh, nội dung chuẩn. Chỉ tiếc là chưa có phần triển khai lên hosting.",
+      "Thích phần Post/Redirect/Get và flash message. Giao diện danh sách trong bài tập hơi thô, nên có chút CSS gợi ý.",
+      "Kiến thức nền tốt. Mình mong có thêm bài upload ảnh vì đồ án nào cũng cần.",
+      "Giải thích session rất hay. Phần cấu hình cookie phiên có nhiều tùy chọn, ước gì có bảng tóm tắt khi nào dùng cái nào.",
+      "Khóa ngắn, đọc nhanh, đúng trọng tâm. Bốn sao vì mình muốn nhiều bài tập luyện thêm hơn.",
+      "Nội dung rõ ràng, có hệ thống. Bài 3 nhảy độ khó hơi nhanh so với hai bài đầu.",
+      "Rất đáng học. Mong có thêm phần xử lý lỗi và ghi log bài bản thay vì chỉ nhắc qua.",
+      "Mình thích cách tách repo. Nếu có thêm ví dụ trang thêm mới đầy đủ như trang sửa thì dễ làm theo hơn.",
+      "Ví dụ đời thường dễ nhớ, code chuẩn. Phần phân trang nên có hiển thị số trang thay vì chỉ trước sau.",
+      "Học xong tự tin làm form và đăng nhập. Chỉ thiếu phần quên mật khẩu, mong có bài bổ sung.",
+      "Chất lượng tốt so với độ dài. Nên có thêm một bài tổng kết làm dự án nhỏ từ đầu đến cuối.",
+      "Hiểu được CSRF là gì sau khóa này. Tuy vậy ví dụ nút xóa còn dùng onsubmit nội tuyến, nên có luôn bản tách file JS."
+    ],
+    "5": [
+      "Khóa học rất chắc kiến thức. Phần prepared statement và SQL injection được giải thích rõ đến mức mình đi sửa lại toàn bộ đồ án cũ. Code mẫu chạy được ngay.",
+      "Mình đến từ khóa Node.js, khóa này giúp chuyển sang PHP rất mượt. Ví dụ so sánh hai mô hình chạy server rất dễ hiểu.",
+      "Bài CRUD là điểm sáng nhất: có phân trang, CSRF, flash message, kiểm tra id. Làm xong là có một module quản trị dùng được thật.",
+      "Thầy giải thích lỗi headers already sent quá chuẩn. Mình bị lỗi này cả tuần, đọc bài xong sửa trong hai phút.",
+      "Nội dung ngắn gọn mà đầy đủ, mỗi bài đều có phần lỗi hay gặp rất thực tế. Mục hỏi đáp được trả lời nhanh.",
+      "Bài session và cookie là bài bảo mật hay nhất mình từng đọc ở mức cơ bản. Hiểu được vì sao phải session_regenerate_id.",
+      "Rất thích cách viết bằng tiếng Việt dễ hiểu, thuật ngữ tiếng Anh có ghi kèm. Người mới như mình theo được hết.",
+      "Bài tập vừa sức, lời giải để trong mục ẩn nên mình tự làm trước. Sau khóa mình tự viết được trang đăng ký có validate.",
+      "Khóa học giúp mình qua môn Lập trình web với điểm cao. Đặc biệt phần form và Post/Redirect/Get rất dễ áp dụng.",
+      "Ví dụ đời thường như nhà hàng, tủ gửi đồ, mẫu đơn in sẵn giúp nhớ khái niệm rất lâu. Năm sao xứng đáng.",
+      "Code sạch, có declare strict_types, có hàm e() escape ở mọi chỗ. Học theo là tự có thói quen viết code an toàn.",
+      "Mình đánh giá cao việc khóa nói rõ những điều không được làm: md5, ghép chuỗi SQL, lưu quyền trong cookie.",
+      "Từ một người chưa biết PHP, sau năm bài mình đã làm được giỏ hàng bằng session. Cảm ơn thầy và đội ngũ.",
+      "Phần phân trang dùng bindValue với PARAM_INT giải quyết đúng lỗi mình hay gặp. Giải thích công thức OFFSET rất rõ.",
+      "Quiz cuối mỗi bài giúp mình kiểm tra lại hiểu bài chưa. Câu hỏi bám sát nội dung, không đánh đố.",
+      "Khóa tốt cho người muốn hiểu bản chất trước khi dùng framework. Bài 4 giải thích MVC thu nhỏ rất dễ hình dung.",
+      "Thích việc mọi bài đều có phần đọc thêm từ tài liệu chính thức, mình tra cứu tiếp rất thuận tiện.",
+      "Hướng dẫn kết nối PDO với utf8mb4 giúp mình hết hẳn lỗi font tiếng Việt. Chi tiết nhỏ mà rất giá trị.",
+      "Khóa học ngắn nhưng không hời hợt. Mỗi đoạn code đều có chú thích tiếng Việt giải thích từng dòng.",
+      "Mình học buổi tối sau giờ làm, mỗi bài khoảng 20 phút đọc cộng 30 phút làm bài tập, rất vừa.",
+      "Giảng viên trả lời câu hỏi kỹ, có lần còn chỉ ra lỗi so sánh với false mà mình không để ý.",
+      "Nội dung bảo mật xuyên suốt khóa: escape, CSRF, prepared statement, password_hash. Rất đáng học.",
+      "Đã giới thiệu cho cả lớp. Ai làm đồ án web bằng PHP nên học khóa này trước.",
+      "Mình thích việc bài học chỉ ra số dòng thường sai khi gặp parse error, mẹo nhỏ mà tiết kiệm nhiều thời gian.",
+      "Khóa học rõ ràng, có hệ thống, bài sau dựa trên bài trước. Hoàn thành khóa mình thấy tiến bộ rõ."
+    ]
+  },
+  "chat": [
+    "Chào mọi người, mình mới vào khóa PHP hôm nay.",
+    "Mọi người đang học tới bài mấy rồi?",
+    "Mình đang ở bài 3, phần PDO hơi nhiều thứ phải nhớ.",
+    "Ai xong bài CRUD chưa, cho mình hỏi chỗ phân trang với.",
+    "Mẹo nhỏ: lỗi Parse error thì nhìn lên dòng phía trên trước nha.",
+    "Tối nay 8 giờ có ai muốn học nhóm bài session không?",
+    "Mình tham gia, học online qua phòng chat này luôn nhé.",
+    "Ai dùng Windows mà MySQL không chạy được thì xem có phần mềm nào chiếm cổng 3306 không.",
+    "Chào cả nhà, mình là dân trái ngành, mong được mọi người chỉ giáo.",
+    "Bài tập giỏ hàng vui thật, mình thêm nút giảm số lượng rồi.",
+    "Có ai bị lỗi headers already sent chưa? Mình vừa sửa xong, do BOM.",
+    "Mình hay quên exit sau header Location, giờ dán giấy nhớ trên màn hình luôn :)",
+    "Bài 2 phần validate mình làm lại 3 lần mới ưng.",
+    "Ai có mẹo nhớ thứ tự các bước đăng xuất không?",
+    "Xóa dữ liệu session, hết hạn cookie, rồi destroy. Mình nhớ theo thứ tự đó.",
+    "Cuối tuần này ai rảnh thì cùng làm một web quản lý sách nhỏ không?",
+    "Mình đăng ký một suất nhé.",
+    "Học xong bài 5 thấy đồ án cũ của mình lỗ hổng khắp nơi.",
+    "Mọi người dùng editor gì để code PHP vậy?",
+    "Mình dùng editor bình thường, cài thêm tiện ích tô màu PHP là đủ.",
+    "Nhớ lưu file UTF-8 không BOM nha mọi người.",
+    "Mình vừa làm xong quiz bài 1, được điểm tối đa.",
+    "Bài 3 có ai làm bài tập email trùng chưa? Mã lỗi 23000 đó.",
+    "Mình xong rồi, nhớ chỉ bắt đúng mã 23000, lỗi khác thì ném tiếp.",
+    "Chúc mọi người học tốt, mình đi ngủ đây.",
+    "Có ai đang ôn thi môn web giống mình không?",
+    "Mẹo: chạy SELECT với cùng điều kiện trước khi DELETE, đỡ mất dữ liệu.",
+    "Hôm qua mình quên WHERE trong UPDATE, mất hết dữ liệu test :(",
+    "Ai cần thì mình chia sẻ cách tổ chức thư mục cho bài CRUD.",
+    "Cho mình xin với, mình đang rối file require lung tung.",
+    "Để db.php, ham-chung.php, repo chung một thư mục, require bằng __DIR__ là ổn.",
+    "Chào buổi sáng mọi người, hôm nay mình bắt đầu bài 4.",
+    "Phần CSRF ai thấy khó thì đọc lại ví dụ trang độc hại, mình đọc lần hai mới hiểu.",
+    "Nhóm học tối thứ năm vẫn họp chứ mọi người?",
+    "Vẫn họp nhé, mình sẽ chia sẻ màn hình bài phân trang.",
+    "Mình vừa hoàn thành cả khóa, cảm ơn mọi người đã giúp đỡ.",
+    "Chúc mừng bạn! Mình còn bài 5 nữa thôi.",
+    "Có ai thử password_hash ra chuỗi khác nhau mỗi lần và hoang mang như mình không?",
+    "Bình thường mà, muối mỗi lần một khác, cứ dùng password_verify là được.",
+    "Hẹn mọi người tối mai cùng ôn quiz nhé."
+  ]
+}

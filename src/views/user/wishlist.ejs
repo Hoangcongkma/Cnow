@@ -1,0 +1,11 @@
+<%- include('../partials/header') %>
+<section class="wrap section">
+  <h1>Khóa học yêu thích</h1>
+  <% if (!courses.length) { %>
+    <div class="empty">Bạn chưa thêm khóa học nào. Bấm ♡ trên thẻ khóa học để lưu lại. <a href="/courses">Khám phá khóa học</a></div>
+  <% } %>
+  <div class="grid">
+    <% courses.forEach(c => { %><%- include('../partials/course-card', { c, owned }) %><% }) %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

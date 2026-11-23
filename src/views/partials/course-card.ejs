@@ -1,0 +1,33 @@
+<% const wished = me && (me.wishlist || []).some(id => String(id) === String(c._id)); %>
+<article class="card">
+  <div class="thumb" data-color="<%= c.color %>">
+    <span class="thumb-tag"><%= c.tag || c.title %></span>
+    <span class="thumb-logo"><span class="brand-c">C</span>now</span>
+  </div>
+  <% if (me) { %>
+    <form method="post" action="/wishlist/<%= c._id %>" class="wish">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="back" value="<%= currentUrl %>">
+      <button class="heart <%= wished ? 'on' : '' %>" aria-pressed="<%= wished ? 'true' : 'false' %>" aria-label="<%= wished ? 'Bỏ yêu thích' : 'Yêu thích' %> <%= c.title %>"><%= wished ? '♥' : '♡' %></button>
+    </form>
+  <% } %>
+  <div class="card-body">
+    <h3><a class="card-link stretched" href="/courses/<%= c.slug %>"><%= c.title %></a></h3>
+    <p class="muted small clamp"><%= c.summary %></p>
+    <div class="card-meta">
+      <span class="pill"><%= c.level %></span>
+      <span class="small muted"><%= c.lessons.length %> bài · <%= c.totalMinutes %> phút</span>
+    </div>
+    <p class="rating small">
+      <% if (c.ratingCount) { %><span class="stars" aria-hidden="true"><%= stars(c.ratingAvg) %></span> <b><%= c.ratingAvg.toFixed(1) %></b> <span class="muted">(<%= c.ratingCount %>)</span><span class="sr-only"> – đánh giá <%= c.ratingAvg %> trên 5</span><% } else { %><span class="muted">Chưa có đánh giá</span><% } %>
+    </p>
+    <div class="card-foot">
+      <% if (typeof owned !== 'undefined' && owned.includes(String(c._id))) { %>
+        <span class="price owned">✓ Đã sở hữu</span>
+      <% } else { %>
+        <span class="price"><%= c.price === 0 ? 'Miễn phí' : usd(c.price) %><% if (c.price > 0) { %><span class="price-vnd muted small">≈ <%= vnd(c.price) %></span><% } %></span>
+      <% } %>
+      <span class="btn btn-sm" aria-hidden="true">Xem khóa học</span>
+    </div>
+  </div>
+</article>

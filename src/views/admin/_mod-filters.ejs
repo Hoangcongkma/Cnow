@@ -1,0 +1,11 @@
+<%# Bộ lọc dùng chung cho trang kiểm duyệt Hỏi – Đáp và Bình luận %>
+<form method="get" class="filters filters-admin" role="search">
+  <label class="f-q">Tìm<input type="search" name="q" value="<%= f.q %>" maxlength="80" placeholder="Nội dung hoặc tên người viết"></label>
+  <label>Khóa học
+    <select name="course"><option value="">Tất cả</option><% courses.forEach(c => { %><option value="<%= c._id %>" <%= f.course === String(c._id) ? 'selected' : '' %>><%= c.title %></option><% }) %></select>
+  </label>
+  <label>Trạng thái
+    <select name="show"><option value="">Tất cả</option><option value="visible" <%= f.show === 'visible' ? 'selected' : '' %>>Đang hiện</option><option value="hidden" <%= f.show === 'hidden' ? 'selected' : '' %>>Đã ẩn</option></select>
+  </label>
+  <div class="f-actions"><button class="btn btn-sm">Lọc</button><% if (f.q || f.course || f.show) { %><a class="small" href="<%= base %>">Xóa lọc</a><% } %></div>
+</form>

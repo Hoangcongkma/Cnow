@@ -1,0 +1,13 @@
+<div class="sec" data-section data-id="<%= s.id %>">
+  <div class="sec-head">
+    <span class="handle" title="Kéo để sắp xếp chương" aria-hidden="true">⠿</span>
+    <input class="sec-title" data-f="title" value="<%= s.title %>" placeholder="Tên chương" aria-label="Tên chương" maxlength="150" required>
+    <button type="button" class="icon-btn" data-move="up" aria-label="Chuyển chương lên">↑</button>
+    <button type="button" class="icon-btn" data-move="down" aria-label="Chuyển chương xuống">↓</button>
+    <button type="button" class="icon-btn danger" data-remove="Xóa chương này và toàn bộ bài học trong chương?" aria-label="Xóa chương">✕</button>
+  </div>
+  <ol class="sec-lessons" data-lessons>
+    <% s.lessons.forEach(l => { %><%- include('_lesson-row', { l, courseId }) %><% }) %>
+  </ol>
+  <button type="button" class="btn btn-ghost btn-xs" data-add-lesson>+ Thêm bài học</button>
+</div>

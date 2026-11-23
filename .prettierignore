@@ -1,0 +1,9 @@
+node_modules
+package-lock.json
+public/vendor
+content
+uploads
+coverage
+# Prettier không hỗ trợ EJS; Markdown giữ nguyên định dạng soạn tay
+*.ejs
+*.md

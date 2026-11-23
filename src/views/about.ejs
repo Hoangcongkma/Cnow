@@ -1,0 +1,34 @@
+<%- include('partials/header') %>
+<section class="wrap section about">
+  <h1>Về Cnow</h1>
+  <p class="lead-text">Cnow là website học lập trình trực tuyến: bài học văn bản kèm code chạy thử, trắc nghiệm cuối bài, hỏi – đáp theo từng bài, phòng chat khóa học, chứng nhận hoàn thành và trang quản trị cho quản trị viên, cộng tác viên.</p>
+
+  <div class="about-grid">
+    <div class="card-pad">
+      <h2>Dự án</h2>
+      <dl class="kv-list">
+        <dt>Loại</dt><dd>Đồ án tốt nghiệp ngành An toàn thông tin</dd>
+        <dt>Trường</dt><dd>Học viện Kỹ thuật Mật mã</dd>
+        <dt>Tác giả</dt><dd><b>Hoàng Mạnh Công</b></dd>
+        <dt>Giảng viên hướng dẫn</dt><dd>Thầy Phạm Duy Trung</dd>
+        <dt>Phiên bản</dt><dd>Bản làm lại để kỷ niệm</dd>
+      </dl>
+    </div>
+    <div class="card-pad">
+      <h2>Điểm nhấn an toàn thông tin</h2>
+      <ul class="checks">
+        <li>CSP chỉ cho phép nguồn của chính website, không có script/style nội tuyến</li>
+        <li>CSRF cho mọi form, phiên được cấp lại sau đăng nhập, cookie HttpOnly + SameSite</li>
+        <li>Xác thực hai lớp TOTP; tài khoản quản trị có thêm mã quản trị</li>
+        <li>Giới hạn đăng nhập sai theo IP và theo tài khoản, nhật ký bảo mật</li>
+        <li>Giá và số tiền luôn tính ở máy chủ, đối chiếu kết quả cổng thanh toán trước khi mở khóa học</li>
+      </ul>
+    </div>
+  </div>
+
+  <% if (demoMode) { %>
+    <p class="flash flash-warn" role="note">Đây là <b>bản demo</b>: thanh toán chỉ là mô phỏng (PayPal / VNPay / MoMo demo), không phát sinh giao dịch thật. Tài khoản, đánh giá và bình luận có nhãn “Dữ liệu mẫu” là dữ liệu tạo ra để trình diễn.</p>
+  <% } %>
+  <p class="muted small">Mã nguồn phát hành theo giấy phép MIT © Hoàng Mạnh Công.</p>
+</section>
+<%- include('partials/footer') %>

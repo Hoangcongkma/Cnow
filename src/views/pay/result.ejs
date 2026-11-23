@@ -1,0 +1,24 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <div class="auth-card center">
+    <% const demo = typeof order !== 'undefined' && order && orderView.isDemo(order); %>
+    <% if (demo) { %><p class="demo-warn" role="note"><%= orderView.DEMO_NOTE %></p><% } %>
+    <div class="result-ic <%= ok ? 'ok' : 'fail' %>"><%= ok ? '✓' : '✕' %></div>
+    <h1><%= title %></h1>
+    <% if (ok) { %>
+      <p>Khóa học <b><%= course.title %></b> đã được mở cho bạn.</p>
+      <table class="kv">
+        <tr><th>Số tiền</th><td><%= usd(order.amount) %> <%= order.currency %><% if (order.amountVnd && order.gateway && orderView.GATEWAYS[order.gateway].currency === 'VND') { %><br><span class="muted small">đã thanh toán <%= fmtVnd(order.amountVnd) %></span><% } %></td></tr>
+        <tr><th>Phương thức</th><td><%= orderView.methodLabel(order) %></td></tr>
+        <tr><th>Mã giao dịch</th><td><code><%= order.captureId %></code></td></tr>
+        <tr><th>Thời gian</th><td><%= order.updatedAt.toLocaleString('vi-VN') %></td></tr>
+      </table>
+      <a class="btn btn-block" href="/learn/<%= course.slug %>">Vào học ngay</a>
+      <p class="small"><a href="/orders">Xem lịch sử thanh toán & hóa đơn</a></p>
+    <% } else { %>
+      <p><%= message %></p>
+      <% if (course) { %><a class="btn btn-block" href="/courses/<%= course.slug %>">Quay lại khóa học</a><% } else { %><a class="btn btn-block" href="/courses">Xem khóa học</a><% } %>
+    <% } %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

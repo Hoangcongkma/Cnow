@@ -1,0 +1,56 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="section-head"><h1>Quản lý khóa học</h1><a class="btn btn-sm" href="/admin/courses/new">+ Thêm khóa học</a></div>
+    <div class="tabs mb">
+      <a href="/admin/courses" class="<%= !status ? 'on' : '' %>">Tất cả</a>
+      <% Object.entries(labels).forEach(([k, v]) => { %><a href="?status=<%= k %>" class="<%= status === k ? 'on' : '' %>"><%= v %><%= k === 'pending' && pendingCount ? ` (${pendingCount})` : '' %></a><% }) %>
+    </div>
+    <% if (me.role === 'admin' && pendingCount && status !== 'pending') { %><p class="flash flash-warn">Có <b><%= pendingCount %></b> khóa học đang chờ duyệt. <a href="?status=pending">Xem ngay</a></p><% } %>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Khóa học</th><th>Giá</th><th>Bài học</th><th>Học viên</th><th>Trạng thái</th><th>Tác giả</th><th><span class="sr-only">Thao tác</span></th></tr></thead>
+        <tbody>
+          <% if (!courses.length) { %><tr><td colspan="7" class="muted">Không có khóa học.</td></tr><% } %>
+          <% courses.forEach(c => { %>
+            <tr>
+              <td><span class="dot" data-color="<%= c.color %>"></span><% if (c.published) { %><a href="/courses/<%= c.slug %>"><%= c.title %></a><% } else { %><%= c.title %><% } %><br><span class="muted small">/<%= c.slug %></span></td>
+              <td><%= c.price === 0 ? 'Miễn phí' : usd(c.price) %></td>
+              <td><%= c.lessons.length %></td>
+              <td><%= counts[String(c._id)] || 0 %></td>
+              <td>
+                <span class="status cs-<%= c.status %>"><%= labels[c.status] || c.status %></span>
+                <% if (c.status === 'rejected' && c.rejectReason) { %><br><span class="small muted">Lý do: <%= c.rejectReason %></span><% } %>
+              </td>
+              <td><%= c.author ? c.author.name : '—' %></td>
+              <td class="actions wrap-actions">
+                <a class="btn btn-ghost btn-xs" href="/admin/courses/<%= c._id %>/edit">Sửa</a>
+                <% if (me.role === 'admin' && c.status === 'pending') { %>
+                  <form method="post" action="/admin/courses/<%= c._id %>/approve" data-confirm="Duyệt và xuất bản “<%= c.title %>”?">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ok btn-xs">Duyệt</button>
+                  </form>
+                  <details class="reject">
+                    <summary class="btn btn-danger btn-xs">Từ chối</summary>
+                    <form method="post" action="/admin/courses/<%= c._id %>/reject">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <label class="sr-only" for="reason-<%= c._id %>">Lý do từ chối</label>
+                      <textarea id="reason-<%= c._id %>" name="reason" rows="2" minlength="5" maxlength="500" required placeholder="Lý do từ chối, cần sửa gì…"></textarea>
+                      <button class="btn btn-danger btn-xs">Gửi từ chối</button>
+                    </form>
+                  </details>
+                <% } %>
+                <% if (me.role === 'admin') { %>
+                  <form method="post" action="/admin/courses/<%= c._id %>/delete" data-confirm="Xóa khóa học “<%= c.title %>”?">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-danger btn-xs">Xóa</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>

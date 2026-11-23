@@ -1,0 +1,170 @@
+<%- include('../partials/header') %>
+<% const reading = Boolean(lesson && !lesson.youtubeId && materialsHtml); %>
+<section class="learn <%= reading ? 'reading' : '' %>" data-learn>
+  <div class="player">
+    <% if (lesson && lesson.youtubeId) { %>
+      <iframe id="yt-player" src="https://www.youtube-nocookie.com/embed/<%= lesson.youtubeId %>?enablejsapi=1&amp;rel=0&amp;origin=<%= encodeURIComponent(baseUrl) %>" title="<%= lesson.title %>" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen <%= enrolled ? 'data-yt-api' : '' %>></iframe>
+    <% } else if (!reading) { %>
+      <div class="player-empty">
+        <div class="play">▶</div>
+        <p><b><%= lesson ? lesson.title : 'Chưa có bài học' %></b></p>
+        <p class="muted small">Bài học chưa có nội dung. Cộng tác viên có thể thêm bài đọc hoặc video trong trang Quản trị.</p>
+      </div>
+    <% } %>
+    <% if (reading) { %><div class="read-progress" aria-hidden="true"><span data-read-bar></span></div><% } %>
+    <div class="player-info">
+      <% if (reading) { %><p class="crumb-dark small"><%= course.title %> · Bài <%= idx + 1 %>/<%= course.lessons.length %> · khoảng <%= lesson.minutes %> phút đọc</p><% } %>
+      <div class="title-row">
+        <h1><%= lesson ? lesson.title : course.title %></h1>
+        <% if (reading) { %><button type="button" class="btn btn-ghost btn-xs" data-reading-toggle aria-pressed="false" title="Ẩn/hiện danh sách bài học">⤢ Đọc toàn màn hình</button><% } %>
+      </div>
+      <% if (!reading) { %><p class="muted"><%= course.title %> · Bài <%= idx + 1 %>/<%= course.lessons.length %></p><% } %>
+      <% if (lesson && lesson.sourceUrl) { %>
+        <p class="source small">Nguồn: <b><%= lesson.sourceName || 'YouTube' %></b> – <a href="<%= lesson.sourceUrl %>" target="_blank" rel="noopener">Xem trên YouTube</a><% if (lesson.license) { %> <span class="muted">· <%= lesson.license %></span><% } %></p>
+      <% } %>
+      <%- include('_pager') %>
+      <% if (!enrolled) { %><p class="flash flash-warn">Bạn đang học thử. <a href="/courses/<%= course.slug %>">Mua khóa học</a> để mở toàn bộ bài học.</p><% } %>
+      <% if (reading) { %>
+        <div class="reader">
+          <% if (toc.length > 2) { %>
+            <details class="toc" open data-toc>
+              <summary class="toc-h">Mục lục <span aria-hidden="true">▾</span></summary>
+              <nav aria-label="Mục lục bài học">
+                <ol><% toc.forEach(t => { %><li class="toc-l<%= t.level %>"><a href="#<%= t.id %>"><%= t.text %></a></li><% }) %></ol>
+              </nav>
+            </details>
+          <% } %>
+          <%# Đã render Markdown + lọc XSS bằng services/markdown.js %>
+          <article class="prose reading-body" data-reading><%- materialsHtml %></article>
+        </div>
+        <%- include('_pager') %>
+      <% } %>
+      <% if (enrolled && lesson) { %>
+        <section class="notes" id="notes" aria-labelledby="notes-h">
+          <h2 id="notes-h">🗒️ Ghi chú của tôi <span class="muted small">(chỉ mình bạn thấy)</span></h2>
+          <form method="post" action="/learn/<%= course.slug %>/notes" class="note-form" data-note-form>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="lessonId" value="<%= lesson._id %>">
+            <input type="hidden" name="seconds" value="0" data-note-seconds>
+            <label class="sr-only" for="note-text">Nội dung ghi chú</label>
+            <textarea id="note-text" name="text" rows="2" maxlength="1000" required placeholder="<%= lesson.youtubeId ? 'Ghi lại ý chính tại thời điểm này của video…' : 'Ghi lại ý chính của bài đọc…' %>"></textarea>
+            <button class="btn btn-sm"><%= lesson.youtubeId ? 'Thêm ghi chú tại ' : 'Thêm ghi chú' %><% if (lesson.youtubeId) { %><span data-note-time>00:00</span><% } %></button>
+          </form>
+          <% if (!notes.length) { %><p class="muted small">Chưa có ghi chú nào cho bài này.</p><% } %>
+          <ul class="note-list">
+            <% notes.forEach(n => { %>
+              <li>
+                <% if (lesson.youtubeId) { %><button type="button" class="note-time" data-seek="<%= n.seconds %>" aria-label="Tua video đến <%= fmtTime(n.seconds) %>">▶ <%= fmtTime(n.seconds) %></button><% } %>
+                <div class="note-body">
+                  <p class="prewrap"><%= n.text %></p>
+                  <details class="note-edit">
+                    <summary class="small">Sửa</summary>
+                    <form method="post" action="/notes/<%= n._id %>">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <label class="sr-only" for="note-<%= n._id %>">Sửa ghi chú</label>
+                      <textarea id="note-<%= n._id %>" name="text" rows="2" maxlength="1000" required><%= n.text %></textarea>
+                      <button class="btn btn-xs">Lưu</button>
+                    </form>
+                  </details>
+                </div>
+                <form method="post" action="/notes/<%= n._id %>/delete" data-confirm="Xóa ghi chú này?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="icon-btn danger" aria-label="Xóa ghi chú">✕</button>
+                </form>
+              </li>
+            <% }) %>
+          </ul>
+        </section>
+      <% } %>
+      <% if (materialsHtml && !reading) { %>
+        <section class="materials" aria-labelledby="materials-h">
+          <h2 id="materials-h">📄 Tài liệu</h2>
+          <%# Đã render Markdown + lọc XSS bằng services/markdown.js %>
+          <article class="prose"><%- materialsHtml %></article>
+        </section>
+      <% } %>
+      <% if (quiz) { const L = ['A', 'B', 'C', 'D']; %>
+        <section class="quiz" id="quiz" aria-labelledby="quiz-h">
+          <h2 id="quiz-h">📝 Trắc nghiệm cuối bài</h2>
+          <% if (quiz.review) { %>
+            <p class="quiz-score <%= quiz.result.pct >= quiz.passRatio * 100 ? 'ok' : 'fail' %>">
+              Lần nộp gần nhất: <b><%= quiz.result.correct %>/<%= quiz.result.total %></b> câu đúng (<%= quiz.result.pct %>%)
+              <%= quiz.result.pct >= quiz.passRatio * 100 ? '– Đạt' : `– Chưa đạt (cần ${quiz.passRatio * 100}%)` %>
+              <% if (quiz.result.passed && quiz.result.pct < quiz.passRatio * 100) { %><span class="small">· bạn đã từng đạt trước đó</span><% } %>
+            </p>
+            <ol class="quiz-list">
+              <% quiz.items.forEach((q, i) => { %>
+                <li class="<%= q.chosen === q.answer ? 'right' : 'wrong' %>">
+                  <p class="quiz-q"><%= q.question %></p>
+                  <ul class="quiz-opts">
+                    <% q.options.forEach((o, j) => { %>
+                      <li class="<%= j === q.answer ? 'is-answer' : '' %> <%= j === q.chosen && j !== q.answer ? 'is-wrong' : '' %>">
+                        <b><%= L[j] %>.</b> <%= o %>
+                        <% if (j === q.answer) { %><span class="small"> ✓ Đáp án đúng</span><% } else if (j === q.chosen) { %><span class="small"> ✗ Bạn chọn</span><% } %>
+                      </li>
+                    <% }) %>
+                  </ul>
+                  <% if (q.chosen === -1) { %><p class="small muted">Bạn bỏ trống câu này.</p><% } %>
+                  <% if (q.explain) { %><p class="quiz-explain small"><b>Giải thích:</b> <%= q.explain %></p><% } %>
+                </li>
+              <% }) %>
+            </ol>
+            <% if (quiz.attempts.left) { %>
+              <a class="btn btn-ghost btn-sm" href="?lesson=<%= idx %>&amp;retry=1#quiz">↻ Làm lại</a>
+              <span class="muted small">Còn <%= quiz.attempts.left %>/<%= quiz.attempts.max %> lần nộp trong giờ này.</span>
+            <% } else { %>
+              <p class="muted small">Bạn đã dùng hết <%= quiz.attempts.max %> lần nộp trong 1 giờ cho bài này – làm lại được sau khoảng <%= quiz.attempts.waitMinutes %> phút. Trong lúc chờ, hãy đọc kỹ phần giải thích ở trên.</p>
+            <% } %>
+          <% } else { %>
+            <p class="muted small"><%= quiz.items.length %> câu · cần đúng từ <%= quiz.passRatio * 100 %>% để đánh dấu đã học bài này.</p>
+            <form method="post" action="/learn/<%= course.slug %>/quiz" class="quiz-form">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="lessonId" value="<%= lesson._id %>">
+              <ol class="quiz-list">
+                <% quiz.items.forEach((q, i) => { %>
+                  <li>
+                    <fieldset>
+                      <legend class="quiz-q"><%= q.question %></legend>
+                      <% q.options.forEach((o, j) => { %>
+                        <label class="quiz-opt"><input type="radio" name="q<%= i %>" value="<%= j %>" required> <b><%= L[j] %>.</b> <%= o %></label>
+                      <% }) %>
+                    </fieldset>
+                  </li>
+                <% }) %>
+              </ol>
+              <button class="btn btn-sm">Nộp bài</button>
+            </form>
+          <% } %>
+        </section>
+      <% } %>
+      <% if (lesson) { %><%- include('_qa') %><% } %>
+    </div>
+  </div>
+  <aside class="playlist">
+    <h2>Nội dung khóa học</h2>
+    <% if (enrolled) { %>
+      <div class="progress-row">
+        <progress max="100" value="<%= summary.pct %>" aria-label="Tiến độ khóa học"><%= summary.pct %>%</progress>
+        <span class="small"><b><%= summary.pct %>%</b> · <%= summary.completed %>/<%= summary.total %> bài</span>
+      </div>
+      <% if (cert) { %><p class="flash flash-success small">🎓 Bạn đã hoàn thành khóa học. <a href="/certificate/<%= cert._id %>">Xem chứng nhận</a> · <a href="/courses/<%= course.slug %>#reviews">Đánh giá khóa học</a></p><% } %>
+    <% } %>
+    <% let n = 0; course.sections.forEach((s) => { const start = n; const current = idx >= start && idx < start + s.lessons.length; %>
+      <details <%= current || course.sections.length === 1 ? 'open' : '' %>>
+        <summary><span><%= s.title %></span><span class="muted small"><%= s.lessons.length %> bài</span></summary>
+        <ol>
+          <% s.lessons.forEach((l) => { const i = n++; const open = enrolled || l.preview; const isDone = summary.done.has(String(l._id)); %>
+            <li class="<%= i === idx ? 'on' : '' %> <%= open ? '' : 'locked' %> <%= isDone ? 'done' : '' %>">
+              <% if (open) { %><a href="?lesson=<%= i %>" <%= i === idx ? 'aria-current=page' : '' %>><% } %>
+                <span class="lesson-no"><% if (isDone) { %><span class="tick" aria-label="Đã học">✓</span><% } else { %><%= i + 1 %><% } %></span><span><%= l.title %><br><span class="muted small"><%= l.minutes %> phút</span></span>
+              <% if (open) { %></a><% } else { %><span aria-label="Đã khóa">🔒</span><% } %>
+            </li>
+          <% }) %>
+        </ol>
+      </details>
+    <% }) %>
+    <a class="small" href="#qa">💬 Hỏi – Đáp của bài này (<%= thread.length %>)</a>
+    <% if (enrolled) { %><br><a class="small" href="/courses/<%= course.slug %>/chat">🗨️ Phòng chat của khóa học</a><% } %>
+  </aside>
+</section>
+<%- include('../partials/footer') %>

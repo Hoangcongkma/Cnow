@@ -1,0 +1,58 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <h1>Mã giảm giá</h1>
+    <% if (errors.length) { %><div class="flash flash-error" role="alert"><%= errors.join(' ') %></div><% } %>
+    <form class="form-grid mb" method="post" action="/admin/coupons">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Mã (chữ in hoa, số, - _)<input name="code" value="<%= form.code || '' %>" required maxlength="32" pattern="[A-Za-z0-9_\-]{3,32}" placeholder="VD: CHAOHE2026"></label>
+      <label>Kiểu giảm
+        <select name="type">
+          <option value="percent" <%= form.type !== 'amount' ? 'selected' : '' %>>Phần trăm (%)</option>
+          <option value="amount" <%= form.type === 'amount' ? 'selected' : '' %>>Số tiền (USD)</option>
+        </select>
+      </label>
+      <label>Giá trị<input type="number" name="value" min="0.01" max="10000" step="0.01" value="<%= form.value || '' %>" required></label>
+      <label>Hết hạn (để trống = không hết hạn)<input type="date" name="expiresAt"></label>
+      <label>Số lượt tối đa (để trống = không giới hạn)<input type="number" name="maxUses" min="1" step="1" value="<%= form.maxUses || '' %>"></label>
+      <label>Ghi chú<input name="note" maxlength="200" value="<%= form.note || '' %>"></label>
+      <label class="full">Áp dụng cho khóa học (không chọn = mọi khóa có phí; giữ Ctrl để chọn nhiều)
+        <select name="courses" multiple size="5">
+          <% courses.forEach(c => { %><option value="<%= c._id %>"><%= c.title %></option><% }) %>
+        </select>
+      </label>
+      <div class="full"><button class="btn">Tạo mã giảm giá</button></div>
+    </form>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Mã</th><th>Giảm</th><th>Đã dùng</th><th>Hết hạn</th><th>Áp dụng</th><th>Trạng thái</th><th><span class="sr-only">Thao tác</span></th></tr></thead>
+        <tbody>
+          <% if (!list.length) { %><tr><td colspan="7" class="muted">Chưa có mã giảm giá.</td></tr><% } %>
+          <% list.forEach(c => { const expired = c.expiresAt && c.expiresAt < new Date(); %>
+            <tr class="<%= !c.active || expired ? 'dim' : '' %>">
+              <td><code><%= c.code %></code><% if (c.note) { %><br><span class="muted small"><%= c.note %></span><% } %></td>
+              <td><%= c.type === 'percent' ? `${c.value}%` : usd(c.value) %></td>
+              <td><%= c.usedCount %><%= c.maxUses ? ` / ${c.maxUses}` : '' %></td>
+              <td><%= c.expiresAt ? c.expiresAt.toLocaleDateString('vi-VN') : '—' %><%= expired ? ' (hết hạn)' : '' %></td>
+              <td class="small"><%= c.courses.length ? c.courses.map(x => x.title).join(', ') : 'Mọi khóa có phí' %></td>
+              <td><span class="status <%= c.active ? 'st-COMPLETED' : 'st-CANCELLED' %>"><%= c.active ? 'Đang bật' : 'Đã tắt' %></span></td>
+              <td class="actions">
+                <form method="post" action="/admin/coupons/<%= c._id %>">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="active" value="<%= c.active ? '0' : '1' %>">
+                  <button class="btn btn-ghost btn-xs"><%= c.active ? 'Tắt' : 'Bật' %></button>
+                </form>
+                <form method="post" action="/admin/coupons/<%= c._id %>/delete" data-confirm="Xóa mã <%= c.code %>?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-danger btn-xs">Xóa</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>

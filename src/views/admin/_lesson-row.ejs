@@ -1,0 +1,14 @@
+<li class="les" data-lesson data-id="<%= l.id %>">
+  <span class="handle" title="Kéo để sắp xếp" aria-hidden="true">⠿</span>
+  <input class="les-title" data-f="title" value="<%= l.title %>" placeholder="Tiêu đề bài học" aria-label="Tiêu đề bài học" maxlength="200" required>
+  <input class="les-video" data-f="youtubeId" value="<%= l.youtubeId %>" placeholder="Link hoặc mã video YouTube" aria-label="Link hoặc mã video YouTube" maxlength="200">
+  <label class="les-min"><input type="number" data-f="minutes" value="<%= l.minutes %>" min="0" max="600" aria-label="Số phút"> phút</label>
+  <label class="check les-prev"><input type="checkbox" data-f="preview" <%= l.preview ? 'checked' : '' %>> Học thử</label>
+  <span class="les-tools">
+    <% if (l.id && courseId) { %><a class="btn btn-ghost btn-xs" href="/admin/courses/<%= courseId %>/lessons/<%= l.id %>">Tài liệu &amp; quiz</a><% } %>
+    <button type="button" class="icon-btn" data-move="up" aria-label="Chuyển bài lên">↑</button>
+    <button type="button" class="icon-btn" data-move="down" aria-label="Chuyển bài xuống">↓</button>
+    <button type="button" class="icon-btn danger" data-remove="Xóa bài học này?" aria-label="Xóa bài học">✕</button>
+  </span>
+  <% if (l.sourceName) { %><span class="les-src muted small">Nguồn: <%= l.sourceName %></span><% } %>
+</li>

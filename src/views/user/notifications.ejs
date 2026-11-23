@@ -1,0 +1,31 @@
+<%- include('../partials/header') %>
+<section class="wrap section">
+  <div class="section-head">
+    <h1>🔔 Thông báo</h1>
+    <% if (items.some(n => !n.read)) { %>
+      <form method="post" action="/notifications/read-all">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-ghost btn-sm">Đánh dấu tất cả đã đọc</button>
+      </form>
+    <% } %>
+  </div>
+  <% if (!items.length) { %><div class="empty">Bạn chưa có thông báo nào.</div><% } %>
+  <ul class="notif-list">
+    <% const icon = { qa_reply: '💬', new_lesson: '📚', payment: '✅', refund: '↩️' }; %>
+    <% items.forEach(n => { %>
+      <li class="<%= n.read ? '' : 'unread' %>">
+        <form method="post" action="/notifications/<%= n._id %>/open">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="notif">
+            <span class="notif-ic" aria-hidden="true"><%= icon[n.type] || '🔔' %></span>
+            <span class="notif-body">
+              <span><%= n.text %></span>
+              <span class="muted small"><%= n.createdAt.toLocaleString('vi-VN') %><%= n.read ? '' : ' · Chưa đọc' %></span>
+            </span>
+          </button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+</section>
+<%- include('../partials/footer') %>

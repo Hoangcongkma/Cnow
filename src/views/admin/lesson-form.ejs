@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <a class="small" href="/admin/courses/<%= course._id %>/edit">← <%= course.title %></a>
+    <h1>Bài <%= index + 1 %>: <%= lesson.title %></h1>
+    <% if (errors.length) { %><div class="flash flash-error"><%= errors.join(' ') %></div><% } %>
+    <form class="form-grid" method="post" action="/admin/courses/<%= course._id %>/lessons/<%= lesson._id %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="full">Tiêu đề bài học<input name="title" value="<%= form.title %>" required maxlength="200"></label>
+      <label>Link hoặc mã video YouTube<input name="youtubeId" value="<%= form.youtubeId || '' %>" maxlength="200" placeholder="https://www.youtube.com/watch?v=..."></label>
+      <label>Số phút<input type="number" name="minutes" min="0" max="600" value="<%= form.minutes %>"></label>
+      <% if (lesson.sourceName) { %><p class="full small muted">Nguồn video hiện tại: <b><%= lesson.sourceName %></b> – <a href="<%= lesson.sourceUrl %>" target="_blank" rel="noopener">Xem trên YouTube</a></p><% } %>
+      <label class="check full"><input type="checkbox" name="preview" <%= form.preview ? 'checked' : '' %>> Cho học thử (xem miễn phí)</label>
+      <label class="full">Tài liệu (Markdown: bài đọc, code mẫu, bài tập)
+        <textarea name="materials" rows="16" class="mono" maxlength="40000" placeholder="## Tóm tắt&#10;&#10;```js&#10;console.log('Xin chào');&#10;```&#10;&#10;### Bài tập&#10;- [ ] Viết hàm cộng hai số"><%= form.materials || '' %></textarea>
+        <span class="muted small">Hỗ trợ tiêu đề, danh sách, bảng, liên kết, khối code có tên ngôn ngữ (```js, ```html, ```css…). HTML nguy hiểm sẽ bị lọc bỏ.</span>
+      </label>
+      <fieldset class="full" data-quiz-editor>
+        <legend>Trắc nghiệm cuối bài (mỗi câu 4 phương án, học viên cần đúng ≥ 70% mới được đánh dấu đã học)</legend>
+        <div data-quiz-list>
+          <% (form.quiz || []).forEach(q => { %><%- include('_quiz-item', { q }) %><% }) %>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" data-quiz-add>+ Thêm câu hỏi</button>
+        <span class="muted small">Câu để trống hoàn toàn sẽ bị bỏ qua. Xóa hết câu hỏi = bài không có trắc nghiệm.</span>
+        <template data-quiz-tpl><%- include('_quiz-item', { q: { question: '', options: [], answer: 0, explain: '' } }) %></template>
+      </fieldset>
+      <div class="full"><button class="btn">Lưu bài học</button> <a class="btn btn-ghost" href="/admin/courses/<%= course._id %>/edit">Quay lại khóa học</a></div>
+    </form>
+    <% if (materialsHtml) { %>
+      <h2 class="mt">Xem trước tài liệu</h2>
+      <article class="prose card-pad"><%- materialsHtml %></article>
+    <% } %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

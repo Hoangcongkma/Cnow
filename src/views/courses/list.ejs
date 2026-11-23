@@ -1,0 +1,46 @@
+<%- include('../partials/header') %>
+<section class="wrap section">
+  <div class="section-head">
+    <h1>Khóa học</h1>
+    <span class="muted small"><%= total %> khóa học<%= pages > 1 ? ` · trang ${page}/${pages}` : '' %></span>
+  </div>
+  <form class="filters" method="get" action="/courses" role="search" data-filter-form>
+    <label class="f-q">Tìm kiếm<input type="search" name="q" value="<%= params.q %>" placeholder="Tên khóa học…" maxlength="60"></label>
+    <label>Trình độ
+      <select name="level"><option value="">Tất cả</option><% levels.forEach(l => { %><option <%= params.level === l ? 'selected' : '' %>><%= l %></option><% }) %></select>
+    </label>
+    <label>Học phí
+      <select name="price">
+        <option value="">Tất cả</option>
+        <option value="free" <%= params.price === 'free' ? 'selected' : '' %>>Miễn phí</option>
+        <option value="paid" <%= params.price === 'paid' ? 'selected' : '' %>>Có phí</option>
+      </select>
+    </label>
+    <label>Đánh giá
+      <select name="rating">
+        <option value="">Tất cả</option>
+        <% ['4.5', '4', '3'].forEach(r => { %><option value="<%= r %>" <%= params.rating === r ? 'selected' : '' %>>Từ <%= r %> ★</option><% }) %>
+      </select>
+    </label>
+    <label>Sắp xếp
+      <select name="sort"><% Object.entries(sorts).forEach(([k, s]) => { %><option value="<%= k %>" <%= params.sort === k ? 'selected' : '' %>><%= s.label %></option><% }) %></select>
+    </label>
+    <div class="f-actions"><button class="btn btn-sm">Lọc</button><% if (params.q || params.level || params.price || params.rating || params.sort !== 'new') { %> <a class="small" href="/courses">Xóa bộ lọc</a><% } %></div>
+  </form>
+  <% if (!courses.length) { %>
+    <p class="empty">Không tìm thấy khóa học nào<%= params.q ? ` cho “${params.q}”` : '' %>. <a href="/courses">Xem tất cả khóa học</a></p>
+  <% } %>
+  <div class="grid">
+    <% courses.forEach(c => { %><%- include('../partials/course-card', { c, owned }) %><% }) %>
+  </div>
+  <% if (pages > 1) { %>
+    <nav class="pagination" aria-label="Phân trang">
+      <% if (page > 1) { %><a href="<%= urlWith({ page: String(page - 1) }) %>" rel="prev">← Trước</a><% } %>
+      <% for (let p = 1; p <= pages; p++) { %>
+        <% if (p === page) { %><span class="on" aria-current="page"><%= p %></span><% } else { %><a href="<%= urlWith({ page: String(p) }) %>"><%= p %></a><% } %>
+      <% } %>
+      <% if (page < pages) { %><a href="<%= urlWith({ page: String(page + 1) }) %>" rel="next">Sau →</a><% } %>
+    </nav>
+  <% } %>
+</section>
+<%- include('../partials/footer') %>

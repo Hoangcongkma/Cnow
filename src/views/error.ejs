@@ -1,0 +1,28 @@
+<%- include('partials/header') %>
+<section class="auth">
+  <div class="auth-card center">
+    <% if (typeof notFound !== 'undefined' && notFound) { %>
+      <div class="big-404" aria-hidden="true">404</div>
+      <h1><%= title %></h1>
+      <p class="muted"><%= message %></p>
+      <form class="search search-404" method="get" action="/courses" role="search">
+        <label class="sr-only" for="q404">Tìm khóa học</label>
+        <input id="q404" type="search" name="q" placeholder="Tìm khóa học…" maxlength="60">
+        <button class="btn btn-sm">Tìm</button>
+      </form>
+      <% if (suggest && suggest.length) { %>
+        <p class="small muted">Có thể bạn quan tâm:</p>
+        <ul class="suggest">
+          <% suggest.forEach(c => { %><li><a href="/courses/<%= c.slug %>"><%= c.title %></a></li><% }) %>
+        </ul>
+      <% } %>
+      <p><a class="btn" href="/">Về trang chủ</a> <a class="btn btn-ghost" href="/courses">Xem khóa học</a></p>
+    <% } else { %>
+      <div class="result-ic fail" aria-hidden="true">!</div>
+      <h1><%= title %></h1>
+      <p><%= message %></p>
+      <a class="btn" href="/">Về trang chủ</a>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>

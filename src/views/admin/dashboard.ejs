@@ -1,0 +1,66 @@
+<%- include('../partials/header') %>
+<section class="wrap admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="section-head">
+      <h1>Tổng quan</h1>
+      <form class="range" method="get" action="/admin">
+        <label>Từ<input type="date" name="from" value="<%= range.from %>"></label>
+        <label>Đến<input type="date" name="to" value="<%= range.to %>"></label>
+        <button class="btn btn-sm">Xem</button>
+        <a class="btn btn-ghost btn-sm" href="/admin/export/revenue.csv?from=<%= range.from %>&amp;to=<%= range.to %>" download>⬇ Doanh thu theo khóa (CSV)</a>
+      </form>
+    </div>
+    <% if (scoped) { %><p class="muted small">Số liệu chỉ tính các khóa học do bạn tạo.</p><% } %>
+    <div class="kpis">
+      <div class="kpi"><span>Doanh thu</span><b><%= usd(stats.revenue) %></b></div>
+      <div class="kpi"><span>Đơn thành công</span><b><%= stats.orders %></b></div>
+      <div class="kpi"><span>Tỉ lệ thanh toán thành công</span><b><%= stats.successRate === null ? '—' : stats.successRate + '%' %></b></div>
+      <div class="kpi"><span><%= scoped ? 'Học viên của bạn' : 'Học viên' %> · Khóa học</span><b><%= stats.learners %> · <%= stats.courses %></b></div>
+    </div>
+    <div class="charts">
+      <figure class="chart-card chart-wide">
+        <figcaption>Doanh thu theo tháng (<%= range.from.split('-').reverse().join('/') %> – <%= range.to.split('-').reverse().join('/') %>)</figcaption>
+        <div class="chart-box"><canvas data-chart="<%= JSON.stringify(charts.revenue) %>" role="img" aria-label="Biểu đồ doanh thu theo tháng"></canvas></div>
+      </figure>
+      <figure class="chart-card">
+        <figcaption>Số ghi danh theo khóa học (top 10)</figcaption>
+        <div class="chart-box"><canvas data-chart="<%= JSON.stringify(charts.enroll) %>" role="img" aria-label="Biểu đồ số ghi danh theo khóa học"></canvas></div>
+      </figure>
+      <figure class="chart-card">
+        <figcaption>Tỉ lệ thanh toán (đơn có phí)</figcaption>
+        <div class="chart-box"><canvas data-chart="<%= JSON.stringify(charts.status) %>" role="img" aria-label="Biểu đồ tỉ lệ thanh toán thành công, thất bại"></canvas></div>
+      </figure>
+    </div>
+    <%# Bảng số liệu thay thế cho trình đọc màn hình / khi tắt JS %>
+    <details class="chart-data">
+      <summary class="small">Xem số liệu dạng bảng</summary>
+      <div class="table-wrap">
+        <table class="table"><thead><tr><th>Tháng</th><th>Doanh thu</th></tr></thead>
+          <tbody><% charts.revenue.labels.forEach((m, i) => { %><tr><td><%= m %></td><td><%= usd(charts.revenue.data[i]) %></td></tr><% }) %></tbody>
+        </table>
+      </div>
+    </details>
+    <h2 class="mt">Giao dịch gần đây</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Thời gian</th><th>Học viên</th><th>Khóa học</th><th>Số tiền</th><th>Trạng thái</th></tr></thead>
+        <tbody>
+          <% if (!recent.length) { %><tr><td colspan="5" class="muted">Chưa có giao dịch.</td></tr><% } %>
+          <% recent.forEach(o => { %>
+            <tr>
+              <td><%= o.createdAt.toLocaleString('vi-VN') %></td>
+              <td><%= o.user ? o.user.name : '—' %></td>
+              <td><%= o.course ? o.course.title : '—' %></td>
+              <td><%= usd(o.amount) %></td>
+              <td><span class="status st-<%= o.status %>"><%= o.status %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<script src="<%= asset('/vendor/chartjs/chart.umd.min.js') %>"></script>
+<script src="<%= asset('/js/admin-charts.js') %>"></script>
+<%- include('../partials/footer') %>

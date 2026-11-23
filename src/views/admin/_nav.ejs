@@ -1,0 +1,13 @@
+<nav class="admin-nav" aria-label="Quản trị">
+  <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>">📊 Tổng quan</a>
+  <a href="/admin/courses" class="<%= path.startsWith('/admin/courses') ? 'on' : '' %>">📚 Khóa học</a>
+  <a href="/admin/learners" class="<%= path === '/admin/learners' ? 'on' : '' %>">🎓 Người học</a>
+  <% if (me.role === 'admin') { %>
+    <a href="/admin/orders" class="<%= path === '/admin/orders' ? 'on' : '' %>">🧾 Hóa đơn, đơn hàng</a>
+    <a href="/admin/coupons" class="<%= path === '/admin/coupons' ? 'on' : '' %>">🏷️ Mã giảm giá</a>
+    <a href="/admin/users" class="<%= path === '/admin/users' ? 'on' : '' %>">👥 Thành viên & phân quyền</a>
+    <a href="/admin/qa" class="<%= path === '/admin/qa' ? 'on' : '' %>">💬 Hỏi – Đáp</a>
+    <a href="/admin/comments" class="<%= path === '/admin/comments' ? 'on' : '' %>">🗨️ Bình luận</a>
+    <a href="/admin/audit" class="<%= path === '/admin/audit' ? 'on' : '' %>">🛡️ Nhật ký bảo mật</a>
+  <% } %>
+</nav>

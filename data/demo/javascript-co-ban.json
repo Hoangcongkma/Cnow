@@ -1,0 +1,534 @@
+{
+  "slug": "javascript-co-ban",
+  "lessons": {
+    "01-gioi-thieu-javascript": [
+      {
+        "q": "Mình để thẻ script trong head mà quên defer, kết quả document.querySelector('h1') trả về null rồi báo lỗi Cannot set properties of null. Sao lại thế ạ?",
+        "answers": ["Mình cũng bị y hệt, thêm defer vào là chạy liền. Lúc script chạy thì body chưa có gì nên không tìm thấy h1."],
+        "instructor": "Trình duyệt đọc HTML từ trên xuống. Không có defer, script trong head chạy ngay khi gặp, lúc đó phần body chưa được dựng nên querySelector không tìm thấy gì và trả về null. Thêm defer để script chạy sau khi HTML đọc xong, hoặc chuyển thẻ script xuống cuối body. Trong khóa này mình thống nhất dùng defer."
+      },
+      {
+        "q": "defer với async khác nhau chỗ nào vậy mọi người?",
+        "answers": [],
+        "instructor": "Cả hai đều tải script song song, không chặn việc đọc HTML. Khác ở lúc chạy: async chạy ngay khi tải xong, có thể trước khi HTML đọc hết và không giữ thứ tự giữa các file; defer chờ HTML đọc xong mới chạy và giữ đúng thứ tự xuất hiện. Code thao tác giao diện thì nên dùng defer."
+      },
+      {
+        "q": "mn ơi mình chạy node app.js thì bị ReferenceError: document is not defined, mình làm sai gì ạ",
+        "answers": [
+          "File đó có code trình duyệt rồi bạn ơi, document chỉ có trong trình duyệt thôi.",
+          "Bạn mở file html bằng trình duyệt rồi xem Console nhé, đừng chạy bằng node."
+        ],
+        "instructor": "Hai bạn trả lời đúng rồi. document là đối tượng trình duyệt cung cấp để thao tác trang web, Node.js không có trang web nên không có biến này. Phần cốt lõi (biến, hàm, mảng) chạy được ở cả hai nơi, còn code dùng document hay window thì phải nạp vào trang HTML và chạy trong trình duyệt."
+      },
+      {
+        "q": "'use strict' phải đặt ở đâu ạ? Mình để ở dòng thứ 3, sau mấy câu khai báo biến thì có tác dụng không?",
+        "answers": ["Hình như phải để dòng đầu tiên mới được."],
+        "instructor": "Đúng vậy, chỉ thị này phải đứng đầu file (hoặc đầu thân hàm), trước mọi câu lệnh khác; chú thích đứng trước thì không sao. Đặt sau câu lệnh khác thì nó chỉ là một chuỗi bình thường, không bật chế độ nghiêm ngặt. Lưu ý file dùng import/export (module) đã tự ở chế độ nghiêm ngặt."
+      },
+      {
+        "q": "JavaScript với Java có liên quan gì nhau không thầy? Mình học Java rồi có lợi thế không?",
+        "answers": ["Không liên quan đâu bạn, giống tên thôi. Nhưng biết Java thì quen if, for, hàm nên học nhanh hơn."],
+        "instructor": "Hai ngôn ngữ độc lập, cách chạy và hệ thống kiểu khác nhau, chỉ trùng tên. Tuy vậy cú pháp cơ bản như if, for, while, toán tử khá giống nên bạn sẽ đỡ bỡ ngỡ. Điểm cần chú ý khi chuyển sang là JavaScript kiểu động, biến không khai báo kiểu, và hàm là giá trị có thể truyền qua lại."
+      },
+      {
+        "q": "console.table có dùng được trong Node không hay chỉ trên trình duyệt ạ?",
+        "answers": [],
+        "instructor": "Dùng được ở cả hai. Trong trình duyệt bạn thấy một bảng có thể bấm sắp xếp, còn trong Node.js bảng được vẽ bằng ký tự trong terminal. Nó rất tiện khi xem mảng các đối tượng có cùng thuộc tính."
+      },
+      {
+        "q": "Có bắt buộc viết dấu chấm phẩy cuối câu lệnh không ạ? Mình thấy nhiều code trên mạng không có.",
+        "answers": [
+          "Mình thì cứ viết cho chắc, lint của dự án cũng tự báo nếu thiếu.",
+          "Không bắt buộc nhưng có vài trường hợp lỗi kỳ cục nếu bỏ."
+        ],
+        "instructor": "Không bắt buộc vì JavaScript có cơ chế tự chèn dấu chấm phẩy. Nhưng cơ chế này đôi khi đoán sai, ví dụ dòng tiếp theo bắt đầu bằng ( hoặc [ thì có thể bị nối vào dòng trước. Người mới nên viết đầy đủ và để công cụ định dạng như Prettier giữ cho thống nhất."
+      },
+      {
+        "q": "Console báo 404 cho app.js. File của mình nằm trong thư mục js, còn trong html mình ghi src=\"app.js\".",
+        "answers": ["Sửa thành js/app.js là được bạn."],
+        "instructor": "Đường dẫn trong src là tương đối so với file HTML. File nằm trong thư mục js thì phải ghi js/app.js. Mẹo: mở tab Network trong DevTools, bạn sẽ thấy trình duyệt đã cố tải địa chỉ nào và nhận về mã lỗi gì."
+      },
+      {
+        "q": "Mình gõ nhầm soLuogn = 2 khi không bật strict mode, không thấy lỗi gì. Vậy biến đó đi đâu vậy thầy?",
+        "answers": [],
+        "instructor": "Không có strict mode, gán cho một tên chưa khai báo sẽ âm thầm tạo thuộc tính trên đối tượng toàn cục (window trong trình duyệt, globalThis nói chung). Biến soLuong thật vẫn giữ giá trị cũ, nên chương trình chạy sai mà không báo gì. Bật 'use strict' thì dòng đó ném ReferenceError ngay, bạn sửa được liền."
+      },
+      {
+        "q": "Trong bài có typeof document !== 'undefined'. Sao không viết luôn document !== undefined cho gọn ạ?",
+        "answers": ["Viết vậy trong node sẽ bị lỗi vì document chưa khai báo đó bạn."],
+        "instructor": "Chính xác. Nhắc tới một biến chưa từng được khai báo ở bất kỳ đâu sẽ ném ReferenceError, nên document !== undefined làm Node dừng chương trình. Riêng typeof là ngoại lệ: với tên chưa khai báo nó trả về chuỗi 'undefined' thay vì báo lỗi, nên đây là cách kiểm tra an toàn môi trường đang chạy."
+      }
+    ],
+    "02-kieu-du-lieu-va-toan-tu": [
+      {
+        "q": "Thầy ơi sao 0.1 + 0.2 lại ra 0.30000000000000004? Máy tính tính sai à?",
+        "answers": [
+          "Không phải sai đâu, do số thực lưu dạng nhị phân nên có sai số nhỏ.",
+          "Ngôn ngữ nào dùng số thực dấu phẩy động cũng vậy, không riêng JS."
+        ],
+        "instructor": "Máy không tính sai, chỉ là 0.1 và 0.2 không biểu diễn chính xác được trong hệ nhị phân, giống 1/3 không viết hết bằng số thập phân. Sai số rất nhỏ nhưng làm phép so sánh === thất bại. Với tiền, hãy lưu số nguyên theo đơn vị nhỏ nhất (đồng, xu) và chỉ định dạng khi hiển thị."
+      },
+      {
+        "q": "0 ?? 10 với 0 || 10 khác nhau chỗ nào ạ?",
+        "answers": ["?? ra 0, || ra 10. Mình nhớ là ?? chỉ quan tâm null với undefined."],
+        "instructor": "Bạn trả lời đúng. || thay thế khi vế trái là bất kỳ giá trị falsy nào (0, chuỗi rỗng, false, NaN, null, undefined), còn ?? chỉ thay thế khi vế trái là null hoặc undefined. Khi 0 hay chuỗi rỗng là dữ liệu hợp lệ, ví dụ số lượng 0 hay giảm giá 0%, hãy dùng ??."
+      },
+      {
+        "q": "typeof null ra 'object' là bug của JavaScript hả thầy?",
+        "answers": [],
+        "instructor": "Có thể coi là lỗi lịch sử từ phiên bản đầu tiên, nhưng không sửa được vì sẽ làm hỏng rất nhiều trang web cũ. null vẫn là kiểu nguyên thủy. Muốn kiểm tra null thì so sánh trực tiếp giaTri === null; muốn kiểm tra một đối tượng thật thì dùng typeof x === 'object' && x !== null."
+      },
+      {
+        "q": "Mình viết ten.trim(); xong in ten ra vẫn còn khoảng trắng hai đầu, mình làm sai ở đâu ạ?",
+        "answers": ["trim trả về chuỗi mới chứ không sửa ten đâu bạn, phải gán lại."],
+        "instructor": "Chuỗi là bất biến nên mọi phương thức chuỗi đều trả về chuỗi mới. Bạn cần nhận kết quả: ten = ten.trim(); (ten phải khai báo bằng let) hoặc const tenGon = ten.trim();. Lỗi này hay gặp với cả toUpperCase, replaceAll, slice."
+      },
+      {
+        "q": "isNaN('abc') ra true nhưng Number.isNaN('abc') lại ra false, vậy dùng cái nào?",
+        "answers": ["Bài khuyên Number.isNaN đó bạn."],
+        "instructor": "isNaN toàn cục đổi đối số sang số trước rồi mới kiểm tra, nên chuỗi 'abc' bị đổi thành NaN và cho true. Number.isNaN không đổi kiểu, chỉ trả true khi giá trị thực sự là NaN. Cách rõ ràng nhất là tự đổi trước rồi kiểm tra: Number.isNaN(Number(chuoi))."
+      },
+      {
+        "q": "Mình làm (2/3).toFixed(2) + 1 mà ra '0.671' chứ không phải 1.67 :)",
+        "answers": [
+          "toFixed trả về chuỗi nên dấu + thành nối chuỗi rồi.",
+          "Bọc Number(...) quanh toFixed là được, nhưng tốt nhất cộng xong rồi mới toFixed."
+        ],
+        "instructor": "Đúng như các bạn nói: toFixed trả về chuỗi dùng để hiển thị. Khi một vế của + là chuỗi thì phép cộng thành nối chuỗi. Hãy tính toán hết bằng số, chỉ gọi toFixed hoặc toLocaleString ở bước in ra cuối cùng."
+      },
+      {
+        "q": "Math.round(-4.5) ra -4 chứ không phải -5, mình tưởng làm tròn .5 là ra xa số 0?",
+        "answers": [],
+        "instructor": "Math.round làm tròn phần .5 về phía dương vô cùng, nên 4.5 thành 5 còn -4.5 thành -4. Nếu muốn làm tròn đối xứng cho số âm, bạn có thể làm Math.sign(x) * Math.round(Math.abs(x)). Trong thực tế số tiền thường không âm nên ít gặp, nhưng nên biết để tránh bất ngờ."
+      },
+      {
+        "q": "user?.diaChi.thanhPho với user?.diaChi?.thanhPho khác nhau thế nào ạ? Mình thấy cả hai đều chạy.",
+        "answers": ["Cái đầu vẫn lỗi nếu user có mà diaChi không có."],
+        "instructor": "?. chỉ bảo vệ đúng vị trí nó đứng. user?.diaChi.thanhPho: nếu user là null hoặc undefined thì cả chuỗi trả về undefined; nhưng nếu user có mà diaChi thiếu thì .thanhPho vẫn ném TypeError. Viết ?. ở mỗi chỗ có thể thiếu dữ liệu, nhưng đừng rải khắp nơi vì sẽ che mất lỗi thật."
+      },
+      {
+        "q": "Sao '5' + 1 ra '51' mà '5' - 1 lại ra 4 vậy mọi người?",
+        "answers": [
+          "Dấu + ưu tiên nối chuỗi, còn dấu - thì chỉ có nghĩa với số nên nó tự đổi sang số.",
+          "Mình hay dùng Number() trước cho chắc."
+        ],
+        "instructor": "Toán tử + vừa cộng số vừa nối chuỗi; chỉ cần một vế là chuỗi thì nó nối chuỗi. Các toán tử -, *, / chỉ làm việc với số nên tự đổi chuỗi sang số. Dữ liệu từ ô nhập luôn là chuỗi, vì vậy hãy chủ động đổi bằng Number() rồi kiểm tra NaN trước khi tính."
+      },
+      {
+        "q": "Tiền VND không có số lẻ thì mình có cần lo vụ sai số số thực không ạ?",
+        "answers": [],
+        "instructor": "Cộng trừ số nguyên VND thì không có sai số. Nhưng khi nhân phần trăm, ví dụ giảm 15% của 19900, kết quả có thể ra số lẻ, nên làm tròn bằng Math.round ngay sau phép tính. Với tiền có phần lẻ như USD, hãy quy ra xu. Số nguyên an toàn tới khoảng 9 triệu tỷ (Number.MAX_SAFE_INTEGER), đủ dùng cho bài tập."
+      }
+    ],
+    "03-ham-va-pham-vi": [
+      {
+        "q": "Mình gọi chao() ở dòng trên rồi mới viết const chao = () => ... thì báo Cannot access 'chao' before initialization. Sao function thường lại gọi trước được?",
+        "answers": ["Function declaration được hoisting còn const thì không bạn ơi."],
+        "instructor": "Khai báo function được kéo lên đầu phạm vi cùng với thân hàm, nên gọi trước được. Biến const và let cũng được ghi nhận từ đầu khối nhưng chưa có giá trị cho tới dòng khai báo; khoảng đó gọi là vùng chết tạm thời (temporal dead zone), truy cập vào sẽ báo lỗi. Hãy khai báo biểu thức hàm trước khi dùng."
+      },
+      {
+        "q": "for (var i = 0; i < 3; i++) setTimeout(() => console.log(i), 0) in ra 3 3 3, đổi sang let thì 0 1 2. Mình chưa hiểu lắm ạ.",
+        "answers": [
+          "var thì cả vòng lặp dùng chung 1 biến i, đến lúc setTimeout chạy thì i đã là 3 rồi.",
+          "let thì mỗi vòng có một i riêng, closure nhớ i của vòng đó."
+        ],
+        "instructor": "Hai bạn giải thích chuẩn. Các hàm trong setTimeout chỉ chạy sau khi vòng lặp kết thúc. Với var chỉ có một biến i cho cả hàm, lúc đó đã bằng 3. Với let, mỗi lần lặp tạo một biến mới, mỗi hàm mũi tên đóng gói (closure) đúng biến của lần lặp đó."
+      },
+      {
+        "q": "const gapDoi = (x) => { x * 2 }; gapDoi(4) ra undefined luôn, ai cứu mình với",
+        "answers": ["Có ngoặc nhọn thì phải return bạn ơi."],
+        "instructor": "Khi thân hàm mũi tên có ngoặc nhọn, đó là một khối lệnh bình thường và phải có return. Viết (x) => { return x * 2; } hoặc gọn hơn (x) => x * 2. Lưu ý muốn trả về một đối tượng theo kiểu gọn thì bọc ngoặc tròn: () => ({ ten: 'An' })."
+      },
+      {
+        "q": "Closure có làm tốn bộ nhớ không thầy? Mình tạo nhiều bộ đếm thì sao?",
+        "answers": [],
+        "instructor": "Mỗi bộ đếm giữ biến dem của riêng nó, và biến đó còn sống chừng nào còn tham chiếu tới các hàm tang, giam. Khi không còn ai giữ bộ đếm, bộ thu gom rác sẽ dọn. Một vài nghìn bộ đếm nhỏ không đáng kể; chỉ cần cẩn thận đừng để closure vô tình giữ dữ liệu lớn không còn dùng."
+      },
+      {
+        "q": "boDemA.dem ra undefined, vậy nếu mình muốn đặt lại bộ đếm về 0 thì làm sao ạ?",
+        "answers": ["Thêm một hàm datLai vào object trả về là được."],
+        "instructor": "Đúng, đó là ý của dữ liệu riêng tư: bên ngoài chỉ làm được những gì bạn cho phép. Thêm datLai: () => { dem = batDau; } vào đối tượng trả về. Hàm này cũng nằm trong closure nên đọc được cả dem và batDau."
+      },
+      {
+        "q": "Bài có nói hàm mũi tên xử lý this khác. Khác như nào vậy thầy, mình dùng arrow cho phương thức của object thì this ra undefined.",
+        "answers": ["Arrow không có this riêng đâu bạn."],
+        "instructor": "Hàm mũi tên không có this của riêng nó mà dùng this của phạm vi bao ngoài lúc được tạo. Khi viết phương thức trong object bằng arrow, this không phải object đó. Với phương thức cần this, hãy dùng cú pháp rút gọn trungBinh() { ... } như ở bài sau. Arrow hợp làm callback bên trong phương thức."
+      },
+      {
+        "q": "Hàm có console.log bên trong thì không còn là hàm thuần nữa đúng không ạ?",
+        "answers": [],
+        "instructor": "Đúng, in ra màn hình là một tác dụng phụ. Cách làm tốt là để hàm tính toán trả về kết quả, còn việc in hay lưu do code gọi hàm đảm nhận. Khi gỡ lỗi bạn vẫn có thể thêm console.log tạm thời, nhớ xóa đi sau đó."
+      },
+      {
+        "q": "Math.max() không có đối số ra -Infinity hả mọi người? Mình tưởng nó báo lỗi.",
+        "answers": ["Ừ, ra -Infinity, nên bài tập lonNhat phải kiểm tra length trước.", "Math.min() thì ngược lại ra Infinity."],
+        "instructor": "Đúng vậy. -Infinity là giá trị khởi đầu hợp lý cho phép tìm số lớn nhất, nhưng thường không phải điều người dùng mong đợi. Vì thế trong bài tập ta kiểm tra so.length và trả về null khi không có số nào."
+      },
+      {
+        "q": "function taoBoDem(batDau = 0): nếu mình gọi taoBoDem(null) thì batDau là 0 hay null?",
+        "answers": ["Mình đoán là 0?"],
+        "instructor": "Là null. Giá trị mặc định chỉ được dùng khi đối số là undefined hoặc không truyền. Với null, dem = null, rồi ++dem sẽ đổi null thành 0 và cộng lên 1, nên chạy được nhưng dễ gây nhầm. Nếu muốn coi null như không truyền, viết let dem = batDau ?? 0;."
+      },
+      {
+        "q": "taoHamThue(10)(100000) – hai cặp ngoặc liền nhau là sao ạ, lần đầu mình thấy kiểu này.",
+        "answers": [],
+        "instructor": "taoHamThue(10) trả về một hàm mới đã nhớ phanTram = 10 (nhờ closure). Cặp ngoặc thứ hai gọi ngay hàm vừa trả về với gia = 100000. Viết tách ra cho dễ đọc: const thueVat = taoHamThue(10); thueVat(100000);. Kỹ thuật này giúp tạo nhiều hàm cấu hình sẵn từ một khuôn chung."
+      }
+    ],
+    "04-mang-va-doi-tuong": [
+      {
+        "q": "[10, 9, 1].sort() ra [1, 10, 9] luôn, JavaScript sort sai à mn?",
+        "answers": ["Mặc định sort so sánh như chuỗi, truyền (a, b) => a - b vào nhé.", "Muốn giảm dần thì b - a."],
+        "instructor": "Không sai, chỉ là mặc định sort đổi phần tử thành chuỗi rồi so theo thứ tự ký tự, nên '10' đứng trước '9'. Với số luôn truyền hàm so sánh: sort((a, b) => a - b) cho tăng dần. Hàm so sánh trả số âm thì a đứng trước, số dương thì b đứng trước."
+      },
+      {
+        "q": "Mình viết ds.filter(sp => sp.ma === 'A1').ten mà ra undefined, rõ ràng có sản phẩm A1 mà?",
+        "answers": ["filter trả về mảng nên phải [0].ten hoặc dùng find."],
+        "instructor": "filter luôn trả về một mảng, kể cả khi chỉ có một phần tử khớp, và mảng không có thuộc tính ten. Khi bạn cần đúng một phần tử, dùng find: ds.find(sp => sp.ma === 'A1')?.ten. Thêm ?. vì find trả về undefined nếu không tìm thấy."
+      },
+      {
+        "q": "const gioHang = []; gioHang.push('Áo') vẫn chạy được, vậy const có tác dụng gì ạ?",
+        "answers": [],
+        "instructor": "const chỉ cấm gán lại biến cho một giá trị khác (gioHang = [...] sẽ báo TypeError), không cấm thay đổi nội dung bên trong mảng hay đối tượng mà biến đang tham chiếu. Dùng const mặc định giúp bạn biết chắc biến luôn trỏ tới cùng một đối tượng, chỉ dùng let khi thật sự cần gán lại."
+      },
+      {
+        "q": "[].reduce((t, x) => t + x) báo TypeError: Reduce of empty array with no initial value. Mảng rỗng thì tổng phải là 0 chứ ạ?",
+        "answers": ["Truyền 0 vào tham số thứ 2 là hết lỗi bạn."],
+        "instructor": "Không có giá trị khởi đầu, reduce lấy phần tử đầu tiên làm giá trị khởi đầu; mảng rỗng thì không có phần tử nào nên báo lỗi. Luôn truyền tham số thứ hai: 0 cho tổng, {} cho nhóm, [] khi gom thành mảng. Riêng bài tập tìm đơn lớn nhất không truyền vì mảng chắc chắn có phần tử."
+      },
+      {
+        "q": "Mình copy bằng { ...goc } rồi sửa banSao.diaChi.thanhPho mà goc cũng bị đổi theo. Spread không phải là copy hả?",
+        "answers": ["Spread chỉ copy lớp ngoài thôi, object bên trong vẫn chung.", "Dùng structuredClone nếu cần copy hết."],
+        "instructor": "Spread là sao chép nông: tạo đối tượng mới nhưng các giá trị là đối tượng lồng bên trong vẫn là cùng một tham chiếu. Muốn tách hẳn, dùng structuredClone(goc), hoặc sao chép riêng tầng cần sửa: { ...goc, diaChi: { ...goc.diaChi, thanhPho: 'Đà Nẵng' } }."
+      },
+      {
+        "q": "structuredClone có copy được object có phương thức (hàm) không ạ?",
+        "answers": [],
+        "instructor": "Không. structuredClone dành cho dữ liệu thuần như số, chuỗi, mảng, đối tượng thường, Date, Map, Set. Gặp hàm, nó ném lỗi DataCloneError. Đối tượng như hocVien có phương thức trungBinh thì không sao chép sâu bằng cách này được; thường ta tách dữ liệu và hàm xử lý ra riêng."
+      },
+      {
+        "q": "Sao bài lại viết [...sanPham].sort(...) mà không sort thẳng sanPham luôn cho gọn?",
+        "answers": ["sort sửa mảng gốc, nên copy trước để giữ thứ tự ban đầu."],
+        "instructor": "Đúng vậy, sort sắp xếp ngay trên mảng gốc. Nếu chỗ khác của chương trình đang dựa vào thứ tự ban đầu thì sẽ bị ảnh hưởng. Sao chép bằng spread trước giúp phần tính toán không có tác dụng phụ. Node.js 20 và trình duyệt mới còn có toSorted() trả về mảng mới mà không sửa mảng cũ."
+      },
+      {
+        "q": "Dòng (nhom[sp.loai] ??= []).push(sp.ten) mình đọc mãi không hiểu, thầy giải thích giúp ạ.",
+        "answers": ["Hiểu là nếu nhom chưa có loại đó thì tạo mảng rỗng, rồi push tên vào."],
+        "instructor": "a ??= b nghĩa là chỉ gán b cho a khi a đang là null hoặc undefined, và cả biểu thức trả về giá trị của a sau đó. Vì vậy nếu nhóm chưa có mảng cho loại này thì tạo mảng rỗng, rồi push tên vào chính mảng đó. Viết dài ra là: if (!nhom[sp.loai]) nhom[sp.loai] = []; nhom[sp.loai].push(sp.ten);."
+      },
+      {
+        "q": "forEach với map khác nhau sao ạ? Mình thấy dùng cái nào cũng lặp được.",
+        "answers": [
+          "map trả về mảng mới, forEach trả về undefined.",
+          "Dùng map mà không lấy kết quả thì nên đổi sang forEach hoặc for...of."
+        ],
+        "instructor": "Cả hai gọi hàm cho từng phần tử, nhưng map gom giá trị trả về thành mảng mới cùng độ dài, còn forEach không trả về gì. Dùng map khi bạn biến đổi dữ liệu, dùng forEach hoặc for...of khi chỉ cần làm việc gì đó với từng phần tử như in ra hay vẽ lên trang."
+      },
+      {
+        "q": "const khoa = 'ten'; console.log(nguoi.khoa) ra undefined, nguoi['khoa'] cũng undefined. Mình sai chỗ nào?",
+        "answers": [],
+        "instructor": "nguoi.khoa và nguoi['khoa'] đều tìm thuộc tính có tên đúng là chữ khoa. Muốn dùng giá trị của biến làm tên thuộc tính thì bỏ dấu nháy: nguoi[khoa], tương đương nguoi['ten']. Dấu chấm chỉ dùng khi bạn biết trước tên thuộc tính lúc viết code."
+      }
+    ],
+    "05-lam-viec-voi-dom": [
+      {
+        "q": "document.querySelector('.danhsach') trả về null dù mình chắc chắn có ul danh sách trên trang.",
+        "answers": ["Class trong HTML là danh-sach có gạch nối đó bạn, bạn gõ thiếu rồi.", "Mở tab Elements copy tên class cho chắc."],
+        "instructor": "Selector phải khớp chính xác, kể cả gạch nối và chữ hoa thường. Ngoài sai tên, hãy kiểm tra script có defer chưa. Thói quen tốt: sau khi querySelector, nếu kết quả có thể không tồn tại thì kiểm tra if (!ds) return; trước khi dùng, để lỗi không lan sang dòng khác."
+      },
+      {
+        "q": "document.querySelectorAll('.goi-y').map(...) báo map is not a function ạ",
+        "answers": ["NodeList không có map, bọc [... ] lại là được."],
+        "instructor": "querySelectorAll trả về NodeList, có forEach và duyệt được bằng for...of nhưng không có map, filter, reduce. Chuyển sang mảng bằng [...document.querySelectorAll('.goi-y')] hoặc Array.from(...) rồi dùng các phương thức mảng như bình thường."
+      },
+      {
+        "q": "Mình dùng innerHTML để hiện tên người dùng thấy cũng hiển thị bình thường mà, sao bài lại nói nguy hiểm?",
+        "answers": ["Bình thường thì không sao, nhưng nếu ai đó cố tình nhập thẻ HTML có mã thì nó sẽ chạy."],
+        "instructor": "Với tên bình thường thì đúng là thấy không khác gì. Vấn đề là innerHTML phân tích chuỗi thành HTML, nên một tên được cố tình soạn chứa thẻ img có onerror sẽ chạy mã trong trang của người khác. Đó là XSS. textContent luôn hiển thị nguyên văn nên an toàn; chỉ dùng innerHTML với HTML do chính bạn viết."
+      },
+      {
+        "q": "Mình gán el.className = 'an' thì phần tử mất luôn mấy class kiểu dáng cũ.",
+        "answers": [],
+        "instructor": "className là toàn bộ chuỗi class, gán lại là thay hết. Dùng el.classList.add('an') để thêm, remove để bỏ, toggle để bật tắt. toggle còn nhận tham số thứ hai true/false để ép trạng thái, như el.classList.toggle('xong', v.xong) trong bài tập."
+      },
+      {
+        "q": "Thẻ có data-ma-sp=\"A1\" nhưng el.dataset['ma-sp'] ra undefined. Với lại data-gia đọc ra cộng thì bị nối chuỗi.",
+        "answers": ["Phải viết dataset.maSp, nó tự đổi sang camelCase.", "dataset luôn là chuỗi, Number(el.dataset.gia) nhé."],
+        "instructor": "Hai bạn nói đúng cả hai ý. Tên sau data- được đổi từ dạng gạch nối sang camelCase: data-ma-sp thành dataset.maSp. Mọi giá trị trong dataset đều là chuỗi, nên cần Number() trước khi tính. Khi ghi, li.dataset.ma = 'A1' sẽ tạo thuộc tính data-ma trên thẻ."
+      },
+      {
+        "q": "replaceChildren() với innerHTML = '' khác gì nhau ạ? Cả hai đều xóa sạch mà.",
+        "answers": [],
+        "instructor": "Kết quả xóa giống nhau. replaceChildren() rõ ý hơn, không phải qua bước phân tích HTML và còn nhận các phần tử mới để thay vào trong một lệnh: ds.replaceChildren(li1, li2). Dùng nó giúp code thống nhất với nguyên tắc tránh innerHTML cho dữ liệu động."
+      },
+      {
+        "q": "getElementById còn nên dùng không thầy hay chuyển hết sang querySelector?",
+        "answers": ["Mình thấy vẫn nhiều người dùng, ngắn mà."],
+        "instructor": "Vẫn dùng được, không có gì sai. Lưu ý getElementById nhận id không có dấu thăng, còn querySelector cần '#o-viec'. Trong khóa này mình ưu tiên querySelector cho thống nhất vì nó nhận mọi selector CSS và gọi được trên một phần tử để tìm bên trong."
+      },
+      {
+        "q": "Mình append cùng một li vào hai ul khác nhau, cuối cùng chỉ ul thứ hai có. Bug hả mn?",
+        "answers": ["Một node chỉ ở được một chỗ, append lần hai là nó chuyển đi."],
+        "instructor": "Không phải lỗi: một nút DOM chỉ có một vị trí trong cây, append một nút đã nằm trên trang sẽ di chuyển nó. Cần hai bản thì tạo hai phần tử bằng createElement, hoặc dùng li.cloneNode(true) để sao chép cả nội dung bên trong."
+      },
+      {
+        "q": "Mình đặt el.style.display = 'none' cũng ẩn được mà, sao bài khuyên dùng class?",
+        "answers": [],
+        "instructor": "Cách đó chạy, nhưng giao diện bị rải vào JavaScript, sau này muốn đổi hiệu ứng ẩn hiện phải sửa nhiều file. Dùng class như .an trong CSS thì JavaScript chỉ đổi trạng thái, CSS quyết định trông thế nào. Bạn cũng có thể dùng thuộc tính hidden: el.hidden = true."
+      },
+      {
+        "q": "ds.children.length ra 2 nhưng ds.childNodes.length lại ra 5, vậy cái nào đúng ạ?",
+        "answers": ["childNodes đếm cả mấy khoảng trắng xuống dòng nữa."],
+        "instructor": "Cả hai đúng theo nghĩa riêng. children chỉ chứa các phần tử (thẻ), còn childNodes chứa mọi loại nút, kể cả nút văn bản sinh ra từ khoảng trắng và xuống dòng giữa các thẻ. Khi đếm hay duyệt các mục danh sách, hãy dùng children."
+      }
+    ],
+    "06-su-kien": [
+      {
+        "q": "Mình viết nut.addEventListener('click', xuLy()) mà hàm chạy ngay lúc tải trang, bấm nút thì không có gì.",
+        "answers": ["Bỏ cặp ngoặc sau xuLy đi bạn, phải truyền hàm chứ không gọi hàm."],
+        "instructor": "Có ngoặc là gọi hàm ngay, rồi lấy giá trị trả về (thường là undefined) làm hàm xử lý. Phải truyền chính hàm: addEventListener('click', xuLy). Nếu cần truyền thêm đối số, bọc trong hàm mũi tên: addEventListener('click', () => xuLy(5))."
+      },
+      {
+        "q": "Bấm Thêm xong màn hình chớp một cái rồi danh sách trống trơn ạ",
+        "answers": [
+          "Quên event.preventDefault() rồi, trang tải lại nên mất hết.",
+          "Nhớ gắn vào sự kiện submit của form chứ không phải click của nút nhé."
+        ],
+        "instructor": "Đúng rồi. Mặc định gửi form sẽ tải lại trang, mọi dữ liệu trong biến JavaScript mất theo. Gọi event.preventDefault() ở đầu hàm xử lý submit. Gắn vào submit của form tốt hơn click của nút vì bắt được cả trường hợp người dùng nhấn Enter trong ô nhập."
+      },
+      {
+        "q": "mọi người ơi sao bấm nút một lần mà hàm xử lý chạy 2 lần, lần sau thành 3 lần, cứ tăng dần?",
+        "answers": ["Chắc bạn để addEventListener bên trong hàm render, mỗi lần render lại gắn thêm một cái."],
+        "instructor": "Rất có thể bạn gọi addEventListener nhiều lần cho cùng một phần tử, ví dụ đặt trong render() hoặc trong một hàm xử lý khác. Mỗi lần gọi với hàm mũi tên mới là thêm một hàm xử lý. Hãy gắn sự kiện một lần ở ngoài, và với danh sách vẽ lại nhiều lần thì dùng ủy quyền trên phần tử cha cố định."
+      },
+      {
+        "q": "Nút Xóa của mình có icon span bên trong, bấm trúng icon thì event.target là span chứ không phải button. Xử lý sao ạ?",
+        "answers": [],
+        "instructor": "event.target là phần tử sâu nhất được bấm, có thể là span bên trong nút. Dùng event.target.closest('button'): nó đi ngược lên từ target cho tới khi gặp button gần nhất, hoặc trả về null nếu bấm ngoài nút. Còn event.currentTarget luôn là phần tử đã gắn addEventListener, ở đây là ul."
+      },
+      {
+        "q": "Mình gắn click cho các nút Xóa bằng querySelectorAll lúc đầu, mấy việc thêm sau thì bấm Xóa không ăn.",
+        "answers": ["Dùng ủy quyền sự kiện trên ul như bài là ổn.", "Mấy nút mới tạo sau nên chưa được gắn gì cả."],
+        "instructor": "querySelectorAll chỉ lấy những nút có mặt tại thời điểm gọi; nút tạo sau, hoặc nút được render lại, là phần tử mới chưa có hàm xử lý. Gắn một hàm trên phần tử cha cố định (ul) và dựa vào sự kiện nổi bọt, kết hợp closest('button') để biết nút nào được bấm."
+      },
+      {
+        "q": "Sự kiện input với change khác nhau thế nào ạ? Bộ đếm ký tự nên dùng cái nào?",
+        "answers": ["input chạy mỗi lần gõ, change chạy khi rời ô."],
+        "instructor": "Với ô nhập văn bản, input phát ra mỗi khi nội dung thay đổi, kể cả dán hay xóa; change chỉ phát khi giá trị đã đổi và người dùng rời khỏi ô. Bộ đếm ký tự cần cập nhật tức thì nên dùng input. Với select hay checkbox, change phát ngay khi chọn."
+      },
+      {
+        "q": "removeEventListener('click', () => {...}) không gỡ được hàm, mình viết y chang hàm lúc gắn mà?",
+        "answers": [],
+        "instructor": "Mỗi lần viết hàm mũi tên là tạo ra một hàm mới, dù nội dung giống hệt. removeEventListener cần đúng tham chiếu tới hàm đã gắn. Hãy đặt hàm vào biến hoặc dùng khai báo function, rồi truyền cùng tên đó cho cả addEventListener và removeEventListener."
+      },
+      {
+        "q": "Trong form mình có thêm nút Xóa nội dung, bấm vào nó thì form lại tự gửi đi luôn :(",
+        "answers": ["Button trong form mặc định là type submit đó bạn."],
+        "instructor": "Trong form, thẻ button không ghi type sẽ mặc định là type=\"submit\". Với nút không dùng để gửi, hãy ghi rõ type=\"button\". Như vậy nút Thêm vẫn gửi form, còn nút Xóa nội dung chỉ chạy hàm click của bạn."
+      },
+      {
+        "q": "Đã dùng defer rồi thì có cần bọc code trong DOMContentLoaded nữa không thầy?",
+        "answers": ["Không cần đâu, defer chạy lúc HTML đọc xong rồi."],
+        "instructor": "Không cần. Script có defer chạy sau khi HTML đã được đọc xong và ngay trước khi DOMContentLoaded phát ra, nên mọi phần tử đã sẵn sàng. Bọc thêm cũng không sai nhưng thừa một lớp lồng nhau."
+      },
+      {
+        "q": "event.key với event.code khác nhau sao ạ? Mình bắt phím Escape thì nên dùng cái nào?",
+        "answers": [],
+        "instructor": "event.key là giá trị phím tạo ra, phụ thuộc bố cục bàn phím và phím Shift, ví dụ 'a' hoặc 'A'. event.code là vị trí vật lý của phím, như 'KeyA', không đổi theo bố cục. Với phím chức năng như Escape, Enter thì dùng event.key === 'Escape' là rõ ràng và phổ biến nhất."
+      }
+    ]
+  },
+  "comments": [
+    "Khóa học trình bày dễ hiểu, ví dụ đời thường giúp mình nhớ lâu hơn.",
+    "Phần closure ví như chiếc ba lô làm mình hiểu ra ngay, cảm ơn thầy.",
+    "Học xong bài DOM mình tự làm được danh sách việc cần làm rồi, vui ghê.",
+    "Bài sự kiện hơi dài nhưng rất đáng đọc.",
+    "Mong có thêm bài về Promise và async/await sau khóa này.",
+    "Phần Lỗi hay gặp là phần mình thích nhất, đúng y những lỗi mình từng gặp.",
+    "Cảm ơn thầy, giờ mình mới hiểu vì sao không nên dùng var.",
+    "Bài tập có lời giải ẩn rất tiện, mình tự làm trước rồi mới mở ra so.",
+    "Ví dụ tính tiền bằng số nguyên rất thực tế.",
+    "Mình là người trái ngành mà vẫn theo được, cảm ơn khóa học.",
+    "Quiz cuối bài giúp ôn lại kiến thức nhanh, hay lắm.",
+    "Giải thích == và === rõ ràng, trước giờ mình toàn dùng lung tung.",
+    "Bài mảng và đối tượng hơi nhiều kiến thức, mình phải đọc hai lần mới thấm.",
+    "Có ai học cùng tiến độ bài 4 không, lập nhóm ôn nhé.",
+    "Phần ?? và ?. ngắn mà cực kỳ hữu ích.",
+    "Mình đã áp dụng event delegation vào bài tập trên trường, thầy khen luôn.",
+    "Bài 1 nhẹ nhàng, hợp cho người mới bắt đầu.",
+    "Giá như có thêm một bài tổng hợp làm mini project cuối khóa thì tuyệt.",
+    "Mình thích cách bài nhắc về bảo mật XSS ngay từ đầu.",
+    "Đọc xong phần reduce mình mới dám dùng nó trong code thật.",
+    "Ví dụ sort [10, 9, 1] làm mình giật mình, may mà học được.",
+    "Thời lượng đọc mỗi bài khoảng 15 phút là vừa sức.",
+    "Cho mình hỏi khóa sau có học về fetch gọi API không ạ?",
+    "Code mẫu có chú thích từng dòng nên đọc rất dễ.",
+    "Bài 5 giúp mình hiểu tại sao React lại vẽ lại giao diện từ dữ liệu.",
+    "Cảm ơn đội ngũ Cnow đã làm khóa học miễn phí phần giới thiệu.",
+    "Mình mất cả buổi vì quên defer, giờ thì nhớ đời rồi :)",
+    "Bài hàm và phạm vi là bài mình học kỹ nhất, rất chắc kiến thức.",
+    "Ví dụ giỏ hàng xuyên suốt các bài làm mình thấy liên kết tốt.",
+    "Mình mong có thêm vài bài tập nâng cao cho ai muốn thử thách.",
+    "Phần destructuring trong tham số hàm hay quá, code gọn hẳn.",
+    "Ai bị lỗi querySelector ra null thì kiểm tra defer trước nhé.",
+    "Học tới bài 6 rồi, còn chút nữa là xong khóa.",
+    "Bài viết dễ đọc, không lan man, đúng trọng tâm.",
+    "Mình thích việc khóa nhắc dùng button thật cho người dùng bàn phím.",
+    "Cảm ơn thầy đã trả lời câu hỏi của mình rất nhanh.",
+    "Chưa hiểu lắm phần this trong hàm mũi tên, mong có bài riêng.",
+    "Bài tập chuẩn hóa tên khá thú vị, mình làm mất 20 phút.",
+    "Mình học trên điện thoại vẫn đọc tốt, giao diện gọn gàng.",
+    "Khóa học giúp mình tự tin hơn trước buổi phỏng vấn thực tập.",
+    "Hay nhưng hơi ít hình minh họa, mấy phần DOM mà có sơ đồ cây thì dễ hình dung hơn.",
+    "Bài 4 dài quá, nên tách thành hai bài mảng và đối tượng riêng.",
+    "Mình thấy phần ví dụ trình duyệt hơi khó tự chạy lại nếu không có sẵn file HTML mẫu.",
+    "Tốc độ bài 3 hơi nhanh với người mới, closure cần thêm ví dụ nữa.",
+    "Quiz chỉ có 4 câu mỗi bài, mong thêm câu khó hơn một chút.",
+    "Ai có mẹo nhớ map filter reduce chia sẻ với ạ.",
+    "Lần đầu mình hiểu tham chiếu và sao chép nông là gì.",
+    "Phần structuredClone mới với mình, cảm ơn khóa học.",
+    "Bài sự kiện có ví dụ phím Escape đóng hộp tìm kiếm thực tế lắm.",
+    "Mình đã hoàn thành khóa, giờ chuyển sang học Node.js đây.",
+    "Đọc phần toFixed trả về chuỗi mới biết vì sao code cũ mình bị nối chuỗi.",
+    "Khóa ngắn gọn mà đủ ý, rất đáng thời gian.",
+    "Mình đề xuất thêm bảng tổng hợp phương thức mảng để in ra ôn.",
+    "Cách giải thích scope bằng phòng kính một chiều rất dễ nhớ.",
+    "Mọi người làm bài tập bộ đếm ký tự chưa, mình làm xong rồi nè.",
+    "Thầy ơi bài 2 có thể thêm ví dụ về Date không ạ?",
+    "Hỏi đáp dưới mỗi bài rất hữu ích, nhiều câu đúng thắc mắc của mình.",
+    "Lời giải bài 3 phần mảng dùng reduce tìm lớn nhất hay thật.",
+    "Mình học chậm nhưng nhờ bài viết rõ ràng nên không bị bỏ cuộc.",
+    "Phần strict mode giúp mình bắt được một lỗi gõ nhầm tên biến trong đồ án.",
+    "Mình nghĩ nên có video ngắn đi kèm cho ai thích xem hơn đọc.",
+    "Tuyệt vời, giờ mình đọc code JavaScript của người khác đỡ hoang mang hơn.",
+    "Bài 6 phần ủy quyền sự kiện là thứ mình tìm hiểu mãi giờ mới rõ.",
+    "Ví dụ console.table lần đầu mình biết, tiện thật.",
+    "Mình sẽ giới thiệu khóa này cho các bạn cùng lớp.",
+    "Có thể thêm phần giải thích tại sao typeof null là object chi tiết hơn không ạ?",
+    "Cảm ơn khóa học, kiến thức nền rất chắc."
+  ],
+  "spam": [
+    "Nhận làm đồ án tốt nghiệp thuê giá rẻ, bao qua môn, ai cần nhắn trang cá nhân mình nhé!!!",
+    "Khóa này chán òm, ai học là phí thời gian, admin làm ăn kiểu gì vậy không biết.",
+    "Bán tài khoản game giá siêu rẻ, số lượng có hạn, vào trang cá nhân của mình để mua ngay."
+  ],
+  "reviews": {
+    "1": [
+      "Mình hoàn toàn mới và bị ngợp ngay từ bài 2: nhiều phương thức, nhiều toán tử mà không có bài luyện từng bước. Cần một lộ trình chậm hơn cho người mới.",
+      "Thiếu video và thiếu bài tập có chấm điểm, mình đọc xong không biết mình hiểu đến đâu. Rất mong khóa cải thiện phần thực hành.",
+      "Ví dụ ở bài DOM và sự kiện không chạy được khi mình tự chép vì không có HTML tương ứng đầy đủ, mất cả buổi mà không ra kết quả."
+    ],
+    "2": [
+      "Khóa chỉ có 6 bài, quá ngắn để gọi là JavaScript cơ bản. Thiếu hẳn phần vòng lặp, điều kiện chi tiết và bất đồng bộ.",
+      "Bài tập lời giải dùng những thứ chưa học kỹ như filter(Boolean) ở bài 2, trong khi mảng mãi bài 4 mới học. Rất khó theo.",
+      "Toàn đọc chữ, không có video, không có ví dụ tương tác chạy ngay trên trang. Với mình học kiểu này rất mệt.",
+      "Tốc độ quá nhanh, closure và hàm bậc cao chỉ vài đoạn đã chuyển sang phần khác. Mình làm bài tập giỏ hàng không nổi.",
+      "Phần sự kiện bỏ qua nhiều thứ quan trọng như removeEventListener, stopPropagation. Mong bổ sung trước khi gọi là đầy đủ.",
+      "Các bài phần trình duyệt không có trang mẫu để thực hành, người mới không biết dựng HTML thế nào cho khớp với code.",
+      "Câu hỏi quiz trùng ý với nội dung vừa đọc, không giúp kiểm tra hiểu thật. Bài tập lại quá khó so với ví dụ."
+    ],
+    "3": [
+      "Nội dung đúng nhưng tốc độ hơi nhanh với người mới hoàn toàn. Bài 3 gộp hàm, phạm vi, closure, hàm thuần trong một bài là quá nhiều.",
+      "Khóa ổn ở mức đọc hiểu, nhưng thiếu bài tập. Mỗi bài chỉ 1 đến 3 bài tập, mình cần luyện nhiều hơn mới nhớ.",
+      "Mình thích học qua video hơn, khóa này toàn văn bản nên đôi lúc khó tập trung. Mong bổ sung video ngắn.",
+      "Phần trình duyệt khó tự chạy lại vì không có sẵn file HTML đầy đủ đi kèm, mình phải tự đoán cấu trúc trang.",
+      "Kiến thức chuẩn nhưng thiếu ví dụ trực quan. Phần DOM và nổi bọt sự kiện rất cần hình minh họa.",
+      "Bài 4 quá dài, gộp mảng, đối tượng, tham chiếu, destructuring cùng lúc khiến mình rối. Nên chia nhỏ ra.",
+      "Ổn cho người đã biết chút lập trình, còn người mới như mình thì nhiều thuật ngữ quá, đọc phải tra liên tục.",
+      "Quiz quá dễ, chỉ kiểm tra lý thuyết. Mong có bài tập viết code được chấm tự động.",
+      "Nội dung tốt nhưng thiếu phần bất đồng bộ như setTimeout, Promise, trong khi bài 3 đã dùng setTimeout mà không giải thích kỹ.",
+      "Hợp với ôn tập hơn là học từ đầu. Mỗi khái niệm chỉ có một ví dụ, mình mong có thêm ví dụ từ dễ đến khó."
+    ],
+    "4": [
+      "Nội dung tốt, dễ hiểu. Trừ một sao vì bài mảng và đối tượng hơi dài, nên tách đôi cho dễ theo.",
+      "Khóa học chắc kiến thức nền. Mong có thêm sơ đồ minh họa cây DOM và luồng sự kiện nổi bọt.",
+      "Giải thích rõ ràng, ví dụ thực tế. Mình muốn có thêm bài tập nâng cao để luyện thêm.",
+      "Rất hữu ích cho người mới, nhưng phần this trong hàm mũi tên chỉ nhắc qua, mình mong có giải thích sâu hơn.",
+      "Bài viết hay, quiz tốt. Giá như mỗi bài có thêm file HTML mẫu để tải về chạy thử phần trình duyệt.",
+      "Mình học được nhiều, nhất là phần ?? và ?.. Chỉ tiếc là chưa có phần về bất đồng bộ.",
+      "Code mẫu chạy đúng như kết quả ghi trong bài, điều này rất quan trọng. Bốn sao vì mong có thêm video.",
+      "Khóa ngắn gọn, đúng trọng tâm. Muốn có một mini project tổng hợp ở cuối khóa.",
+      "Phần sự kiện rất hay, phần DOM ổn. Bài 2 hơi nhiều bảng phương thức, đọc hơi khô.",
+      "Thầy trả lời câu hỏi nhiệt tình. Mong khóa có thêm phần về Date và xử lý thời gian.",
+      "Dễ hiểu và có tính thực hành. Một số bài tập hơi dễ với người đã biết một ngôn ngữ khác.",
+      "Rất tốt cho người bắt đầu. Phần closure mình phải đọc lại hai lần, có thêm một ví dụ nữa sẽ tốt hơn.",
+      "Mình thích phần Lỗi hay gặp. Chỉ góp ý là phần Đọc thêm toàn tiếng Anh, người yếu tiếng Anh hơi vất.",
+      "Nội dung chuẩn, cập nhật cú pháp hiện đại. Mong có bài về module import và export.",
+      "Khóa học tổ chức logic. Mình mong quiz có thêm câu dạng đọc code đoán kết quả.",
+      "Học xong biết dùng map filter reduce thành thạo. Trừ một sao vì chưa có phần giải thích sâu về sort ổn định.",
+      "Khá đầy đủ cho mức cơ bản, nhưng thời lượng đọc ghi trong bài hơi ít so với thực tế mình cần.",
+      "Ví dụ đời thường dễ nhớ. Bài 6 có thể thêm ví dụ kéo thả hoặc sự kiện cuộn trang.",
+      "Rất ổn. Mình muốn có phần so sánh thêm cách làm cũ và mới để đọc được code cũ trên mạng.",
+      "Kiến thức nền tốt, trình bày sạch sẽ. Mong khóa sau đi tiếp phần fetch và làm việc với API."
+    ],
+    "5": [
+      "Khóa học rất chất lượng. Phần closure và phạm vi được giải thích bằng ví dụ dễ hình dung, mình làm được bài tập giỏ hàng ngay lần đầu.",
+      "Mình thích cách mỗi bài có mục Lỗi hay gặp, đúng những lỗi mình hay mắc như quên defer hay sort số sai.",
+      "Nội dung gọn, đúng trọng tâm. Học xong bài DOM và sự kiện mình đã tự làm được trang danh sách việc cần làm có thêm và xóa.",
+      "Rất đáng học cho người mới. Ví dụ tính tiền bằng số nguyên giúp mình tránh được lỗi 0.1 + 0.2 trong đồ án.",
+      "Bài viết rõ ràng, code mẫu có chú thích từng dòng, quiz cuối bài giúp ôn lại hiệu quả. Năm sao xứng đáng.",
+      "Lần đầu mình hiểu rõ khác nhau giữa ?? và ||, cũng như vì sao không nên dùng var. Cảm ơn thầy rất nhiều.",
+      "Phần bảo mật XSS với textContent và innerHTML được nhắc rất đúng lúc, mình đã sửa lại code cũ của mình.",
+      "Khóa học dẫn dắt hợp lý: học phần cốt lõi bằng Node.js trước rồi mới sang trình duyệt, không bị ngợp.",
+      "Bài mảng và đối tượng cực kỳ hữu ích, map filter reduce giờ là công cụ mình dùng hằng ngày.",
+      "Giải thích ủy quyền sự kiện là phần hay nhất. Trước đây mình gắn sự kiện cho từng nút và bị lỗi nút mới không chạy.",
+      "Mình học trái ngành mà vẫn theo kịp, ngôn ngữ thân thiện, ví dụ đời thường như chuông cửa hay ba lô rất dễ nhớ.",
+      "Lời giải bài tập để ẩn nên mình tự làm trước, sau đó so sánh và học được thêm cách viết gọn hơn.",
+      "Thầy trả lời hỏi đáp nhanh và kỹ. Khóa học nhỏ nhưng chất, rất đáng thời gian bỏ ra.",
+      "Mình đánh giá cao việc khóa nhấn mạnh dùng button thật để hỗ trợ bàn phím, ít khóa nào nhắc tới trợ năng.",
+      "Kiến thức nền vững chắc, học xong mình đọc tài liệu chính thức thấy dễ hiểu hơn hẳn.",
+      "Phần sao chép nông và structuredClone giúp mình giải quyết một lỗi dữ liệu bị đổi theo mà mình tìm mãi không ra.",
+      "Mỗi bài khoảng 15 phút, vừa đủ học sau giờ làm. Nội dung không lan man, rất thích.",
+      "Ví dụ giỏ hàng, đơn hàng xuyên suốt làm kiến thức liên kết với nhau, không bị rời rạc.",
+      "Quiz có giải thích cho từng đáp án nên làm sai vẫn học được, rất hay.",
+      "Mình đã hoàn thành cả 6 bài trong một tuần, giờ tự tin làm phần giao diện cho bài tập lớn.",
+      "Bài hàm và phạm vi viết rất kỹ, ví dụ var và let trong vòng lặp với setTimeout làm mình hiểu ra vấn đề.",
+      "Hướng dẫn dùng Console và đọc thông báo lỗi ở bài 1 tưởng nhỏ mà giúp mình gỡ lỗi nhanh hơn nhiều.",
+      "Cách trình bày mô hình dữ liệu là nguồn, giao diện là bản vẽ rất hay, mình áp dụng cho mọi trang có tương tác.",
+      "Khóa học miễn phí phần đầu mà chất lượng như khóa trả phí. Cảm ơn đội ngũ Cnow.",
+      "Rất hài lòng. Bài tập bộ đếm ký tự ngắn mà ôn được cả sự kiện input, classList và textContent."
+    ]
+  },
+  "chat": [
+    "Chào mọi người, mình mới vào khóa hôm nay.",
+    "Hello cả nhà, mọi người đang học tới bài mấy rồi?",
+    "Mình đang ở bài 3, closure hơi xoắn não chút.",
+    "Bài 2 xong rồi, giờ mới biết 0.1 + 0.2 không bằng 0.3 :)",
+    "Có ai muốn lập nhóm học tối thứ 3 và thứ 5 không?",
+    "Mình tham gia nhóm với, học một mình dễ lười lắm.",
+    "Mẹo nhỏ: lỗi querySelector ra null thì kiểm tra defer trước tiên nhé.",
+    "Mọi người làm bài chuẩn hóa tên chưa, mình làm mãi chưa bỏ được khoảng trắng thừa.",
+    "Dùng filter(Boolean) sau split là bỏ được phần tử rỗng đó bạn.",
+    "Cảm ơn bạn, chạy rồi!",
+    "Ai học xong bài DOM rồi cho mình hỏi cách xóa hết li trong ul với.",
+    "Dùng replaceChildren() là gọn nhất bạn ạ.",
+    "Tối nay mình ôn lại map filter reduce, ai muốn ôn chung không?",
+    "Mình vừa hoàn thành bài 6, còn làm quiz nữa là xong khóa.",
+    "Chúc mừng bạn nha, mình mới tới bài 4.",
+    "Mẹo: sort số thì luôn nhớ (a, b) => a - b.",
+    "Có ai thấy bài 4 dài không, mình chia ra học hai buổi.",
+    "Mình cũng vậy, đọc một lượt rồi làm bài tập riêng buổi sau.",
+    "Mọi người dùng trình soạn thảo gì để làm bài vậy?",
+    "Mình dùng VS Code với Live Server cho phần trình duyệt.",
+    "Nhóm học thứ 7 này mình sẽ cùng làm bài todo list ở bài 6 nhé.",
+    "Ok mình tham gia, nhớ nhắc mình với.",
+    "Ai giải thích giúp mình event.target với currentTarget được không?",
+    "target là chỗ bạn bấm trúng, currentTarget là chỗ gắn listener.",
+    "Hiểu rồi, cảm ơn bạn nhiều.",
+    "Chào buổi sáng mọi người, hôm nay quyết tâm xong bài 5.",
+    "Ai bị form tải lại trang thì nhớ preventDefault nha.",
+    "Mình bị lỗi này hồi tối, mất nửa tiếng mới tìm ra :)",
+    "Có ai đang học song song khóa HTML CSS không?",
+    "Mình học xong HTML CSS rồi mới qua đây, thấy dễ theo hơn.",
+    "Mẹo: bật 'use strict' để bắt lỗi gõ nhầm tên biến sớm.",
+    "Tuần này ai đặt mục tiêu xong khóa không, cùng đua nhé.",
+    "Mình đăng ký, mục tiêu chủ nhật xong bài cuối.",
+    "Mọi người có hay đọc phần hỏi đáp dưới bài không, nhiều câu bổ ích lắm.",
+    "Có, mình tìm được lời giải cho lỗi sự kiện chạy hai lần ở đó.",
+    "Ai cần mình chia sẻ ghi chú tóm tắt phương thức mảng không?",
+    "Có ạ, bạn đăng lên phần ghi chú của bài 4 nhé.",
+    "Mình sắp thi giữa kỳ nên tạm nghỉ vài hôm, hẹn gặp lại mọi người.",
+    "Chúc bạn thi tốt, quay lại học tiếp nha.",
+    "Chúc cả nhà học vui, ngủ ngon nhé."
+  ]
+}
