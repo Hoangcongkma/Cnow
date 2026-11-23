@@ -11,9 +11,11 @@ const HASHED = /^(\/[A-Za-z0-9_./-]+)\.([0-9a-f]{10})\.(css|js|svg|png|jpg|jpeg|
 function hashOf(rel) {
   const abs = path.join(PUBLIC, rel);
   if (!abs.startsWith(PUBLIC + path.sep)) throw new Error('đường dẫn không hợp lệ');
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- đã chặn thoát khỏi thư mục public/ ở dòng trên
   const st = fs.statSync(abs);
   const c = cache.get(rel);
   if (c && c.mtimeMs === st.mtimeMs) return c.hash;
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- như trên: chỉ file trong public/
   const hash = crypto.createHash('sha256').update(fs.readFileSync(abs)).digest('hex').slice(0, 10);
   cache.set(rel, { mtimeMs: st.mtimeMs, hash });
   return hash;

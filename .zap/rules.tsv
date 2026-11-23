@@ -1,0 +1,4 @@
+10049	IGNORE	(Cache: thông tin "storable/cacheable" – mang tính tham khảo)
+10096	IGNORE	(Timestamp Disclosure – nhầm với số trong nội dung bài học / hash tài nguyên)
+10027	IGNORE	(Information Disclosure – Suspicious Comments: chú thích tiếng Việt trong file JS tự host)
+10109	IGNORE	(Modern Web Application – chỉ là thông tin)

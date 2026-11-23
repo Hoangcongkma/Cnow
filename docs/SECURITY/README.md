@@ -6,3 +6,5 @@
 | [rbac.md](rbac.md) | Bảng phân quyền tập trung, mức truy cập, kiểm tra theo đối tượng |
 | [data-inventory.md](data-inventory.md) | Danh mục dữ liệu cá nhân, phân loại, thời gian lưu, quyền của người dùng |
 | [backup.md](backup.md) | Sao lưu / khôi phục MongoDB |
+| [checklist-asvs.md](checklist-asvs.md) | Đối chiếu OWASP ASVS 4.0.3 mức 2: Đạt / Một phần / Không áp dụng, kèm vị trí trong code |
+| [../../SECURITY.md](../../SECURITY.md) | Chính sách báo cáo lỗ hổng |

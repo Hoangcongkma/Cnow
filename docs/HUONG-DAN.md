@@ -147,8 +147,7 @@ Các thành phần sẵn có trong repo:
 1. Đăng ký https://www.mongodb.com/cloud/atlas → **Create** → chọn gói **M0 (Free)**, vùng gần Việt Nam (ví dụ Singapore).
 2. **Database Access** → *Add New Database User*: tạo user/mật khẩu riêng cho Cnow (quyền *Read and write to any database*).
 3. **Network Access** → *Add IP Address* → `0.0.0.0/0` (Render bản free không có IP tĩnh; dữ liệu vẫn được bảo vệ bằng user/mật khẩu + TLS).
-4. **Connect → Drivers** → chép chuỗi kết nối và thêm tên CSDL sau dấu `/`, ví dụ:
-   `mongodb+srv://cnow_app:<mat-khau>@cluster0.xxxxx.mongodb.net/cnow?retryWrites=true&w=majority`
+4. **Connect → Drivers** → chép chuỗi kết nối `mongodb+srv://…` Atlas cấp (đã có tên đăng nhập và mật khẩu), rồi thêm tên CSDL `/cnow` ngay trước dấu `?`, ví dụ phần cuối chuỗi: `….mongodb.net/cnow?retryWrites=true&w=majority`
 
 ### 2. Render
 

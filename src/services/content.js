@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-fs-filename -- chỉ đọc file trong thư mục content/ của repo (slug đã kiểm tra bằng regex), không nhận đường dẫn từ người dùng web */
 // Đọc bài học văn bản trong content/<slug-khoa>/<so-thu-tu>-<slug-bai>.md (dùng chung cho import-content và check-content)
 const fs = require('fs');
 const path = require('path');
@@ -34,6 +35,7 @@ function wordCount(body) {
   const prose = String(body)
     .replace(/^```[^\n]*\n[\s\S]*?^```\s*$/gm, ' ') // khối code
     .replace(/``[^\n]*?``|`[^`\n]*`/g, ' x ') // code trong dòng (đếm là 1 từ)
+    // eslint-disable-next-line security/detect-unsafe-regex -- tuyến tính (không lượng từ lồng nhau chồng lấn), chạy trên file bài học của repo
     .replace(/<\/?[a-z][a-z0-9]*(\s[^<>]*)?>/gi, ' ') // chỉ thẻ HTML thật (không nuốt "i < 5 … n > 0")
     .replace(/\]\([^)]*\)/g, ']'); // URL của liên kết
   return (prose.match(/[\p{L}\p{N}]+/gu) || []).length;
@@ -90,8 +92,11 @@ function loadLessonFile(file) {
     if (!(Number.isInteger(q?.answer) && q.answer >= 0 && q.answer <= 3)) errors.push(`quiz câu ${i + 1}: answer phải là 0–3`);
     if (!q?.explain) errors.push(`quiz câu ${i + 1}: thiếu explain`);
   });
+  const headings = String(body)
+    .split('\n')
+    .filter((line) => line.startsWith('## '));
   for (const h of ['Lỗi hay gặp', 'Bài tập thực hành', 'Tóm tắt', 'Đọc thêm'])
-    if (!new RegExp(`^## .*${h}`, 'mi').test(body)) errors.push(`thiếu mục "## ${h}"`);
+    if (!headings.some((line) => line.toLowerCase().includes(h.toLowerCase()))) errors.push(`thiếu mục "## ${h}"`);
   if (!/<details>/.test(body)) errors.push('bài tập cần lời giải ẩn trong <details>');
   for (const l of links(body)) if (!ALLOWED_LINK.some((re) => re.test(l))) errors.push(`liên kết không thuộc tài liệu chính thức: ${l}`);
   const words = wordCount(body);

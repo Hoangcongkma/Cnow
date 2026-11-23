@@ -1,4 +1,6 @@
-name: Kiểm thử
+# CI: cài đặt khóa phiên bản (npm ci) → lint (ESLint + plugin security/n, Prettier) → quét bí mật → test có độ phủ (≥ 80% dòng)
+# → npm audit (chặn lỗ hổng high/critical)
+name: CI
 
 on:
   push:
@@ -7,14 +9,22 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
-        node: [20, 22]
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -26,6 +36,10 @@ jobs:
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
       - run: npm run lint
-      - run: npm test
+      - run: npm run lint:secrets
+      - name: Test + độ phủ (ngưỡng 80% dòng)
+        run: npm run test:coverage
         env:
           NODE_ENV: test
+      - name: npm audit (high/critical)
+        run: npm audit --audit-level=high

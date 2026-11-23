@@ -25,6 +25,7 @@ const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  * @param {unknown} s
  * @param {number} [max=80]
  */
+// eslint-disable-next-line security/detect-non-literal-regexp -- đầu vào đã escape toàn bộ ký tự đặc biệt và cắt ≤ 80 ký tự
 const searchRegex = (s, max = 80) => new RegExp(escapeRegex(String(s ?? '').slice(0, max)), 'i');
 
 module.exports = { safeRedirect, escapeRegex, searchRegex };

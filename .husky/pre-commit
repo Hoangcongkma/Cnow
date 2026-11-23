@@ -1,0 +1,2 @@
+# Chặn commit có bí mật (secretlint) hoặc lỗi lint/định dạng trên các file đang commit
+npx lint-staged

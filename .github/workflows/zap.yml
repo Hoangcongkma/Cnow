@@ -1,0 +1,66 @@
+# Quét DAST bằng OWASP ZAP (baseline – thụ động, không tấn công): khởi động MongoDB + Cnow, nạp dữ liệu mẫu, quét,
+# xuất báo cáo (artifact) và FAIL nếu có cảnh báo mức Medium trở lên.
+name: ZAP baseline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '41 3 * * 1' # 03:41 UTC thứ Hai hằng tuần
+
+permissions:
+  contents: read
+
+jobs:
+  zap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mongo:
+        image: mongo:7
+        ports: ['27017:27017']
+    env:
+      NODE_ENV: development
+      PORT: 3000
+      BASE_URL: http://localhost:3000
+      MONGODB_URI: mongodb://localhost:27017/cnow_zap
+      PAYMENT_MODE: demo
+      GLOBAL_RATE_LIMIT: 5000 # spider của ZAP gửi nhiều request – tránh bị 429 làm sai kết quả
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tạo bí mật ngẫu nhiên cho lần quét (không lưu ở đâu)
+        run: |
+          echo "SESSION_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          echo "SEED_ADMIN_PASSWORD=Zap-$(openssl rand -hex 12)-Aa1" >> "$GITHUB_ENV"
+      - name: Nạp dữ liệu và khởi động Cnow
+        run: |
+          npm run seed
+          npm start > app.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://localhost:3000/healthz && break; sleep 2; done
+      - name: OWASP ZAP baseline
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: http://localhost:3000
+          rules_file_name: .zap/rules.tsv
+          cmd_options: '-a -j'
+          fail_action: false
+          allow_issue_writing: false
+          artifact_name: zap-report
+      - name: Chặn nếu có cảnh báo Medium trở lên
+        run: |
+          test -f report_json.json || { echo "Không có báo cáo ZAP"; exit 1; }
+          n=$(jq '[.site[].alerts[] | select((.riskcode|tonumber) >= 2)] | length' report_json.json)
+          jq -r '.site[].alerts[] | select((.riskcode|tonumber) >= 2) | "\(.riskdesc): \(.alert) (\(.pluginid))"' report_json.json
+          echo "Số cảnh báo Medium+: $n"
+          test "$n" -eq 0
+      - name: Log ứng dụng (khi lỗi)
+        if: failure()
+        run: tail -n 100 app.log

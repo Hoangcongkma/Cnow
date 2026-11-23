@@ -11,3 +11,4 @@ PROGRESS.md
 .claude/
 content/_checks/
 backups/
+coverage/

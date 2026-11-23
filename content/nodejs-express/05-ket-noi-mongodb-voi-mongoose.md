@@ -48,7 +48,7 @@ Khi thiết kế dữ liệu MongoDB, câu hỏi quan trọng nhất là: dữ l
 
 ### Chuỗi kết nối và biến môi trường
 
-Chuỗi kết nối có dạng `mongodb://127.0.0.1:27017/ten-csdl` (máy cục bộ) hoặc `mongodb+srv://nguoi-dung:mat-khau@...` (Atlas). Vì nó có thể chứa mật khẩu, hãy luôn đọc từ biến môi trường, ví dụ `process.env.MONGODB_URI`, thay vì viết thẳng vào code.
+Chuỗi kết nối có dạng `mongodb://127.0.0.1:27017/ten-csdl` (máy cục bộ) hoặc `mongodb+srv://…` kèm tên đăng nhập và mật khẩu ngay trong chuỗi (Atlas). Vì nó có thể chứa mật khẩu, hãy luôn đọc từ biến môi trường, ví dụ `process.env.MONGODB_URI`, thay vì viết thẳng vào code.
 
 ### CRUD
 

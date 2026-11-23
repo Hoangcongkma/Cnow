@@ -174,6 +174,7 @@ const document = {
 const store = new Map();
 globalThis.document = document;
 globalThis.window = globalThis;
+// eslint-disable-next-line n/no-unsupported-features/node-builtins -- đây là bản GIẢ LẬP localStorage cho môi trường chạy thử
 globalThis.localStorage = {
   getItem: (k) => (store.has(k) ? store.get(k) : null),
   setItem: (k, v) => store.set(k, String(v)),

@@ -82,6 +82,7 @@ const MIGRATIONS = [
       let n = 0;
       for (const u of await User.find({ avatar: trusted({ $type: 'string' }) }).select('avatar')) {
         if (!NAME_RE.test(u.avatar) || (await findAvatar(u.avatar))) continue;
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- tên file đã khớp NAME_RE (32 hex + .webp), thư mục cố định
         const data = await fs.readFile(path.join(uploadDir, 'avatars', u.avatar)).catch(() => null);
         if (!data) continue;
         await putFile(u.avatar, data, { user: String(u._id), migrated: true });
@@ -112,6 +113,6 @@ if (require.main === module) {
   })().catch(async (e) => {
     console.error(e);
     await mongoose.disconnect().catch(() => {});
-    process.exit(1);
+    process.exitCode = 1;
   });
 }

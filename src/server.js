@@ -22,5 +22,6 @@ const { logger } = require('./logger');
   });
 })().catch((err) => {
   logger.fatal({ err }, 'Không khởi động được');
-  process.exit(1);
+  process.exitCode = 1;
+  mongoose.disconnect().catch(() => {});
 });

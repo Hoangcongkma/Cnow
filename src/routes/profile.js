@@ -62,6 +62,7 @@ router.post('/profile/password', passwordLimiter, validate(S.profile.password), 
     return render(res, 400, { pwErrors: ['Mật khẩu hiện tại không đúng.'] });
   }
   const pwErrors = checkPassword(password, user);
+  // eslint-disable-next-line security/detect-possible-timing-attacks -- so 2 chuỗi đều do chính người dùng vừa nhập (mật khẩu và nhập lại), không phải bí mật đã lưu
   if (password !== String(req.body.confirm || '')) pwErrors.push('Mật khẩu nhập lại không khớp.');
   if (!pwErrors.length && (await bcrypt.compare(password, user.passwordHash))) pwErrors.push('Mật khẩu mới phải khác mật khẩu hiện tại.');
   if (pwErrors.length) return render(res, 422, { pwErrors });

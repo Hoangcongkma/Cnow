@@ -36,6 +36,7 @@ router.post('/register', registerLimiter, validate(S.auth.register), async (req,
   if (!/^[a-z0-9_.]{3,30}$/.test(form.username)) errors.push('Tên đăng nhập 3–30 ký tự, chỉ gồm chữ thường, số, dấu chấm, gạch dưới.');
   if (!EMAIL.test(form.email)) errors.push('Email không hợp lệ.');
   errors.push(...checkPassword(password, form));
+  // eslint-disable-next-line security/detect-possible-timing-attacks -- so 2 chuỗi đều do chính người dùng vừa nhập (mật khẩu và nhập lại), không phải bí mật đã lưu
   if (password !== req.body.confirm) errors.push('Mật khẩu nhập lại không khớp.');
   if (!errors.length && (await User.exists({ $or: [{ username: form.username }, { email: form.email }] }))) {
     errors.push('Tên đăng nhập hoặc email đã được sử dụng.');
