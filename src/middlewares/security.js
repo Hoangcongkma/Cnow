@@ -1,43 +1,6 @@
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
-async function loginBlocked(req, res) {
-  await require('../services/audit').audit(req, 'login.rate_limited', {
-    actor: null,
-    meta: { login: String(req.body?.login || '').slice(0, 120) },
-  });
-  res.status(429).render('auth/login', {
-    title: 'Đăng nhập',
-    form: { login: String(req.body?.login || '').slice(0, 120) },
-    error: 'Bạn đã đăng nhập sai quá nhiều lần. Vui lòng thử lại sau 15 phút.',
-  });
-}
-
-// Vá lỗ hổng "Login page password-guessing attack" (Acunetix): tối đa 5 lần thử sai trong 15 phút / IP
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 5,
-  skipSuccessfulRequests: true, // chỉ đếm lần đăng nhập sai
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  handler: loginBlocked,
-});
-
-// Thêm giới hạn THEO TÀI KHOẢN: chống dò mật khẩu một tài khoản từ nhiều IP (10 lần sai / 15 phút / tên đăng nhập)
-const loginAccountLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  skipSuccessfulRequests: true,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  keyGenerator: (req) =>
-    `acct:${String(req.body?.login || '')
-      .trim()
-      .toLowerCase()
-      .slice(0, 120)}`,
-  handler: loginBlocked,
-});
-
 const registerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 10, standardHeaders: 'draft-7', legacyHeaders: false });
 
 // Giới hạn chung cho trang động theo IP (mặc định 600 yêu cầu/phút, đổi bằng GLOBAL_RATE_LIMIT)
@@ -89,4 +52,4 @@ function verifyCsrf(req, res, next) {
   next();
 }
 
-module.exports = { loginLimiter, loginAccountLimiter, registerLimiter, globalLimiter, csrf, verifyCsrf, ANON_SESSION_MS };
+module.exports = { registerLimiter, globalLimiter, csrf, verifyCsrf, ANON_SESSION_MS };

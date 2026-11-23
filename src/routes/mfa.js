@@ -5,7 +5,7 @@ const S = require('../validators/schemas');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { User } = require('../models');
-const { requireLogin } = require('../middlewares/auth');
+const { startSession, renewSession } = require('../middlewares/auth');
 const { audit } = require('../services/audit');
 const mfa = require('../services/mfa');
 
@@ -54,10 +54,10 @@ async function renderPage(req, res, extra = {}) {
     });
 }
 
-router.get('/profile/2fa', requireLogin, validate(S.none), (req, res) => renderPage(req, res));
+router.get('/profile/2fa', validate(S.none), (req, res) => renderPage(req, res));
 
 // Bật 2FA: xác nhận mã đầu tiên từ ứng dụng Authenticator
-router.post('/profile/2fa/enable', requireLogin, validate(S.mfa.code), async (req, res, next) => {
+router.post('/profile/2fa/enable', validate(S.mfa.code), async (req, res) => {
   const s = req.session.mfaSetup;
   const user = await withSecrets(req.user._id);
   if (user.mfaEnabled) return res.redirect('/profile/2fa');
@@ -76,26 +76,22 @@ router.post('/profile/2fa/enable', requireLogin, validate(S.mfa.code), async (re
   });
   await user.save();
   await audit(req, 'mfa.enable', { target: user._id });
-  req.session.regenerate((err) => {
-    if (err) return next(err);
-    req.session.userId = user.id;
-    req.session.ver = user.sessionVersion;
-    req.session.f2 = 'totp';
-    noStore(res).render('user/mfa', {
-      title: 'Xác thực hai lớp',
-      enabled: true,
-      left: codes.length,
-      setup: null,
-      codes,
-      error: null,
-      isAdmin: user.role === 'admin',
-      justEnabled: true,
-    });
+  await renewSession(req, user); // id phiên mới, giữ trạng thái đăng nhập + mốc thời gian
+  req.session.f2 = 'totp';
+  noStore(res).render('user/mfa', {
+    title: 'Xác thực hai lớp',
+    enabled: true,
+    left: codes.length,
+    setup: null,
+    codes,
+    error: null,
+    isAdmin: user.role === 'admin',
+    justEnabled: true,
   });
 });
 
 // Tạo lại mã khôi phục (cần mã TOTP hiện tại) – mã cũ hết hiệu lực
-router.post('/profile/2fa/recovery', requireLogin, validate(S.mfa.code), async (req, res) => {
+router.post('/profile/2fa/recovery', validate(S.mfa.code), async (req, res) => {
   const user = await withSecrets(req.user._id);
   if (!user.mfaEnabled) return res.redirect('/profile/2fa');
   const r = await mfa.checkTotp(mfa.decrypt(user.mfaSecret), req.body.code, user.mfaLastStep);
@@ -119,7 +115,7 @@ router.post('/profile/2fa/recovery', requireLogin, validate(S.mfa.code), async (
 });
 
 // Tắt 2FA: cần mật khẩu + mã (TOTP hoặc mã khôi phục). TOTP là tùy chọn với mọi vai trò (admin tắt thì quay về dùng mã quản trị).
-router.post('/profile/2fa/disable', requireLogin, validate(S.mfa.disable), async (req, res) => {
+router.post('/profile/2fa/disable', validate(S.mfa.disable), async (req, res) => {
   const user = await withSecrets(req.user._id).select('+passwordHash');
   if (!user.mfaEnabled) return res.redirect('/profile/2fa');
   const okPw = await bcrypt.compare(String(req.body.password || ''), user.passwordHash);
@@ -148,7 +144,7 @@ router.get('/login/2fa', validate(S.none), (req, res) => {
   noStore(res).render('auth/login-2fa', { title: 'Xác thực hai lớp', error: null });
 });
 
-router.post('/login/2fa', mfaLimiter, validate(S.mfa.code), async (req, res, next) => {
+router.post('/login/2fa', mfaLimiter, validate(S.mfa.code), async (req, res) => {
   const p = pendingOf(req);
   if (!p) {
     delete req.session.mfaPending;
@@ -175,25 +171,20 @@ router.post('/login/2fa', mfaLimiter, validate(S.mfa.code), async (req, res, nex
   }
   await user.save(); // lưu bước TOTP đã dùng / mã khôi phục đã dùng
   const returnTo = p.returnTo;
-  req.session.regenerate(async (err) => {
-    if (err) return next(err);
-    req.session.userId = user.id;
-    req.session.ver = user.sessionVersion || 0;
-    req.session.f2 = how; // 'totp' | 'recovery' – thay cho mã quản trị với admin
-    if (how === 'recovery') {
-      await audit(req, 'mfa.recovery_used', { actor: user._id, target: user._id });
-      req.session.flash = {
-        type: 'warn',
-        text: `Bạn vừa dùng 1 mã khôi phục, còn ${mfa.recoveryLeft(user)} mã. Hãy tạo mã mới nếu sắp hết.`,
-      };
-    }
-    await audit(req, 'login.success', {
-      actor: user._id,
-      target: user._id,
-      meta: { reason: how === 'recovery' ? 'mfa_recovery' : 'mfa_totp' },
-    });
-    res.redirect(returnTo);
+  await startSession(req, user, how); // how: 'totp' | 'recovery' – thay cho mã quản trị với admin
+  if (how === 'recovery') {
+    await audit(req, 'mfa.recovery_used', { actor: user._id, target: user._id });
+    req.session.flash = {
+      type: 'warn',
+      text: `Bạn vừa dùng 1 mã khôi phục, còn ${mfa.recoveryLeft(user)} mã. Hãy tạo mã mới nếu sắp hết.`,
+    };
+  }
+  await audit(req, 'login.success', {
+    actor: user._id,
+    target: user._id,
+    meta: { reason: how === 'recovery' ? 'mfa_recovery' : 'mfa_totp' },
   });
+  res.redirect(returnTo);
 });
 
 /** Gọi từ route đăng nhập khi mật khẩu đúng và người dùng bật 2FA. */

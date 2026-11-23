@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+<section class="wrap section">
+  <a class="small" href="/profile">← Hồ sơ của tôi</a>
+  <h1>Phiên đăng nhập</h1>
+  <p class="muted">Các thiết bị / trình duyệt đang đăng nhập tài khoản của bạn. Thấy phiên lạ? Hãy đăng xuất phiên đó và đổi mật khẩu. Phiên tự hết hạn sau 30 phút không hoạt động hoặc 7 ngày kể từ khi đăng nhập.</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Thiết bị</th><th>Địa chỉ IP</th><th>Đăng nhập lúc</th><th>Hoạt động gần nhất</th><th><span class="sr-only">Thao tác</span></th></tr></thead>
+      <tbody>
+        <% list.forEach(s => { %>
+          <tr>
+            <td class="small"><%= s.userAgent || '(không rõ)' %></td>
+            <td><code><%= s.ip %></code></td>
+            <td><%= s.createdAt.toLocaleString('vi-VN') %></td>
+            <td><%= s.lastSeen.toLocaleString('vi-VN') %></td>
+            <td>
+              <% if (s.current) { %><span class="pill pill-ok">Phiên này</span><% } else { %>
+                <form method="post" action="/profile/sessions/<%= s.id %>/revoke" data-confirm="Đăng xuất phiên này?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-danger btn-xs">Đăng xuất</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% if (list.some(s => !s.current)) { %>
+    <form method="post" action="/profile/sessions/others" data-confirm="Đăng xuất mọi phiên khác (giữ phiên này)?">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="btn btn-ghost btn-sm">Đăng xuất tất cả phiên khác</button>
+    </form>
+  <% } %>
+</section>
+<%- include('../partials/footer') %>

@@ -4,7 +4,6 @@ const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const router = require('express').Router();
 const { Course, Post } = require('../models');
-const { requireLogin } = require('../middlewares/auth');
 const { access, isInstructor } = require('../services/access');
 const { notify } = require('../services/notify');
 
@@ -44,7 +43,7 @@ async function loadThread(course, lesson, me) {
 const back = (course, index) => `/learn/${course.slug}?lesson=${index}#qa`;
 
 // Đặt câu hỏi hoặc trả lời
-router.post('/learn/:slug/qa', requireLogin, validate(S.qa.post), async (req, res) => {
+router.post('/learn/:slug/qa', validate(S.qa.post), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const { full } = await access(req, course);
@@ -103,7 +102,7 @@ async function loadPost(req, res) {
 }
 
 // Vote "Hữu ích" (bấm lần nữa để bỏ vote). Không tự vote bài của mình.
-router.post('/qa/:id/vote', requireLogin, validate(S.qa.action), async (req, res) => {
+router.post('/qa/:id/vote', validate(S.qa.action), async (req, res) => {
   const ctx = await loadPost(req, res);
   if (!ctx) return;
   const { post, course, index } = ctx;
@@ -121,7 +120,7 @@ router.post('/qa/:id/vote', requireLogin, validate(S.qa.action), async (req, res
 });
 
 // Giảng viên (tác giả khóa học hoặc admin) chọn / bỏ chọn câu trả lời hay nhất
-router.post('/qa/:id/best', requireLogin, validate(S.qa.action), async (req, res) => {
+router.post('/qa/:id/best', validate(S.qa.action), async (req, res) => {
   const ctx = await loadPost(req, res);
   if (!ctx) return;
   const { post, course, index } = ctx;

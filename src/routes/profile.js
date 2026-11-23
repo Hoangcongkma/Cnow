@@ -4,8 +4,10 @@ const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
-const { User } = require('../models');
-const { requireLogin } = require('../middlewares/auth');
+const { trusted } = require('mongoose');
+const { User, UserSession } = require('../models');
+const { renewSession } = require('../middlewares/auth');
+const sessions = require('../services/sessions');
 const { checkPassword } = require('../services/password');
 const multer = require('multer');
 const { audit } = require('../services/audit');
@@ -30,9 +32,9 @@ const passwordLimiter = rateLimit({
 const render = (res, status, extra = {}) =>
   res.status(status).render('user/profile', { title: 'Hồ sơ của tôi', form: null, errors: [], pwErrors: [], ...extra });
 
-router.get('/profile', requireLogin, validate(S.none), (req, res) => render(res, 200));
+router.get('/profile', validate(S.none), (req, res) => render(res, 200));
 
-router.post('/profile', requireLogin, validate(S.profile.update), async (req, res) => {
+router.post('/profile', validate(S.profile.update), async (req, res) => {
   const form = {
     name: String(req.body.name || '')
       .trim()
@@ -48,7 +50,7 @@ router.post('/profile', requireLogin, validate(S.profile.update), async (req, re
   res.redirect('/profile');
 });
 
-router.post('/profile/password', requireLogin, passwordLimiter, validate(S.profile.password), async (req, res, next) => {
+router.post('/profile/password', passwordLimiter, validate(S.profile.password), async (req, res) => {
   const user = await User.findById(req.user._id); // cần passwordHash (loadUser không nạp trường này)
   const current = String(req.body.current || '');
   const password = String(req.body.password || '');
@@ -67,16 +69,11 @@ router.post('/profile/password', requireLogin, passwordLimiter, validate(S.profi
   user.passwordChangedAt = new Date();
   await user.save();
   await audit(req, 'password.change', { target: user._id });
-  // Cấp phiên mới cho thiết bị hiện tại (chống session fixation) với version mới
-  const f2 = req.session.f2; // giữ bước xác thực thứ hai đã qua (admin) sang phiên mới
-  req.session.regenerate((err) => {
-    if (err) return next(err);
-    req.session.userId = user.id;
-    req.session.ver = user.sessionVersion;
-    if (f2) req.session.f2 = f2;
-    req.session.flash = { type: 'success', text: 'Đã đổi mật khẩu. Các phiên đăng nhập trên thiết bị khác đã bị đăng xuất.' };
-    res.redirect('/profile');
-  });
+  // Cấp id phiên mới cho thiết bị hiện tại (chống session fixation) với version mới; các phiên khác đã mất hiệu lực
+  await renewSession(req, user);
+  await UserSession.deleteMany({ user: user._id, sid: trusted({ $ne: req.sessionID }) });
+  req.session.flash = { type: 'success', text: 'Đã đổi mật khẩu. Các phiên đăng nhập trên thiết bị khác đã bị đăng xuất.' };
+  res.redirect('/profile');
 });
 
 // ---------- Ảnh đại diện ----------
@@ -93,7 +90,6 @@ const avatarLimiter = rateLimit({
 
 router.post(
   '/profile/avatar',
-  requireLogin,
   avatarLimiter,
   (req, res, next) => {
     upload(req, res, (err) => {
@@ -140,6 +136,26 @@ router.get('/avatars/:file', validate(S.profile.avatarFile), async (req, res) =>
   openAvatar(file)
     .once('error', () => (res.headersSent ? res.destroy() : res.status(404).end()))
     .pipe(res);
+});
+
+// ---------- Phiên đăng nhập: xem các thiết bị đang đăng nhập, đăng xuất từ xa ----------
+router.get('/profile/sessions', validate(S.none), async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.render('user/sessions', { title: 'Phiên đăng nhập', list: await sessions.listSessions(req, req.user._id) });
+});
+
+router.post('/profile/sessions/others', validate(S.profile.revokeOthers), async (req, res) => {
+  const n = await sessions.revokeOthers(req, req.user._id);
+  req.session.flash = { type: 'success', text: n ? `Đã đăng xuất ${n} phiên khác.` : 'Không có phiên nào khác.' };
+  res.redirect('/profile/sessions');
+});
+
+router.post('/profile/sessions/:id/revoke', validate(S.profile.revoke), async (req, res) => {
+  const ok = await sessions.revokeSession(req, req.user._id, req.params.id);
+  req.session.flash = ok
+    ? { type: 'success', text: 'Đã đăng xuất phiên đó.' }
+    : { type: 'warn', text: 'Không tìm thấy phiên (hoặc đó là phiên hiện tại).' };
+  res.redirect('/profile/sessions');
 });
 
 module.exports = router;

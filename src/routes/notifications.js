@@ -3,7 +3,6 @@ const router = require('express').Router();
 const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const { Notification } = require('../models');
-const { requireLogin } = require('../middlewares/auth');
 
 // Số thông báo chưa đọc cho chuông trên thanh menu (mọi trang)
 async function unreadCount(req, res, next) {
@@ -12,13 +11,13 @@ async function unreadCount(req, res, next) {
   next();
 }
 
-router.get('/notifications', requireLogin, validate(S.none), async (req, res) => {
+router.get('/notifications', validate(S.none), async (req, res) => {
   const items = await Notification.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(100);
   res.render('user/notifications', { title: 'Thông báo', items });
 });
 
 // Mở một thông báo: chỉ của chính mình; link chỉ là đường dẫn nội bộ (schema kiểm tra) → không có open redirect
-router.post('/notifications/:id/open', requireLogin, validate(S.notifications.open), async (req, res) => {
+router.post('/notifications/:id/open', validate(S.notifications.open), async (req, res) => {
   const n = await Notification.findOneAndUpdate({ _id: req.params.id, user: req.user._id }, { $set: { read: true } }, { new: true }).catch(
     () => null,
   );
@@ -26,7 +25,7 @@ router.post('/notifications/:id/open', requireLogin, validate(S.notifications.op
   res.redirect(n.link && n.link.startsWith('/') && !n.link.startsWith('//') ? n.link : '/notifications');
 });
 
-router.post('/notifications/read-all', requireLogin, validate(S.notifications.readAll), async (req, res) => {
+router.post('/notifications/read-all', validate(S.notifications.readAll), async (req, res) => {
   await Notification.updateMany({ user: req.user._id, read: false }, { $set: { read: true } });
   res.redirect('/notifications');
 });

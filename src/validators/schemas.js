@@ -40,6 +40,8 @@ module.exports = {
     password: { body: z.object({ current: optStr(200), password: optStr(200), confirm: optStr(200) }) },
     avatar: { body: z.object({ remove: flag }) },
     avatarFile: { params: P.avatar, bare: true },
+    revoke: { params: P.id, body: empty },
+    revokeOthers: { body: empty },
   },
 
   // ---------- Khóa học, học tập ----------

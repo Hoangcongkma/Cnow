@@ -4,7 +4,6 @@ const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const router = require('express').Router();
 const { Course, CourseComment } = require('../models');
-const { requireLogin } = require('../middlewares/auth');
 const { access } = require('../services/access');
 
 const MAX_LEN = 500;
@@ -25,7 +24,7 @@ async function loadComments(course, rawPage) {
   return { items, total, page, pages };
 }
 
-router.post('/courses/:slug/comments', requireLogin, validate(S.comments.create), async (req, res) => {
+router.post('/courses/:slug/comments', validate(S.comments.create), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const back = `/courses/${course.slug}#comments`;

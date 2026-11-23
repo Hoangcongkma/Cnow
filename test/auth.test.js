@@ -20,14 +20,14 @@ test('đăng ký thành công: tạo tài khoản, băm mật khẩu, đăng nh�
     name: 'Bình Minh',
     username: 'binhminh',
     email: 'Binh@Test.local',
-    password: 'MatKhau2026',
-    confirm: 'MatKhau2026',
+    password: 'HocLapTrinh2026',
+    confirm: 'HocLapTrinh2026',
   });
   assert.equal(res.status, 302);
   const u = await User.findOne({ username: 'binhminh' });
   assert.ok(u, 'đã tạo người dùng');
   assert.equal(u.email, 'binh@test.local', 'email chuẩn hóa chữ thường');
-  assert.notEqual(u.passwordHash, 'MatKhau2026');
+  assert.notEqual(u.passwordHash, 'HocLapTrinh2026');
   assert.match(u.passwordHash, /^\$2[aby]\$/, 'mật khẩu được băm bằng bcrypt');
   assert.equal((await agent.get('/my-courses')).status, 200, 'phiên đã đăng nhập');
 });
@@ -39,19 +39,30 @@ test('đăng ký bị từ chối: trùng tên, mật khẩu yếu, nhập lại
   let res = await agent
     .post('/register')
     .type('form')
-    .send({ ...base, username: 'anan', password: 'MatKhau2026', confirm: 'MatKhau2026' });
+    .send({ ...base, username: 'anan', password: 'HocLapTrinh2026', confirm: 'HocLapTrinh2026' });
   assert.equal(res.status, 400);
   assert.match(res.text, /đã được sử dụng/);
   res = await agent
     .post('/register')
     .type('form')
-    .send({ ...base, username: 'anhai', password: 'abcdefgh', confirm: 'abcdefgh' });
+    .send({ ...base, username: 'anhai', password: 'abcdefghijk', confirm: 'abcdefghijk' });
   assert.equal(res.status, 400);
   assert.match(res.text, /cả chữ và số/);
   res = await agent
     .post('/register')
     .type('form')
-    .send({ ...base, username: 'anhai', password: 'MatKhau2026', confirm: 'khac2026' });
+    .send({ ...base, username: 'anhai', password: 'Password2026!', confirm: 'Password2026!' });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /quá phổ biến/, 'mật khẩu phổ biến + thêm số ở cuối vẫn bị chặn');
+  res = await agent
+    .post('/register')
+    .type('form')
+    .send({ ...base, username: 'anhai', password: 'Ngan2026', confirm: 'Ngan2026' });
+  assert.match(res.text, /từ 10 ký tự/);
+  res = await agent
+    .post('/register')
+    .type('form')
+    .send({ ...base, username: 'anhai', password: 'HocLapTrinh2026', confirm: 'khac2026' });
   assert.equal(res.status, 400);
 });
 

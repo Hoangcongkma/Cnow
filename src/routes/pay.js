@@ -9,7 +9,6 @@ const crypto = require('crypto');
 const config = require('../config');
 const paypal = require('../services/paypal');
 const { Course, Order, Enrollment, Coupon } = require('../models');
-const { requireLogin } = require('../middlewares/auth');
 const { notify } = require('../services/notify');
 const coupons = require('../services/coupon');
 const money = require('../services/money');
@@ -37,7 +36,7 @@ async function grant(order) {
 const notFoundOrder = (res) =>
   res.status(404).render('error', { title: 'Không tìm thấy đơn hàng', message: 'Đơn hàng không tồn tại hoặc không thuộc về bạn.' });
 
-router.post('/pay', requireLogin, validate(S.pay.create), async (req, res) => {
+router.post('/pay', validate(S.pay.create), async (req, res) => {
   const course = await Course.findOne({ _id: req.body.courseId, published: true }).catch(() => null);
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   if (await Enrollment.exists({ user: req.user.id, course: course.id })) return res.redirect(`/learn/${course.slug}`);
@@ -141,7 +140,7 @@ router.post('/pay', requireLogin, validate(S.pay.create), async (req, res) => {
 
 // ---------- PayPal thật (PAYMENT_MODE=paypal) ----------
 // PayPal chuyển về: /pay/success?token=<PayPal order id>&PayerID=...
-router.get('/pay/success', requireLogin, validate(S.pay.paypalReturn), async (req, res) => {
+router.get('/pay/success', validate(S.pay.paypalReturn), async (req, res) => {
   const order = await Order.findOne({ providerOrderId: String(req.query.token || ''), user: req.user.id, provider: 'paypal' }).populate(
     'course',
   );
@@ -179,7 +178,7 @@ router.get('/pay/success', requireLogin, validate(S.pay.paypalReturn), async (re
   }
 });
 
-router.get('/pay/cancel', requireLogin, validate(S.pay.paypalReturn), async (req, res) => {
+router.get('/pay/cancel', validate(S.pay.paypalReturn), async (req, res) => {
   const order = await Order.findOneAndUpdate(
     { providerOrderId: String(req.query.token || ''), user: req.user.id, provider: 'paypal', status: 'CREATED' },
     { status: 'CANCELLED' },
@@ -218,7 +217,7 @@ if (config.demo) {
         });
 
   // Bước 1: chọn phương thức
-  router.get('/pay/demo/:ref', requireLogin, validate(S.pay.demoChoose), async (req, res) => {
+  router.get('/pay/demo/:ref', validate(S.pay.demoChoose), async (req, res) => {
     const order = await findDemo(req);
     if (!order) return notFoundOrder(res);
     if (order.status !== 'CREATED') return showFinal(res, order);
@@ -226,7 +225,7 @@ if (config.demo) {
   });
 
   // Bước 2: trang xác nhận của cổng đã chọn
-  router.get('/pay/demo/:ref/:gw', requireLogin, validate(S.pay.demoGateway), async (req, res) => {
+  router.get('/pay/demo/:ref/:gw', validate(S.pay.demoGateway), async (req, res) => {
     if (!GATEWAYS[req.params.gw]) return notFoundOrder(res);
     const order = await findDemo(req);
     if (!order) return notFoundOrder(res);
@@ -242,7 +241,7 @@ if (config.demo) {
   });
 
   // Bước 3: kết quả (Thanh toán thành công / thất bại / Hủy giao dịch)
-  router.post('/pay/demo/:ref/:gw', requireLogin, validate(S.pay.demoSubmit), async (req, res) => {
+  router.post('/pay/demo/:ref/:gw', validate(S.pay.demoSubmit), async (req, res) => {
     const gw = req.params.gw;
     if (!GATEWAYS[gw]) return notFoundOrder(res);
     const found = await findDemo(req);
@@ -293,7 +292,7 @@ if (config.demo) {
 }
 
 // Hóa đơn PDF: chỉ chủ đơn hàng hoặc admin; chỉ đơn đã thanh toán / đã hoàn tiền (hoặc miễn phí nhờ mã giảm giá)
-router.get('/orders/:id/invoice.pdf', requireLogin, validate(S.pay.invoice), async (req, res) => {
+router.get('/orders/:id/invoice.pdf', validate(S.pay.invoice), async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate('user', 'name email username')
     .populate('course', 'title')
@@ -309,7 +308,7 @@ router.get('/orders/:id/invoice.pdf', requireLogin, validate(S.pay.invoice), asy
   buildInvoice({ order, user: order.user, course: order.course }).pipe(res);
 });
 
-router.get('/orders', requireLogin, validate(S.none), async (req, res) => {
+router.get('/orders', validate(S.none), async (req, res) => {
   const orders = await Order.find({ user: req.user.id }).sort({ createdAt: -1 }).populate('course', 'title slug');
   res.render('user/orders', { title: 'Lịch sử thanh toán', orders });
 });

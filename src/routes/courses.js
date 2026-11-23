@@ -6,7 +6,6 @@ const router = require('express').Router();
 const { Course, Enrollment, User, Progress, Note, Post, Review, Certificate } = require('../models');
 const { ensureCertificate } = require('./reviews');
 const coupons = require('../services/coupon');
-const { requireLogin } = require('../middlewares/auth');
 const { renderDoc } = require('../services/markdown');
 const { summarize } = require('../services/progress');
 const { grade, resultFor, PASS_RATIO, MAX_ATTEMPTS, attemptsInfo, takeAttempt, minutesUntil } = require('../services/quiz');
@@ -86,7 +85,7 @@ router.get('/courses', validate(S.courses.list), async (req, res) => {
 });
 
 // ---------- Yêu thích ----------
-router.post('/wishlist/:courseId', requireLogin, validate(S.courses.wishlist), async (req, res) => {
+router.post('/wishlist/:courseId', validate(S.courses.wishlist), async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, published: true }).catch(() => null);
   const back = safeRedirect(req.body.back, '/wishlist');
   if (!course) return res.redirect(back);
@@ -99,7 +98,7 @@ router.post('/wishlist/:courseId', requireLogin, validate(S.courses.wishlist), a
   res.redirect(back);
 });
 
-router.get('/wishlist', requireLogin, validate(S.none), async (req, res) => {
+router.get('/wishlist', validate(S.none), async (req, res) => {
   const courses = await Course.find({ _id: trusted({ $in: req.user.wishlist }), published: true });
   const order = req.user.wishlist.map(String).reverse(); // mới thêm lên trước
   courses.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
@@ -142,7 +141,7 @@ router.get('/courses/:slug', validate(S.courses.detail), async (req, res) => {
 const notFound = (res) => res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
 
 // Học khóa học: chỉ người đã ghi danh (hoặc bài học thử)
-router.get('/learn/:slug', requireLogin, validate(S.courses.learn), async (req, res) => {
+router.get('/learn/:slug', validate(S.courses.learn), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return notFound(res);
   const { full } = await access(req, course);
@@ -201,7 +200,7 @@ router.get('/learn/:slug', requireLogin, validate(S.courses.learn), async (req, 
 });
 
 // Phòng chat của khóa học (Socket.IO): học viên đã ghi danh và giảng viên (tác giả khóa học, admin)
-router.get('/courses/:slug/chat', requireLogin, validate(S.courses.chat), async (req, res) => {
+router.get('/courses/:slug/chat', validate(S.courses.chat), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true }).select('title slug author');
   if (!course) return notFound(res);
   const teacher = isInstructor(req.user, course);
@@ -213,7 +212,7 @@ router.get('/courses/:slug/chat', requireLogin, validate(S.courses.chat), async 
 });
 
 // Đánh dấu đã học / bỏ đánh dấu một bài, rồi tự sang bài tiếp theo
-router.post('/learn/:slug/complete', requireLogin, validate(S.courses.complete), async (req, res) => {
+router.post('/learn/:slug/complete', validate(S.courses.complete), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return notFound(res);
   const { full } = await access(req, course);
@@ -254,7 +253,7 @@ router.post('/learn/:slug/complete', requireLogin, validate(S.courses.complete),
 });
 
 // Nộp trắc nghiệm: chấm ở server, lưu kết quả vào Progress rồi quay lại trang học để xem giải thích
-router.post('/learn/:slug/quiz', requireLogin, validate(S.courses.quiz), async (req, res) => {
+router.post('/learn/:slug/quiz', validate(S.courses.quiz), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return notFound(res);
   const { full } = await access(req, course);
@@ -310,7 +309,7 @@ const noteText = (v) =>
     .trim()
     .slice(0, 1000);
 
-router.post('/learn/:slug/notes', requireLogin, validate(S.courses.noteCreate), async (req, res) => {
+router.post('/learn/:slug/notes', validate(S.courses.noteCreate), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return notFound(res);
   const { full } = await access(req, course);
@@ -338,7 +337,7 @@ async function ownNote(req, res) {
   const found = course && course.findLesson(note.lesson);
   return { note, back: course ? `/learn/${course.slug}?lesson=${found ? found.index : 0}#notes` : '/my-courses' };
 }
-router.post('/notes/:id', requireLogin, validate(S.courses.noteUpdate), async (req, res) => {
+router.post('/notes/:id', validate(S.courses.noteUpdate), async (req, res) => {
   const ctx = await ownNote(req, res);
   if (!ctx) return;
   const text = noteText(req.body.text);
@@ -350,14 +349,14 @@ router.post('/notes/:id', requireLogin, validate(S.courses.noteUpdate), async (r
   }
   res.redirect(ctx.back);
 });
-router.post('/notes/:id/delete', requireLogin, validate(S.courses.noteDelete), async (req, res) => {
+router.post('/notes/:id/delete', validate(S.courses.noteDelete), async (req, res) => {
   const ctx = await ownNote(req, res);
   if (!ctx) return;
   await ctx.note.deleteOne();
   res.redirect(ctx.back);
 });
 
-router.get('/my-courses', requireLogin, validate(S.none), async (req, res) => {
+router.get('/my-courses', validate(S.none), async (req, res) => {
   const enrollments = (await Enrollment.find({ user: req.user.id }).sort({ createdAt: -1 }).populate('course')).filter((e) => e.course);
   const progresses = await Progress.find({ user: req.user.id, course: trusted({ $in: enrollments.map((e) => e.course._id) }) });
   const byCourse = new Map(progresses.map((p) => [String(p.course), p]));

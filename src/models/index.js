@@ -34,6 +34,8 @@ const userSchema = new Schema(
     adminPinSetAt: Date,
     adminPinFails: { type: [Date], default: undefined }, // các lần nhập sai trong 15 phút gần nhất (giữ lượt nguyên tử)
     adminPinLockedUntil: Date,
+    // HMAC của các IP đã từng đăng nhập (không lưu IP gốc) – để báo "đăng nhập từ IP mới"
+    knownIpHashes: { type: [String], default: undefined, select: false },
   },
   { timestamps: true },
 );
@@ -279,7 +281,7 @@ postSchema.index({ user: 1, createdAt: -1 }); // giới hạn số bài viết/g
 const notificationSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    type: { type: String, enum: ['qa_reply', 'new_lesson', 'payment', 'refund'], required: true },
+    type: { type: String, enum: ['qa_reply', 'new_lesson', 'payment', 'refund', 'security'], required: true },
     text: { type: String, required: true, maxlength: 300 },
     link: { type: String, maxlength: 300, match: /^\/(?!\/)/ }, // chỉ đường dẫn nội bộ
     read: { type: Boolean, default: false },
@@ -314,6 +316,9 @@ const AUDIT_ACTIONS = {
   'mfa.recovery_regenerated': 'Tạo lại mã khôi phục 2FA',
   'mfa.recovery_used': 'Đăng nhập bằng mã khôi phục 2FA',
   'mfa.failure': 'Nhập sai mã 2FA',
+  'login.new_ip': 'Đăng nhập từ địa chỉ IP mới',
+  'session.revoke': 'Đăng xuất phiên từ xa',
+  'session.expired': 'Phiên hết hạn (không hoạt động / quá hạn tuyệt đối)',
   ADMIN_PIN_OK: 'Mã quản trị đúng',
   ADMIN_PIN_FAIL: 'Nhập sai mã quản trị',
   ADMIN_PIN_LOCKED: 'Khóa bước nhập mã quản trị (sai quá nhiều)',
@@ -354,6 +359,22 @@ const commentSchema = new Schema(
   },
   { timestamps: true },
 );
+
+// ---------- Phiên đăng nhập đang hoạt động (trang "Phiên đăng nhập", đăng xuất từ xa) ----------
+const userSessionSchema = new Schema(
+  {
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    sid: { type: String, required: true, select: false }, // id phiên trong store – chỉ dùng để hủy phiên, không bao giờ hiển thị
+    ip: { type: String, maxlength: 64 },
+    userAgent: { type: String, maxlength: 200 },
+    lastSeen: { type: Date, default: Date.now },
+    expiresAt: { type: Date, required: true }, // = hạn tuyệt đối của phiên; TTL tự dọn
+  },
+  { timestamps: { createdAt: true, updatedAt: false } },
+);
+userSessionSchema.index({ user: 1, lastSeen: -1 });
+userSessionSchema.index({ sid: 1 }, { unique: true });
+userSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // ---------- Bình luận ngắn theo khóa học (cảm nhận, góp ý, hỏi nhanh) – hiển thị ở trang khóa học, admin ẩn được ----------
 const courseCommentSchema = new Schema(
@@ -399,6 +420,7 @@ enrollmentSchema.index({ createdAt: -1 });
 enrollmentSchema.index({ user: 1, createdAt: -1 });
 
 module.exports = {
+  UserSession: model('UserSession', userSessionSchema),
   CourseComment: model('CourseComment', courseCommentSchema),
   User: model('User', userSchema),
   Course: model('Course', courseSchema),

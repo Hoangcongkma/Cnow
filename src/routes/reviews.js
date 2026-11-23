@@ -5,7 +5,6 @@ const S = require('../validators/schemas');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const { Course, Enrollment, Review, Certificate, Progress } = require('../models');
-const { requireLogin } = require('../middlewares/auth');
 const { summarize } = require('../services/progress');
 
 /** Tính lại điểm trung bình và số lượt đánh giá của khóa học. */
@@ -38,7 +37,7 @@ async function ensureCertificate(user, course, progress) {
 }
 
 // Gửi / sửa đánh giá: chỉ học viên đã ghi danh, mỗi người 1 đánh giá
-router.post('/courses/:slug/review', requireLogin, validate(S.reviews.review), async (req, res) => {
+router.post('/courses/:slug/review', validate(S.reviews.review), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const back = `/courses/${course.slug}#reviews`;
@@ -61,7 +60,7 @@ router.post('/courses/:slug/review', requireLogin, validate(S.reviews.review), a
 });
 
 // Chứng nhận: chủ sở hữu hoặc admin xem; người khác kiểm tra qua /verify/:code
-router.get('/certificate/:id', requireLogin, validate(S.reviews.certificate), async (req, res) => {
+router.get('/certificate/:id', validate(S.reviews.certificate), async (req, res) => {
   const cert = await Certificate.findById(req.params.id).catch(() => null);
   if (!cert || (String(cert.user) !== req.user.id && req.user.role !== 'admin')) {
     return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Chứng nhận không tồn tại.' });
@@ -74,7 +73,7 @@ router.get('/certificate/:id', requireLogin, validate(S.reviews.certificate), as
 });
 
 // Lấy (hoặc cấp) chứng nhận của khóa học đã hoàn thành
-router.post('/courses/:slug/certificate', requireLogin, validate(S.reviews.claim), async (req, res) => {
+router.post('/courses/:slug/certificate', validate(S.reviews.claim), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const progress = await Progress.findOne({ user: req.user.id, course: course.id });

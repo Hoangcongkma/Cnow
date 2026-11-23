@@ -4,6 +4,7 @@
   <p class="card-pad mfa-banner">
     🔐 Xác thực hai lớp: <% if (me.mfaEnabled) { %><span class="status st-COMPLETED">Đang bật</span><% } else { %><span class="status st-CANCELLED">Chưa bật</span><% } %>
     <a class="btn btn-ghost btn-sm" href="/profile/2fa"><%= me.mfaEnabled ? 'Quản lý' : 'Bật ngay' %></a>
+    <a class="btn btn-ghost btn-sm" href="/profile/sessions">🖥️ Phiên đăng nhập</a>
   </p>
   <div class="profile-grid">
     <form class="card-pad avatar-form" method="post" action="/profile/avatar" enctype="multipart/form-data" aria-labelledby="av-h">
@@ -41,8 +42,8 @@
       <% if (pwErrors.length) { %><div class="flash flash-error"><ul><% pwErrors.forEach(e => { %><li><%= e %></li><% }) %></ul></div><% } %>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <label>Mật khẩu hiện tại<span class="pw"><input type="password" name="current" required autocomplete="current-password"><button type="button" class="pw-toggle" aria-label="Hiện mật khẩu">👁</button></span></label>
-      <label>Mật khẩu mới<span class="pw"><input type="password" name="password" required minlength="8" maxlength="72" autocomplete="new-password" aria-describedby="pw-hint"><button type="button" class="pw-toggle" aria-label="Hiện mật khẩu">👁</button></span></label>
-      <p id="pw-hint" class="small muted">8–72 ký tự, có cả chữ và số, không chứa tên đăng nhập/email.</p>
+      <label>Mật khẩu mới<span class="pw"><input type="password" name="password" required minlength="10" maxlength="72" autocomplete="new-password" aria-describedby="pw-hint"><button type="button" class="pw-toggle" aria-label="Hiện mật khẩu">👁</button></span></label>
+      <p id="pw-hint" class="small muted">Từ 10 ký tự (tối đa 72 byte), có cả chữ và số, không chứa tên đăng nhập/email, không nằm trong danh sách mật khẩu phổ biến.</p>
       <label>Nhập lại mật khẩu mới<input type="password" name="confirm" required autocomplete="new-password"></label>
       <p class="small muted">Sau khi đổi, mọi phiên đăng nhập trên thiết bị khác sẽ bị đăng xuất.</p>
       <button class="btn btn-sm">Đổi mật khẩu</button>

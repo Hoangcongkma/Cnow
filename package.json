@@ -44,6 +44,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.5.0",
     "otplib": "^13.6.0",
+    "path-to-regexp": "^8.4.2",
     "pdfkit": "^0.21.0",
     "qrcode": "^1.5.4",
     "sanitize-html": "^2.18.2",

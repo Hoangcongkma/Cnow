@@ -59,6 +59,8 @@ module.exports = {
   uploadDir: require('path').resolve(__dirname, '..', process.env.UPLOAD_DIR || 'uploads'),
   sessionSecret: secret || 'dev-only-secret-change-me-dev-only-secret', // chỉ dùng được khi isLocal/test (đã kiểm tra ở trên)
   trustProxy: isProd || process.env.TRUST_PROXY === '1',
+  // Tiền tố __Host-: trình duyệt chỉ nhận cookie khi Secure, Path=/ và KHÔNG có Domain → không bị subdomain ghi đè
+  sessionCookieName: isProd && isHttps ? '__Host-cnow.sid' : 'cnow.sid',
   paymentMode,
   demo: paymentMode === 'demo', // cổng demo: mọi đơn ghi rõ "DEMO – không phải giao dịch thật"
   usdVnd, // tỉ giá DEMO để hiển thị VND và tính tiền cổng VNPay/MoMo mô phỏng

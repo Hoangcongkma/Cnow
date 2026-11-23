@@ -100,10 +100,10 @@ test('phiên của khách chưa đăng nhập hết hạn sau khoảng 2 giờ; 
   assert.ok(days > 6.9, `phiên đăng nhập ~7 ngày (thực tế ${days.toFixed(2)})`);
 });
 
-test('dò mật khẩu 1 tài khoản từ nhiều IP: sau 10 lần sai bị chặn theo tài khoản', async () => {
+test('dò mật khẩu 1 tài khoản từ nhiều IP: sau 5 lần sai bị khóa theo tài khoản (lũy tiến)', async () => {
   const agent = request.agent(app);
   const token = await csrf(agent);
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     const r = await agent
       .post('/login')
       .set('X-Forwarded-For', `10.0.0.${i + 1}`)

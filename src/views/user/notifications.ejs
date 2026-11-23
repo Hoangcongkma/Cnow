@@ -11,7 +11,7 @@
   </div>
   <% if (!items.length) { %><div class="empty">Bạn chưa có thông báo nào.</div><% } %>
   <ul class="notif-list">
-    <% const icon = { qa_reply: '💬', new_lesson: '📚', payment: '✅', refund: '↩️' }; %>
+    <% const icon = { qa_reply: '💬', new_lesson: '📚', payment: '✅', refund: '↩️', security: '🛡️' }; %>
     <% items.forEach(n => { %>
       <li class="<%= n.read ? '' : 'unread' %>">
         <form method="post" action="/notifications/<%= n._id %>/open">

@@ -3,7 +3,10 @@ const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const bcrypt = require('bcryptjs');
 const { User } = require('../models');
-const { loginLimiter, loginAccountLimiter, registerLimiter } = require('../middlewares/security');
+const { registerLimiter } = require('../middlewares/security');
+const guard = require('../services/login-guard');
+const { forgetSession } = require('../services/sessions');
+const config = require('../config');
 const { checkPassword } = require('../services/password');
 const { audit } = require('../services/audit');
 const { startPending } = require('./mfa');
@@ -17,7 +20,7 @@ const DUMMY_HASH = bcrypt.hashSync('cnow-timing-guard', 12);
 
 router.get('/register', validate(S.none), (req, res) => res.render('auth/register', { title: 'Đăng ký', form: {}, errors: [] }));
 
-router.post('/register', registerLimiter, validate(S.auth.register), async (req, res, next) => {
+router.post('/register', registerLimiter, validate(S.auth.register), async (req, res) => {
   const form = {
     name: String(req.body.name || '').trim(),
     username: String(req.body.username || '')
@@ -40,32 +43,44 @@ router.post('/register', registerLimiter, validate(S.auth.register), async (req,
   if (errors.length) return res.status(400).render('auth/register', { title: 'Đăng ký', form, errors });
 
   const user = await User.create({ ...form, passwordHash: await bcrypt.hash(password, 12) });
-  req.session.regenerate((err) => {
-    if (err) return next(err);
-    req.session.userId = user.id;
-    req.session.ver = user.sessionVersion || 0;
-    req.session.flash = { type: 'success', text: `Chào mừng ${user.name} đến với Cnow!` };
-    res.redirect('/courses');
-  });
+  await startSession(req, user);
+  req.session.flash = { type: 'success', text: `Chào mừng ${user.name} đến với Cnow!` };
+  res.redirect('/courses');
 });
 
 router.get('/login', validate(S.none), (req, res) => res.render('auth/login', { title: 'Đăng nhập', form: {}, error: null }));
 
-router.post('/login', loginLimiter, loginAccountLimiter, validate(S.auth.login), async (req, res, next) => {
+/** Đang bị khóa lũy tiến → 429, báo số phút còn lại, ghi audit. */
+async function blocked(req, res, login, ms) {
+  await audit(req, 'login.rate_limited', { actor: null, meta: { login: login.slice(0, 120) } });
+  res.set('Retry-After', String(Math.ceil(ms / 1000)));
+  return res.status(429).render('auth/login', {
+    title: 'Đăng nhập',
+    form: { login },
+    error: `Bạn đã đăng nhập sai quá nhiều lần. Vui lòng thử lại sau ${guard.minutes(ms)} phút.`,
+  });
+}
+
+router.post('/login', validate(S.auth.login), async (req, res, next) => {
   const login = String(req.body.login || '')
     .trim()
     .toLowerCase();
   const password = String(req.body.password || '');
+  // Khóa lũy tiến theo tài khoản + IP (kiểm tra TRƯỚC khi so mật khẩu)
+  const wait = await guard.lockedFor(login, req.ip);
+  if (wait) return blocked(req, res, login, wait);
   const user = login ? await User.findOne({ $or: [{ username: login }, { email: login }] }) : null;
-  const ok = await bcrypt.compare(password, user ? user.passwordHash : DUMMY_HASH);
+  const ok = await bcrypt.compare(password, user ? user.passwordHash : DUMMY_HASH); // luôn băm → thời gian phản hồi đều
   if (!user || !ok) {
     await audit(req, 'login.failure', {
       actor: null,
       target: user?._id,
       meta: { login: login.slice(0, 120), reason: user ? 'wrong_password' : 'unknown_user' },
     });
+    await guard.recordFailure(login, req.ip);
     return res.status(401).render('auth/login', { title: 'Đăng nhập', form: { login }, error: 'Tên đăng nhập hoặc mật khẩu không đúng.' });
   }
+  await guard.recordSuccess(login);
   if (user.locked) {
     await audit(req, 'login.locked', { actor: null, target: user._id, meta: { login: login.slice(0, 120) } });
     return res
@@ -84,8 +99,9 @@ router.post('/login', loginLimiter, loginAccountLimiter, validate(S.auth.login),
 });
 
 router.post('/logout', validate(S.auth.logout), (req, res) => {
+  forgetSession(req.sessionID);
   req.session.destroy(() => {
-    res.clearCookie('cnow.sid');
+    res.clearCookie(config.sessionCookieName, { path: '/' });
     res.redirect('/');
   });
 });

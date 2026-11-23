@@ -72,7 +72,7 @@ app.use(globalLimiter);
 
 // Dùng chung cho HTTP và Socket.IO (src/realtime.js) để xác thực kết nối chat bằng phiên đăng nhập hiện có
 const sessionMiddleware = session({
-  name: 'cnow.sid',
+  name: config.sessionCookieName,
   secret: config.sessionSecret,
   resave: false,
   saveUninitialized: false,
@@ -118,6 +118,7 @@ app.use((req, res, next) => {
 });
 app.use(loadUser);
 app.use(csrf);
+app.use(require('./security/rbac').authorize); // phân quyền tập trung theo bảng RULES (docs/SECURITY/rbac.md)
 
 app.use(require('./routes/notifications').unreadCount); // số thông báo chưa đọc cho chuông trên thanh menu
 app.use(require('./routes/auth'));
