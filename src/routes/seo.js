@@ -39,5 +39,41 @@ router.get('/sitemap.xml', validate(S.none), async (req, res) => {
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`);
 });
 
+// RFC 9116 – nơi nhà nghiên cứu bảo mật báo lỗ hổng. Contact lấy từ SECURITY_CONTACT (mailto: hoặc https:),
+// chưa cấu hình thì trỏ tới trang giới thiệu dự án. Expires luôn còn hạn 180 ngày kể từ lúc tải.
+router.get('/.well-known/security.txt', validate(S.none), (req, res) => {
+  const contact = process.env.SECURITY_CONTACT || `${config.baseUrl}/gioi-thieu`;
+  const expires = new Date(Date.now() + 180 * 24 * 3600 * 1000).toISOString().replace(/\.\d{3}Z$/, '.000Z');
+  res
+    .type('text/plain')
+    .send(
+      [
+        `Contact: ${contact}`,
+        `Expires: ${expires}`,
+        'Preferred-Languages: vi, en',
+        `Canonical: ${config.baseUrl}/.well-known/security.txt`,
+        `Policy: ${config.baseUrl}/chinh-sach-bao-mat`,
+        '',
+      ].join('\n'),
+    );
+});
 module.exports = router;
+// RFC 9116 – nơi nhà nghiên cứu bảo mật báo lỗ hổng. Contact lấy từ SECURITY_CONTACT (mailto: hoặc https:),
+// chưa cấu hình thì trỏ tới trang giới thiệu dự án. Expires luôn còn hạn 180 ngày kể từ lúc tải.
+router.get('/.well-known/security.txt', validate(S.none), (req, res) => {
+  const contact = process.env.SECURITY_CONTACT || `${config.baseUrl}/gioi-thieu`;
+  const expires = new Date(Date.now() + 180 * 24 * 3600 * 1000).toISOString().replace(/\.\d{3}Z$/, '.000Z');
+  res
+    .type('text/plain')
+    .send(
+      [
+        `Contact: ${contact}`,
+        `Expires: ${expires}`,
+        'Preferred-Languages: vi, en',
+        `Canonical: ${config.baseUrl}/.well-known/security.txt`,
+        `Policy: ${config.baseUrl}/chinh-sach-bao-mat`,
+        '',
+      ].join('\n'),
+    );
+});
 module.exports.PRIVATE = PRIVATE;

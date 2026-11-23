@@ -23,6 +23,7 @@ const { parseQuizForm } = require('../services/quiz');
 const { audit } = require('../services/audit');
 const { notifyNewLessons, notify } = require('../services/notify');
 const listing = require('../services/listing');
+const exportLimiter = require('../security/rate-limit').limits.export();
 // Quay lại đúng trang danh sách (giữ bộ lọc) sau khi thao tác – chỉ chấp nhận đường dẫn nội bộ /admin/…
 const safeBack = (v, dflt) => safeRedirect(v, dflt, '/admin/');
 const { safeRedirect } = require('../utils/security');
@@ -628,7 +629,7 @@ router.get('/users', validate(S.admin.users), async (req, res) => {
   });
 });
 
-router.get('/export/users.csv', validate(S.admin.users), async (req, res) => {
+router.get('/export/users.csv', exportLimiter, validate(S.admin.users), async (req, res) => {
   const { filter, sort } = usersQuery(req.query);
   const users = await User.find(filter)
     .sort(sort)
@@ -677,7 +678,7 @@ router.post('/users/:id', validate(S.admin.userUpdate), async (req, res) => {
 const vnTime = (d) => (d ? new Date(d).toLocaleString('vi-VN', { timeZone: TZ }) : '');
 const stamp = () => ymd(new Date());
 
-router.get('/export/orders.csv', validate(S.admin.orders), async (req, res) => {
+router.get('/export/orders.csv', exportLimiter, validate(S.admin.orders), async (req, res) => {
   const { filter, sort } = await ordersQuery(req); // cùng bộ lọc với trang /admin/orders
   const orders = await Order.find(filter).sort(sort).limit(50000).populate('user', 'name username email').populate('course', 'title');
   sendCsv(
@@ -720,7 +721,7 @@ router.get('/export/orders.csv', validate(S.admin.orders), async (req, res) => {
   );
 });
 
-router.get('/export/learners.csv', validate(S.admin.learners), async (req, res) => {
+router.get('/export/learners.csv', exportLimiter, validate(S.admin.learners), async (req, res) => {
   const { filter, sort } = await learnersQuery(req);
   const enrollments = await Enrollment.find(filter)
     .sort(sort)
@@ -745,7 +746,7 @@ router.get('/export/learners.csv', validate(S.admin.learners), async (req, res) 
   );
 });
 
-router.get('/export/revenue.csv', validate(S.admin.revenueCsv), async (req, res) => {
+router.get('/export/revenue.csv', exportLimiter, validate(S.admin.revenueCsv), async (req, res) => {
   const [from, to] = dateRange(req.query);
   const ids = await scopeCourseIds(req.user);
   const courses = await Course.find(ids ? { _id: trusted({ $in: ids }) } : {})

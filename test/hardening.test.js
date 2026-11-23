@@ -142,7 +142,10 @@ test('ảnh đại diện kích thước quá lớn bị từ chối', async () 
 
 test('CSP chỉ cho phép 2 đường dẫn script của YouTube, không cả domain', async () => {
   const csp = (await request(app).get('/')).headers['content-security-policy'];
-  assert.match(csp, /script-src 'self' https:\/\/www\.youtube\.com\/iframe_api https:\/\/www\.youtube\.com\/s\/player\//);
+  assert.match(
+    csp,
+    /script-src 'nonce-[A-Za-z0-9+/=]+' 'strict-dynamic' 'self' https:\/\/www\.youtube\.com\/iframe_api https:\/\/www\.youtube\.com\/s\/player\//,
+  );
   assert.doesNotMatch(csp, /https:\/\/www\.youtube\.com[ ;]/);
 });
 

@@ -16,6 +16,6 @@
     <p class="small muted">Lưu 200 tin gần nhất · tối đa 5 tin/10 giây · giữ lịch sự, không chia sẻ thông tin cá nhân.<% if (teacher) { %> Bạn là giảng viên: có thể xóa tin vi phạm.<% } %></p>
   </div>
 </section>
-<script src="/socket.io/socket.io.js"></script>
-<script src="<%= asset('/js/chat.js') %>"></script>
+<script nonce="<%= cspNonce %>" src="/socket.io/socket.io.js"></script>
+<script nonce="<%= cspNonce %>" src="<%= asset('/js/chat.js') %>"></script>
 <%- include('../partials/footer') %>

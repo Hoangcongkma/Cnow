@@ -20,6 +20,6 @@
   </div>
   <div class="wrap copy muted small">© <%= new Date().getFullYear() %> Hoàng Mạnh Công · Cnow · Node.js · MongoDB<%= demoMode ? '' : ' · PayPal' %></div>
 </footer>
-<script src="<%= asset('/js/app.js') %>"></script>
+<script nonce="<%= cspNonce %>" src="<%= asset('/js/app.js') %>"></script>
 </body>
 </html>

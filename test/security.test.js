@@ -43,7 +43,7 @@ test('header bảo mật: CSP chỉ self, nosniff, không lộ X-Powered-By, coo
   const res = await request(app).get('/login');
   const csp = res.headers['content-security-policy'];
   assert.match(csp, /default-src 'self'/);
-  assert.match(csp, /script-src 'self' https:\/\/www\.youtube\.com/);
+  assert.match(csp, /script-src 'nonce-[^']+' 'strict-dynamic' 'self' https:\/\/www\.youtube\.com/);
   assert.match(csp, /style-src 'self'/);
   assert.doesNotMatch(csp, /unsafe-inline/);
   assert.equal(res.headers['x-content-type-options'], 'nosniff');

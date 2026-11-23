@@ -1,16 +1,9 @@
 const crypto = require('crypto');
-const rateLimit = require('express-rate-limit');
+const { limits } = require('../security/rate-limit');
 
-const registerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 10, standardHeaders: 'draft-7', legacyHeaders: false });
-
-// Giới hạn chung cho trang động theo IP (mặc định 600 yêu cầu/phút, đổi bằng GLOBAL_RATE_LIMIT)
-const globalLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  limit: Number(process.env.GLOBAL_RATE_LIMIT) || 600,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.',
-});
+// Giới hạn tần suất (bộ đếm trong MongoDB): đăng ký 10/giờ/IP; trang động chung 600/phút/IP (GLOBAL_RATE_LIMIT)
+const registerLimiter = limits.register();
+const globalLimiter = limits.global();
 
 // Phiên của khách chưa đăng nhập chỉ sống 2 giờ (tránh tích tụ phiên rác trong CSDL); đăng nhập sẽ cấp phiên mới 7 ngày
 const ANON_SESSION_MS = 2 * 60 * 60 * 1000;

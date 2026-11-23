@@ -57,7 +57,7 @@ function attachRealtime(server, app) {
   const io = new Server(server, {
     serveClient: true, // /socket.io/socket.io.js – cùng origin nên hợp lệ với CSP script-src 'self'
     transports: ['websocket'], // bắt tay WebSocket luôn gửi Origin (yêu cầu polling cùng origin thì có thể không)
-    maxHttpBufferSize: 8 * 1024,
+    maxHttpBufferSize: 4 * 1024, // tin ≤ 500 ký tự (~1,5 KB UTF-8) – gói lớn hơn bị ngắt kết nối
     cors: { origin, credentials: true },
     // Chỉ nhận kết nối có Origin đúng website (kể cả WebSocket – CORS không bảo vệ WebSocket)
     allowRequest: (req, cb) => cb(null, req.headers.origin === origin),

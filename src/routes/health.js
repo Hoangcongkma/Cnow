@@ -12,7 +12,7 @@ router.get('/healthz', validate(S.none), async (req, res) => {
   try {
     if (mongoose.connection.readyState !== 1) throw new Error('not connected');
     await withTimeout(mongoose.connection.db.admin().ping(), 2000);
-    res.json({ status: 'ok', db: 'up', uptime: Math.round(process.uptime()) });
+    res.json({ status: 'ok', db: 'up' }); // không trả phiên bản / thời gian chạy (giảm thông tin cho kẻ dò quét)
   } catch {
     res.status(503).json({ status: 'error', db: 'down' });
   }

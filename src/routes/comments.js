@@ -3,6 +3,7 @@ const { trusted } = require('mongoose');
 const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const router = require('express').Router();
+const communityLimiter = require('../security/rate-limit').limits.community();
 const { Course, CourseComment } = require('../models');
 const { access } = require('../services/access');
 
@@ -24,7 +25,7 @@ async function loadComments(course, rawPage) {
   return { items, total, page, pages };
 }
 
-router.post('/courses/:slug/comments', validate(S.comments.create), async (req, res) => {
+router.post('/courses/:slug/comments', communityLimiter, validate(S.comments.create), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const back = `/courses/${course.slug}#comments`;

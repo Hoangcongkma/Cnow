@@ -30,6 +30,7 @@ const RULES = [
   ['GET', '/healthz', 'public'],
   ['GET', '/robots.txt', 'public'],
   ['GET', '/sitemap.xml', 'public'],
+  ['GET', '/.well-known/security.txt', 'public'],
   // Xác thực (khách dùng được)
   ['GET', '/register', 'public'],
   ['POST', '/register', 'public'],

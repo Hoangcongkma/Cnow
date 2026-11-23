@@ -22,7 +22,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="#111318">
   <link rel="icon" href="<%= asset('/img/favicon.svg') %>" type="image/svg+xml">
-  <script src="<%= asset('/js/theme.js') %>"></script>
+  <script nonce="<%= cspNonce %>" src="<%= asset('/js/theme.js') %>"></script>
   <link rel="stylesheet" href="<%= asset('/vendor/highlight/github.min.css') %>">
   <link rel="stylesheet" href="<%= asset('/css/style.css') %>">
 </head>

@@ -3,7 +3,7 @@ const router = require('express').Router();
 const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const bcrypt = require('bcryptjs');
-const rateLimit = require('express-rate-limit');
+const { limits } = require('../security/rate-limit');
 const { User } = require('../models');
 const { startSession, renewSession } = require('../middlewares/auth');
 const { audit } = require('../services/audit');
@@ -137,7 +137,7 @@ const pendingOf = (req) => {
   return p && Date.now() < p.exp ? p : null;
 };
 // Chống dò mã trên diện rộng: 30 lần nhập mã / 15 phút / IP (mỗi phiên chờ vẫn chỉ được 5 lần)
-const mfaLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false });
+const mfaLimiter = limits.mfa();
 
 router.get('/login/2fa', validate(S.none), (req, res) => {
   if (!pendingOf(req)) return res.redirect('/login');

@@ -3,6 +3,7 @@ const { trusted } = require('mongoose');
 const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const router = require('express').Router();
+const communityLimiter = require('../security/rate-limit').limits.community();
 const { Course, Post } = require('../models');
 const { access, isInstructor } = require('../services/access');
 const { notify } = require('../services/notify');
@@ -43,7 +44,7 @@ async function loadThread(course, lesson, me) {
 const back = (course, index) => `/learn/${course.slug}?lesson=${index}#qa`;
 
 // Đặt câu hỏi hoặc trả lời
-router.post('/learn/:slug/qa', validate(S.qa.post), async (req, res) => {
+router.post('/learn/:slug/qa', communityLimiter, validate(S.qa.post), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const { full } = await access(req, course);

@@ -1,5 +1,9 @@
 // Đánh giá khóa học và chứng nhận hoàn thành
 const router = require('express').Router();
+const { limits } = require('../security/rate-limit');
+
+const communityLimiter = limits.community();
+const verifyLimiter = limits.verify();
 const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const crypto = require('crypto');
@@ -37,7 +41,7 @@ async function ensureCertificate(user, course, progress) {
 }
 
 // Gửi / sửa đánh giá: chỉ học viên đã ghi danh, mỗi người 1 đánh giá
-router.post('/courses/:slug/review', validate(S.reviews.review), async (req, res) => {
+router.post('/courses/:slug/review', communityLimiter, validate(S.reviews.review), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const back = `/courses/${course.slug}#reviews`;
@@ -86,14 +90,14 @@ router.post('/courses/:slug/certificate', validate(S.reviews.claim), async (req,
 });
 
 // Trang công khai kiểm tra chứng nhận
-router.get('/verify', validate(S.reviews.verifyQuery), (req, res) => {
+router.get('/verify', verifyLimiter, validate(S.reviews.verifyQuery), (req, res) => {
   const code = String(req.query.code || '')
     .replace(/[^0-9a-f]/gi, '')
     .toUpperCase();
   if (code) return res.redirect(`/verify/${code}`);
   res.render('certificate/verify', { title: 'Kiểm tra chứng nhận', cert: null, code: '', checked: false });
 });
-router.get('/verify/:code', validate(S.reviews.verifyCode), async (req, res) => {
+router.get('/verify/:code', verifyLimiter, validate(S.reviews.verifyCode), async (req, res) => {
   const code = String(req.params.code)
     .replace(/[^0-9a-f]/gi, '')
     .toUpperCase()

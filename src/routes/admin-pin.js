@@ -2,7 +2,7 @@
 const router = require('express').Router();
 const { validate } = require('../validators');
 const S = require('../validators/schemas');
-const rateLimit = require('express-rate-limit');
+const { limiter } = require('../security/rate-limit');
 const { User } = require('../models');
 const { startSession } = require('../middlewares/auth');
 const { audit } = require('../services/audit');
@@ -22,7 +22,8 @@ const pendingOf = (req) => {
 };
 
 // Theo IP: tối đa 5 lần sai / 15 phút (lần đúng không bị tính); vượt quá → khóa bước này 15 phút với IP đó
-const pinIpLimiter = rateLimit({
+const pinIpLimiter = limiter({
+  name: 'admin-pin',
   windowMs: pin.WINDOW_MS,
   limit: pin.MAX_FAILS,
   skipSuccessfulRequests: true,

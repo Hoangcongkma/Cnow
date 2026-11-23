@@ -3,7 +3,7 @@ const router = require('express').Router();
 const { validate } = require('../validators');
 const S = require('../validators/schemas');
 const bcrypt = require('bcryptjs');
-const rateLimit = require('express-rate-limit');
+const { limiter, limits } = require('../security/rate-limit');
 const { trusted } = require('mongoose');
 const { User, UserSession } = require('../models');
 const { renewSession } = require('../middlewares/auth');
@@ -16,7 +16,8 @@ const { verifyCsrf } = require('../middlewares/security');
 const { saveAvatar, removeAvatar, findAvatar, openAvatar, MAX_BYTES } = require('../services/avatar');
 
 // Chống dò mật khẩu cũ: 5 lần sai / 15 phút cho mỗi tài khoản
-const passwordLimiter = rateLimit({
+const passwordLimiter = limiter({
+  name: 'password',
   windowMs: 15 * 60 * 1000,
   limit: 5,
   skipSuccessfulRequests: true,
@@ -81,13 +82,8 @@ router.post('/profile/password', passwordLimiter, validate(S.profile.password), 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_BYTES, files: 1, fields: 5, fieldSize: 1024 } }).single(
   'avatar',
 );
-const avatarLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  limit: 20,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  keyGenerator: (req) => `av:${req.session.userId || 'anon'}`,
-});
+const avatarLimiter = limits.avatar();
+const exportLimiter = limits.export();
 
 router.post(
   '/profile/avatar',
@@ -160,7 +156,7 @@ router.post('/profile/sessions/:id/revoke', validate(S.profile.revoke), async (r
 });
 
 // ---------- Quyền riêng tư: tải dữ liệu cá nhân, tự xóa tài khoản ----------
-router.get('/profile/export.json', validate(S.none), async (req, res) => {
+router.get('/profile/export.json', exportLimiter, validate(S.none), async (req, res) => {
   const data = await privacy.exportData(req.user._id);
   await audit(req, 'data.export', { target: req.user._id, meta: { format: 'json' } });
   res.set({

@@ -10,6 +10,9 @@ const config = require('./config');
   console.log('✓ Index CSDL sẵn sàng');
   const app = require('./app'); // nạp sau khi có kết nối (session store dùng chung client)
   const server = require('http').createServer(app);
+  // Chống request treo / slowloris: tối đa 30 giây cho cả request, 20 giây để gửi xong header
+  server.requestTimeout = 30 * 1000;
+  server.headersTimeout = 20 * 1000;
   require('./realtime').attachRealtime(server, app); // chat Socket.IO dùng chung cổng và phiên đăng nhập
   server.listen(config.port, () => {
     console.log(`✓ Cnow đang chạy tại ${config.baseUrl}`);
