@@ -36,6 +36,7 @@ const userSchema = new Schema(
     adminPinLockedUntil: Date,
     // HMAC của các IP đã từng đăng nhập (không lưu IP gốc) – để báo "đăng nhập từ IP mới"
     knownIpHashes: { type: [String], default: undefined, select: false },
+    deletedAt: Date, // người dùng tự xóa tài khoản → hồ sơ đã ẩn danh hóa
   },
   { timestamps: true },
 );
@@ -319,6 +320,9 @@ const AUDIT_ACTIONS = {
   'login.new_ip': 'Đăng nhập từ địa chỉ IP mới',
   'session.revoke': 'Đăng xuất phiên từ xa',
   'session.expired': 'Phiên hết hạn (không hoạt động / quá hạn tuyệt đối)',
+  'data.export': 'Tải dữ liệu cá nhân',
+  'account.delete': 'Tự xóa tài khoản',
+  'export.csv': 'Xuất dữ liệu CSV (quản trị)',
   ADMIN_PIN_OK: 'Mã quản trị đúng',
   ADMIN_PIN_FAIL: 'Nhập sai mã quản trị',
   ADMIN_PIN_LOCKED: 'Khóa bước nhập mã quản trị (sai quá nhiều)',

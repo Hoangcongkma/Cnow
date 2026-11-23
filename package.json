@@ -13,6 +13,8 @@
     "setup:prod": "npm run seed && npm run import:content",
     "seed:demo": "node scripts/seed-demo.js",
     "unseed:demo": "node scripts/seed-demo.js --unseed",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js",
     "migrate": "node src/migrations.js",
     "import:videos": "node scripts/import-videos.js",
     "video-courses": "node scripts/video-courses.js",

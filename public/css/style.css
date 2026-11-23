@@ -2689,3 +2689,10 @@ body {
     grid-column: 2;
   }
 }
+
+.prose-page {
+  max-width: 900px;
+}
+.prose-page h2 {
+  margin-top: 28px;
+}

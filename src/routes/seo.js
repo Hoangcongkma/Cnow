@@ -26,6 +26,7 @@ router.get('/sitemap.xml', validate(S.none), async (req, res) => {
     { loc: '/courses', priority: '0.9' },
     { loc: '/verify', priority: '0.3' },
     { loc: '/gioi-thieu', priority: '0.4' },
+    { loc: '/chinh-sach-bao-mat', priority: '0.3' },
     ...courses.map((c) => ({ loc: `/courses/${c.slug}`, lastmod: c.updatedAt?.toISOString().slice(0, 10), priority: '0.8' })),
   ];
   const body = urls

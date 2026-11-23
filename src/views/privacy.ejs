@@ -1,0 +1,44 @@
+<%- include('partials/header') %>
+<section class="wrap section prose-page">
+  <h1>Chính sách bảo mật</h1>
+  <p class="muted">Cập nhật: 24/11/2026. Trang này mô tả Cnow thu thập dữ liệu gì, để làm gì, lưu bao lâu và bạn có quyền gì với dữ liệu của mình.</p>
+
+  <h2>1. Dữ liệu chúng tôi thu thập</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Dữ liệu</th><th>Mục đích</th><th>Thời gian lưu</th></tr></thead>
+      <tbody>
+        <tr><td>Tên hiển thị, tên đăng nhập, email</td><td>Tạo và đăng nhập tài khoản, hiển thị tên trong hỏi – đáp, bình luận, chứng nhận</td><td>Đến khi bạn xóa tài khoản</td></tr>
+        <tr><td>Mật khẩu</td><td>Đăng nhập – chỉ lưu bản băm bcrypt, không ai (kể cả quản trị viên) đọc được mật khẩu gốc</td><td>Đến khi bạn đổi mật khẩu / xóa tài khoản</td></tr>
+        <tr><td>Ảnh đại diện, giới thiệu bản thân (không bắt buộc)</td><td>Hiển thị hồ sơ</td><td>Đến khi bạn xóa ảnh / tài khoản</td></tr>
+        <tr><td>Khóa học đã ghi danh, tiến độ, kết quả trắc nghiệm, ghi chú, chứng nhận</td><td>Cung cấp chức năng học tập</td><td>Đến khi bạn xóa tài khoản</td></tr>
+        <tr><td>Đơn hàng (khóa học, số tiền, mã giảm giá, trạng thái)</td><td>Mở quyền học, hóa đơn, thống kê doanh thu</td><td>Giữ ở dạng ẩn danh cả khi bạn xóa tài khoản</td></tr>
+        <tr><td>Hỏi – đáp, bình luận, đánh giá, tin nhắn chat</td><td>Nội dung cộng đồng bạn chủ động đăng</td><td>Đánh giá bị xóa cùng tài khoản; nội dung thảo luận được giữ dưới tên “Người dùng đã xóa”</td></tr>
+        <tr><td>Địa chỉ IP, trình duyệt (user-agent) của phiên đăng nhập</td><td>Bảo vệ tài khoản: hiển thị trang “Phiên đăng nhập”, phát hiện đăng nhập từ IP mới</td><td>Đến khi phiên hết hạn (tối đa 7 ngày); hồ sơ chỉ lưu mã băm của IP</td></tr>
+        <tr><td>Nhật ký bảo mật (đăng nhập, đổi mật khẩu, đổi quyền…, kèm IP)</td><td>Phát hiện và điều tra truy cập trái phép</td><td>Tối đa 12 tháng</td></tr>
+        <tr><td>Cookie phiên <code>cnow.sid</code></td><td>Giữ trạng thái đăng nhập và chống giả mạo yêu cầu (CSRF) – không dùng cookie quảng cáo hay theo dõi</td><td>2 giờ (khách) / 7 ngày (đã đăng nhập), hết hạn sau 30 phút không hoạt động</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>2. Chúng tôi KHÔNG thu thập</h2>
+  <ul>
+    <li>Số thẻ, mật khẩu ngân hàng, mã OTP: thanh toán trên bản demo chỉ là mô phỏng.</li>
+    <li>Vị trí, danh bạ, dữ liệu từ mạng xã hội; không dùng công cụ phân tích hay quảng cáo của bên thứ ba.</li>
+  </ul>
+
+  <h2>3. Ai được xem dữ liệu</h2>
+  <p>Chỉ bạn và quản trị viên (trong phạm vi cần thiết để vận hành và xử lý vi phạm). Cộng tác viên chỉ thấy tên, email, tiến độ của học viên trong khóa học do mình tạo. Dữ liệu được lưu trên MongoDB với kết nối mã hóa; không bán hoặc chia sẻ cho bên thứ ba.</p>
+
+  <h2>4. Quyền của bạn</h2>
+  <ul>
+    <li><b>Xem và sửa</b> hồ sơ tại <a href="/profile">Hồ sơ của tôi</a>.</li>
+    <li><b>Tải toàn bộ dữ liệu</b> của bạn dưới dạng JSON: <a href="/profile/export.json">Tải dữ liệu</a> (cần đăng nhập).</li>
+    <li><b>Xóa tài khoản</b>: <a href="/profile/delete">Xóa tài khoản</a>. Hồ sơ được ẩn danh hóa, dữ liệu học tập riêng tư bị xóa.</li>
+    <li><b>Kiểm soát phiên đăng nhập</b>: xem và đăng xuất từ xa tại <a href="/profile/sessions">Phiên đăng nhập</a>; bật <a href="/profile/2fa">xác thực hai lớp</a>.</li>
+  </ul>
+
+  <h2>5. Bảo mật</h2>
+  <p>Mật khẩu băm bcrypt; bí mật xác thực hai lớp được mã hóa; giới hạn đăng nhập sai; chính sách bảo mật nội dung (CSP); nhật ký bảo mật. Nếu phát hiện lỗ hổng, vui lòng báo theo hướng dẫn tại <a href="/.well-known/security.txt">security.txt</a>.</p>
+</section>
+<%- include('partials/footer') %>

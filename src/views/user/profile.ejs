@@ -6,6 +6,12 @@
     <a class="btn btn-ghost btn-sm" href="/profile/2fa"><%= me.mfaEnabled ? 'Quản lý' : 'Bật ngay' %></a>
     <a class="btn btn-ghost btn-sm" href="/profile/sessions">🖥️ Phiên đăng nhập</a>
   </p>
+  <p class="card-pad mfa-banner">
+    📦 Dữ liệu của bạn:
+    <a class="btn btn-ghost btn-sm" href="/profile/export.json" download>⬇ Tải dữ liệu (JSON)</a>
+    <a class="btn btn-ghost btn-sm" href="/chinh-sach-bao-mat">Chính sách bảo mật</a>
+    <a class="btn btn-danger btn-sm" href="/profile/delete">Xóa tài khoản</a>
+  </p>
   <div class="profile-grid">
     <form class="card-pad avatar-form" method="post" action="/profile/avatar" enctype="multipart/form-data" aria-labelledby="av-h">
       <h2 id="av-h">Ảnh đại diện</h2>

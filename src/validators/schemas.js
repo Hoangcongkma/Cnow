@@ -42,6 +42,7 @@ module.exports = {
     avatarFile: { params: P.avatar, bare: true },
     revoke: { params: P.id, body: empty },
     revokeOthers: { body: empty },
+    deleteAccount: { body: z.object({ password: optStr(200), confirm: optStr(50) }) },
   },
 
   // ---------- Khóa học, học tập ----------

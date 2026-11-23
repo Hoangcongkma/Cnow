@@ -8,6 +8,7 @@ const { trusted } = require('mongoose');
 const { User, UserSession } = require('../models');
 const { renewSession } = require('../middlewares/auth');
 const sessions = require('../services/sessions');
+const privacy = require('../services/privacy');
 const { checkPassword } = require('../services/password');
 const multer = require('multer');
 const { audit } = require('../services/audit');
@@ -156,6 +157,46 @@ router.post('/profile/sessions/:id/revoke', validate(S.profile.revoke), async (r
     ? { type: 'success', text: 'Đã đăng xuất phiên đó.' }
     : { type: 'warn', text: 'Không tìm thấy phiên (hoặc đó là phiên hiện tại).' };
   res.redirect('/profile/sessions');
+});
+
+// ---------- Quyền riêng tư: tải dữ liệu cá nhân, tự xóa tài khoản ----------
+router.get('/profile/export.json', validate(S.none), async (req, res) => {
+  const data = await privacy.exportData(req.user._id);
+  await audit(req, 'data.export', { target: req.user._id, meta: { format: 'json' } });
+  res.set({
+    'Content-Type': 'application/json; charset=utf-8',
+    'Content-Disposition': `attachment; filename="cnow-du-lieu-${req.user.username}.json"`,
+    'Cache-Control': 'no-store',
+  });
+  res.send(JSON.stringify(data, null, 2));
+});
+
+const CONFIRM_TEXT = 'XÓA TÀI KHOẢN';
+const deletePage = (res, status, error = null) =>
+  res
+    .status(status)
+    .set('Cache-Control', 'no-store')
+    .render('user/delete-account', { title: 'Xóa tài khoản', error, confirmText: CONFIRM_TEXT });
+
+router.get('/profile/delete', validate(S.none), (req, res) => deletePage(res, 200));
+
+router.post('/profile/delete', passwordLimiter, validate(S.profile.deleteAccount), async (req, res) => {
+  if (req.user.role === 'admin')
+    return deletePage(res, 403, 'Tài khoản quản trị không tự xóa được – hãy nhờ quản trị viên khác hạ quyền trước.');
+  const user = await User.findById(req.user._id);
+  const okPw = await bcrypt.compare(String(req.body.password || ''), user.passwordHash);
+  if (!okPw) {
+    res.locals.wrongPassword = true; // tính vào giới hạn thử mật khẩu
+    await audit(req, 'password.change_failed', { target: user._id, meta: { reason: 'delete_account_wrong_password' } });
+    return deletePage(res, 400, 'Mật khẩu không đúng.');
+  }
+  if (String(req.body.confirm || '').trim() !== CONFIRM_TEXT) return deletePage(res, 400, `Hãy gõ đúng "${CONFIRM_TEXT}" để xác nhận.`);
+  await audit(req, 'account.delete', { actor: user._id, target: user._id });
+  await privacy.deleteAccount(req, user._id);
+  req.session.regenerate(() => {
+    req.session.flash = { type: 'success', text: 'Tài khoản của bạn đã được xóa. Cảm ơn bạn đã học cùng Cnow.' };
+    res.redirect('/');
+  });
 });
 
 module.exports = router;

@@ -10,4 +10,11 @@ router.get('/gioi-thieu', validate(S.none), (req, res) =>
   }),
 );
 
+router.get('/chinh-sach-bao-mat', validate(S.none), (req, res) =>
+  res.render('privacy', {
+    title: 'Chính sách bảo mật',
+    description: 'Cnow thu thập dữ liệu gì, để làm gì, lưu bao lâu và quyền của bạn với dữ liệu cá nhân.',
+  }),
+);
+
 module.exports = router;

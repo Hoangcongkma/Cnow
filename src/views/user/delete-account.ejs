@@ -1,0 +1,20 @@
+<%- include('../partials/header') %>
+<section class="auth">
+  <form class="auth-card" method="post" action="/profile/delete">
+    <h1>Xóa tài khoản</h1>
+    <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+    <p>Khi xóa tài khoản:</p>
+    <ul class="small">
+      <li>Hồ sơ (tên, email, ảnh, giới thiệu), tiến độ học, ghi chú, đánh giá, chứng nhận, thông báo và mọi phiên đăng nhập bị <b>xóa</b>; bạn mất quyền vào các khóa đã mua.</li>
+      <li>Câu hỏi, trả lời, bình luận và tin nhắn chat được giữ để không làm đứt cuộc thảo luận, nhưng hiển thị dưới tên <b>“Người dùng đã xóa”</b>.</li>
+      <li>Đơn hàng được giữ ở dạng ẩn danh để thống kê doanh thu; nhật ký bảo mật được giữ theo <a href="/chinh-sach-bao-mat">chính sách bảo mật</a>.</li>
+      <li>Thao tác <b>không thể hoàn tác</b>. Bạn nên <a href="/profile/export.json">tải dữ liệu của mình</a> trước.</li>
+    </ul>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Mật khẩu hiện tại<input type="password" name="password" required autocomplete="current-password"></label>
+    <label>Gõ <b><%= confirmText %></b> để xác nhận<input name="confirm" required autocomplete="off"></label>
+    <button class="btn btn-danger btn-block">Xóa vĩnh viễn tài khoản</button>
+    <p class="small center"><a href="/profile">← Quay lại hồ sơ</a></p>
+  </form>
+</section>
+<%- include('../partials/footer') %>
