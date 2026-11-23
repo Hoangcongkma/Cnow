@@ -1,5 +1,7 @@
 // Hồ sơ cá nhân và đổi mật khẩu
 const router = require('express').Router();
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { User } = require('../models');
@@ -28,9 +30,9 @@ const passwordLimiter = rateLimit({
 const render = (res, status, extra = {}) =>
   res.status(status).render('user/profile', { title: 'Hồ sơ của tôi', form: null, errors: [], pwErrors: [], ...extra });
 
-router.get('/profile', requireLogin, (req, res) => render(res, 200));
+router.get('/profile', requireLogin, validate(S.none), (req, res) => render(res, 200));
 
-router.post('/profile', requireLogin, async (req, res) => {
+router.post('/profile', requireLogin, validate(S.profile.update), async (req, res) => {
   const form = {
     name: String(req.body.name || '')
       .trim()
@@ -46,7 +48,7 @@ router.post('/profile', requireLogin, async (req, res) => {
   res.redirect('/profile');
 });
 
-router.post('/profile/password', requireLogin, passwordLimiter, async (req, res, next) => {
+router.post('/profile/password', requireLogin, passwordLimiter, validate(S.profile.password), async (req, res, next) => {
   const user = await User.findById(req.user._id); // cần passwordHash (loadUser không nạp trường này)
   const current = String(req.body.current || '');
   const password = String(req.body.password || '');
@@ -104,6 +106,7 @@ router.post(
     });
   },
   verifyCsrf,
+  validate(S.profile.avatar),
   async (req, res) => {
     if (req.body.remove === '1') {
       await removeAvatar(req.user.avatar);
@@ -125,7 +128,7 @@ router.post(
 );
 
 // Phục vụ ảnh từ GridFS: chỉ tên file đúng định dạng ngẫu nhiên <32 hex>.webp (không có đường dẫn nào để traversal)
-router.get('/avatars/:file', async (req, res) => {
+router.get('/avatars/:file', validate(S.profile.avatarFile), async (req, res) => {
   const file = await findAvatar(req.params.file);
   if (!file) return res.status(404).end();
   res.set({

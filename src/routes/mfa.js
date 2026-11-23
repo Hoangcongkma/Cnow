@@ -1,5 +1,7 @@
 // Xác thực hai lớp: thiết lập/tắt trong /profile/2fa và bước nhập mã khi đăng nhập (/login/2fa)
 const router = require('express').Router();
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { User } = require('../models');
@@ -52,10 +54,10 @@ async function renderPage(req, res, extra = {}) {
     });
 }
 
-router.get('/profile/2fa', requireLogin, (req, res) => renderPage(req, res));
+router.get('/profile/2fa', requireLogin, validate(S.none), (req, res) => renderPage(req, res));
 
 // Bật 2FA: xác nhận mã đầu tiên từ ứng dụng Authenticator
-router.post('/profile/2fa/enable', requireLogin, async (req, res, next) => {
+router.post('/profile/2fa/enable', requireLogin, validate(S.mfa.code), async (req, res, next) => {
   const s = req.session.mfaSetup;
   const user = await withSecrets(req.user._id);
   if (user.mfaEnabled) return res.redirect('/profile/2fa');
@@ -93,7 +95,7 @@ router.post('/profile/2fa/enable', requireLogin, async (req, res, next) => {
 });
 
 // Tạo lại mã khôi phục (cần mã TOTP hiện tại) – mã cũ hết hiệu lực
-router.post('/profile/2fa/recovery', requireLogin, async (req, res) => {
+router.post('/profile/2fa/recovery', requireLogin, validate(S.mfa.code), async (req, res) => {
   const user = await withSecrets(req.user._id);
   if (!user.mfaEnabled) return res.redirect('/profile/2fa');
   const r = await mfa.checkTotp(mfa.decrypt(user.mfaSecret), req.body.code, user.mfaLastStep);
@@ -117,7 +119,7 @@ router.post('/profile/2fa/recovery', requireLogin, async (req, res) => {
 });
 
 // Tắt 2FA: cần mật khẩu + mã (TOTP hoặc mã khôi phục). TOTP là tùy chọn với mọi vai trò (admin tắt thì quay về dùng mã quản trị).
-router.post('/profile/2fa/disable', requireLogin, async (req, res) => {
+router.post('/profile/2fa/disable', requireLogin, validate(S.mfa.disable), async (req, res) => {
   const user = await withSecrets(req.user._id).select('+passwordHash');
   if (!user.mfaEnabled) return res.redirect('/profile/2fa');
   const okPw = await bcrypt.compare(String(req.body.password || ''), user.passwordHash);
@@ -141,12 +143,12 @@ const pendingOf = (req) => {
 // Chống dò mã trên diện rộng: 30 lần nhập mã / 15 phút / IP (mỗi phiên chờ vẫn chỉ được 5 lần)
 const mfaLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false });
 
-router.get('/login/2fa', (req, res) => {
+router.get('/login/2fa', validate(S.none), (req, res) => {
   if (!pendingOf(req)) return res.redirect('/login');
   noStore(res).render('auth/login-2fa', { title: 'Xác thực hai lớp', error: null });
 });
 
-router.post('/login/2fa', mfaLimiter, async (req, res, next) => {
+router.post('/login/2fa', mfaLimiter, validate(S.mfa.code), async (req, res, next) => {
   const p = pendingOf(req);
   if (!p) {
     delete req.session.mfaPending;

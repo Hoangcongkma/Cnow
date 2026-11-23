@@ -3,6 +3,7 @@
 // - Chỉ nhận kết nối từ đúng origin của website (chống Cross-Site WebSocket Hijacking – WebSocket không có CSRF token)
 // - Mỗi khóa học một phòng; vào phòng: học viên đã ghi danh hoặc giảng viên (tác giả khóa học, admin)
 // - Lưu 200 tin gần nhất/khóa, chống spam 5 tin/10 giây/người, giảng viên/admin xóa được tin
+const { trusted } = require('mongoose');
 const { Server } = require('socket.io');
 const config = require('./config');
 const { User, Course, Enrollment, ChatMessage } = require('./models');
@@ -107,7 +108,7 @@ function attachRealtime(server, app) {
         .skip(KEEP - 1)
         .limit(1)
         .select('createdAt');
-      if (cutoff[0]) await ChatMessage.deleteMany({ course: socket.data.courseId, createdAt: { $lt: cutoff[0].createdAt } });
+      if (cutoff[0]) await ChatMessage.deleteMany({ course: socket.data.courseId, createdAt: trusted({ $lt: cutoff[0].createdAt }) });
       io.to(socket.data.room).emit('message', shape(msg, user));
       reply({ ok: true });
     });

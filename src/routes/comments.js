@@ -1,4 +1,7 @@
 // Bình luận ngắn ở trang khóa học: học viên đã ghi danh (hoặc staff) viết; admin ẩn/hiện ở /admin/comments
+const { trusted } = require('mongoose');
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const router = require('express').Router();
 const { Course, CourseComment } = require('../models');
 const { requireLogin } = require('../middlewares/auth');
@@ -22,7 +25,7 @@ async function loadComments(course, rawPage) {
   return { items, total, page, pages };
 }
 
-router.post('/courses/:slug/comments', requireLogin, async (req, res) => {
+router.post('/courses/:slug/comments', requireLogin, validate(S.comments.create), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const back = `/courses/${course.slug}#comments`;
@@ -38,7 +41,10 @@ router.post('/courses/:slug/comments', requireLogin, async (req, res) => {
     req.session.flash = { type: 'warn', text: `Bình luận dài 2–${MAX_LEN} ký tự.` };
     return res.redirect(back);
   }
-  const recent = await CourseComment.countDocuments({ user: req.user._id, createdAt: { $gte: new Date(Date.now() - 3600 * 1000) } });
+  const recent = await CourseComment.countDocuments({
+    user: req.user._id,
+    createdAt: trusted({ $gte: new Date(Date.now() - 3600 * 1000) }),
+  });
   if (recent >= MAX_PER_HOUR) {
     req.session.flash = { type: 'warn', text: `Bạn đã bình luận ${MAX_PER_HOUR} lần trong 1 giờ qua. Vui lòng thử lại sau.` };
     return res.redirect(back);

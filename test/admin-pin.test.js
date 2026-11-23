@@ -1,4 +1,5 @@
 // Mã quản trị (admin PIN): bước xác thực thứ hai bắt buộc của admin chưa bật TOTP
+const { trusted } = require('mongoose');
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { setup, teardown, createUser, csrf, login, request, PASSWORD, ADMIN_PIN } = require('./helpers');
@@ -160,7 +161,7 @@ test('hash mã quản trị không xuất hiện trong bất kỳ response nào'
   for (const p of ['/admin', '/admin/users', '/profile', '/profile/2fa', '/admin/audit', '/admin/export/learners.csv']) {
     keep(await s.agent.get(p));
   }
-  const hashes = (await User.find({ adminPinHash: { $exists: true } }).select('+adminPinHash')).map((u) => u.adminPinHash);
+  const hashes = (await User.find({ adminPinHash: trusted({ $exists: true }) }).select('+adminPinHash')).map((u) => u.adminPinHash);
   assert.ok(hashes.length >= 4);
   const all = seen.join('\n');
   for (const h of hashes) {

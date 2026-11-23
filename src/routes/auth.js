@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const bcrypt = require('bcryptjs');
 const { User } = require('../models');
 const { loginLimiter, loginAccountLimiter, registerLimiter } = require('../middlewares/security');
@@ -7,14 +9,15 @@ const { audit } = require('../services/audit');
 const { startPending } = require('./mfa');
 const { startPinStep } = require('./admin-pin');
 const { startSession } = require('../middlewares/auth');
+const { safeRedirect } = require('../utils/security');
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 // Băm giả để thời gian phản hồi như nhau dù tài khoản có tồn tại hay không
 const DUMMY_HASH = bcrypt.hashSync('cnow-timing-guard', 12);
 
-router.get('/register', (req, res) => res.render('auth/register', { title: 'Đăng ký', form: {}, errors: [] }));
+router.get('/register', validate(S.none), (req, res) => res.render('auth/register', { title: 'Đăng ký', form: {}, errors: [] }));
 
-router.post('/register', registerLimiter, async (req, res, next) => {
+router.post('/register', registerLimiter, validate(S.auth.register), async (req, res, next) => {
   const form = {
     name: String(req.body.name || '').trim(),
     username: String(req.body.username || '')
@@ -46,9 +49,9 @@ router.post('/register', registerLimiter, async (req, res, next) => {
   });
 });
 
-router.get('/login', (req, res) => res.render('auth/login', { title: 'Đăng nhập', form: {}, error: null }));
+router.get('/login', validate(S.none), (req, res) => res.render('auth/login', { title: 'Đăng nhập', form: {}, error: null }));
 
-router.post('/login', loginLimiter, loginAccountLimiter, async (req, res, next) => {
+router.post('/login', loginLimiter, loginAccountLimiter, validate(S.auth.login), async (req, res, next) => {
   const login = String(req.body.login || '')
     .trim()
     .toLowerCase();
@@ -69,7 +72,7 @@ router.post('/login', loginLimiter, loginAccountLimiter, async (req, res, next) 
       .status(403)
       .render('auth/login', { title: 'Đăng nhập', form: { login }, error: 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.' });
   }
-  const returnTo = req.session.returnTo || (user.role === 'user' ? '/my-courses' : '/admin');
+  const returnTo = safeRedirect(req.session.returnTo, user.role === 'user' ? '/my-courses' : '/admin');
   // Đã bật 2FA (TOTP, mọi vai trò): chưa cấp phiên đăng nhập, chuyển sang bước nhập mã (5 phút, tối đa 5 lần)
   if (user.mfaEnabled) return startPending(req, res, next, user, returnTo);
   // Admin chưa bật TOTP: bắt buộc nhập MÃ QUẢN TRỊ trước khi có phiên đăng nhập
@@ -80,7 +83,7 @@ router.post('/login', loginLimiter, loginAccountLimiter, async (req, res, next) 
   res.redirect(returnTo);
 });
 
-router.post('/logout', (req, res) => {
+router.post('/logout', validate(S.auth.logout), (req, res) => {
   req.session.destroy(() => {
     res.clearCookie('cnow.sid');
     res.redirect('/');

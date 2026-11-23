@@ -1,4 +1,7 @@
 // Hỏi – Đáp theo bài học: đặt câu hỏi, trả lời lồng 1 cấp, vote hữu ích, giảng viên chọn câu trả lời hay nhất
+const { trusted } = require('mongoose');
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const router = require('express').Router();
 const { Course, Post } = require('../models');
 const { requireLogin } = require('../middlewares/auth');
@@ -15,7 +18,7 @@ async function loadThread(course, lesson, me) {
     .limit(100)
     .populate('user', 'name role avatar isDemo');
   const answers = questions.length
-    ? await Post.find({ parent: { $in: questions.map((q) => q._id) }, hidden: false }).populate('user', 'name role avatar isDemo')
+    ? await Post.find({ parent: trusted({ $in: questions.map((q) => q._id) }), hidden: false }).populate('user', 'name role avatar isDemo')
     : [];
   const myId = me ? String(me._id) : '';
   const shape = (p) => ({
@@ -41,7 +44,7 @@ async function loadThread(course, lesson, me) {
 const back = (course, index) => `/learn/${course.slug}?lesson=${index}#qa`;
 
 // Đặt câu hỏi hoặc trả lời
-router.post('/learn/:slug/qa', requireLogin, async (req, res) => {
+router.post('/learn/:slug/qa', requireLogin, validate(S.qa.post), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const { full } = await access(req, course);
@@ -70,7 +73,7 @@ router.post('/learn/:slug/qa', requireLogin, async (req, res) => {
     return res.redirect(back(course, found.index));
   }
   // Chống spam: tối đa 10 bài viết (câu hỏi + trả lời) mỗi giờ cho mỗi người
-  const recent = await Post.countDocuments({ user: req.user.id, createdAt: { $gte: new Date(Date.now() - 3600 * 1000) } });
+  const recent = await Post.countDocuments({ user: req.user.id, createdAt: trusted({ $gte: new Date(Date.now() - 3600 * 1000) }) });
   if (recent >= MAX_PER_HOUR) {
     req.session.flash = { type: 'warn', text: `Bạn đã đăng ${MAX_PER_HOUR} bài trong 1 giờ qua. Vui lòng thử lại sau.` };
     return res.redirect(back(course, found.index));
@@ -100,7 +103,7 @@ async function loadPost(req, res) {
 }
 
 // Vote "Hữu ích" (bấm lần nữa để bỏ vote). Không tự vote bài của mình.
-router.post('/qa/:id/vote', requireLogin, async (req, res) => {
+router.post('/qa/:id/vote', requireLogin, validate(S.qa.action), async (req, res) => {
   const ctx = await loadPost(req, res);
   if (!ctx) return;
   const { post, course, index } = ctx;
@@ -118,7 +121,7 @@ router.post('/qa/:id/vote', requireLogin, async (req, res) => {
 });
 
 // Giảng viên (tác giả khóa học hoặc admin) chọn / bỏ chọn câu trả lời hay nhất
-router.post('/qa/:id/best', requireLogin, async (req, res) => {
+router.post('/qa/:id/best', requireLogin, validate(S.qa.action), async (req, res) => {
   const ctx = await loadPost(req, res);
   if (!ctx) return;
   const { post, course, index } = ctx;

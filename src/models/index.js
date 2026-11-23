@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const { Schema, model } = mongoose;
 
+// Chống NoSQL injection ở tầng ORM:
+// - sanitizeFilter: mọi object có khóa "$…" trong bộ lọc bị bọc thành { $eq: … } (vd. ?login[$ne]= không còn là toán tử).
+//   Toán tử do CODE tạo ra phải đánh dấu tường minh bằng mongoose.trusted({ $in: … }).
+// - strictQuery: bỏ qua điều kiện lọc theo trường không có trong schema.
+mongoose.set('sanitizeFilter', true);
+mongoose.set('strictQuery', true);
+
 // ---------- Người dùng: 3 vai trò theo phân tích yêu cầu ----------
 const userSchema = new Schema(
   {

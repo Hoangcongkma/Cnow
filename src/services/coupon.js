@@ -1,4 +1,5 @@
 // Mã giảm giá: kiểm tra, tính giá sau giảm (theo CENT, số nguyên – tránh sai số số thực), giữ/trả lượt dùng nguyên tử
+const { trusted } = require('mongoose');
 const { Coupon, Order } = require('../models');
 
 const normalize = (code) =>
@@ -48,8 +49,8 @@ async function reserve(coupon) {
       _id: coupon._id,
       active: true,
       $and: [
-        { $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }] },
-        { $or: [{ maxUses: null }, { $expr: { $lt: ['$usedCount', '$maxUses'] } }] },
+        { $or: [{ expiresAt: null }, { expiresAt: trusted({ $gt: now }) }] },
+        { $or: [{ maxUses: null }, { $expr: trusted({ $lt: ['$usedCount', '$maxUses'] }) }] },
       ],
     },
     { $inc: { usedCount: 1 } },
@@ -60,8 +61,8 @@ async function reserve(coupon) {
 /** Trả lại lượt dùng khi đơn bị hủy/thất bại (chỉ 1 lần cho mỗi đơn). */
 async function release(order) {
   if (!order || !order.coupon) return;
-  const r = await Order.updateOne({ _id: order._id, couponReleased: { $ne: true } }, { $set: { couponReleased: true } });
-  if (r.modifiedCount) await Coupon.updateOne({ _id: order.coupon, usedCount: { $gt: 0 } }, { $inc: { usedCount: -1 } });
+  const r = await Order.updateOne({ _id: order._id, couponReleased: trusted({ $ne: true }) }, { $set: { couponReleased: true } });
+  if (r.modifiedCount) await Coupon.updateOne({ _id: order.coupon, usedCount: trusted({ $gt: 0 }) }, { $inc: { usedCount: -1 } });
 }
 
 module.exports = { normalize, priceWith, findValid, reserve, release };

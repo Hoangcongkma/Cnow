@@ -1,4 +1,5 @@
 const { User } = require('../models');
+const { safeRedirect } = require('../utils/security');
 
 // Nạp người dùng hiện tại từ phiên
 async function loadUser(req, res, next) {
@@ -20,7 +21,7 @@ async function loadUser(req, res, next) {
 
 function requireLogin(req, res, next) {
   if (req.user) return next();
-  req.session.returnTo = req.originalUrl.startsWith('/') && !req.originalUrl.startsWith('//') ? req.originalUrl : '/';
+  req.session.returnTo = safeRedirect(req.originalUrl, '/');
   res.redirect('/login');
 }
 

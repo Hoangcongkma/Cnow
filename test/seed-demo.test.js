@@ -1,5 +1,6 @@
 // Dữ liệu demo: seed 500 học viên, tỉ lệ đơn hàng, tính tiền đúng, chạy lại không nhân đôi, cùng seed cùng dữ liệu,
 // unseed xóa sạch về 0, dữ liệu thật giữ nguyên; trang quản trị phân trang / tìm kiếm / lọc / CSV đúng; nhãn "Dữ liệu mẫu"
+const { trusted } = require('mongoose');
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { setup, teardown, createUser, login, request } = require('./helpers');
@@ -86,7 +87,7 @@ test('học tập + cộng đồng: tiến độ đa dạng, chứng nhận cho 
   assert.equal(await Certificate.countDocuments({ isDemo: true }), full.length);
   const questions = await Post.find({ isDemo: true, parent: null }).lean();
   assert.ok(questions.length >= 280 && questions.length <= 320, `${questions.length} câu hỏi`);
-  const answered = new Set((await Post.find({ isDemo: true, parent: { $ne: null } }).lean()).map((a) => String(a.parent)));
+  const answered = new Set((await Post.find({ isDemo: true, parent: trusted({ $ne: null }) }).lean()).map((a) => String(a.parent)));
   const ratio = questions.filter((q) => answered.has(String(q._id))).length / questions.length;
   assert.ok(ratio > 0.6 && ratio < 0.8, `có trả lời ${ratio}`);
   const best = await Post.countDocuments({ isDemo: true, best: true });

@@ -1,3 +1,4 @@
+const { trusted } = require('mongoose');
 // Trắc nghiệm cuối bài: chấm điểm hoàn toàn ở server
 const PASS_RATIO = 0.7;
 const MAX_QUESTIONS = 20;
@@ -74,12 +75,12 @@ function attemptsInfo(progress, lessonId, now = Date.now()) {
  */
 async function takeAttempt(Progress, userId, courseId, lessonId, now = new Date()) {
   const since = new Date(now.getTime() - ATTEMPT_WINDOW_MS);
-  await Progress.updateOne({ user: userId, course: courseId }, { $pull: { quizAttempts: { at: { $lt: since } } } });
+  await Progress.updateOne({ user: userId, course: courseId }, { $pull: { quizAttempts: { at: trusted({ $lt: since }) } } });
   const r = await Progress.updateOne(
     {
       user: userId,
       course: courseId,
-      $expr: {
+      $expr: trusted({
         $lt: [
           {
             $size: {
@@ -91,7 +92,7 @@ async function takeAttempt(Progress, userId, courseId, lessonId, now = new Date(
           },
           MAX_ATTEMPTS,
         ],
-      },
+      }),
     },
     { $push: { quizAttempts: { lesson: lessonId, at: now } } },
   );

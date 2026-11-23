@@ -1,5 +1,6 @@
 // Mã quản trị (admin PIN): bước xác thực thứ hai bắt buộc của tài khoản admin (khi chưa bật TOTP).
 // Chỉ lưu hash bcrypt (cost 12). Giữ lượt nhập NGUYÊN TỬ trong CSDL: tối đa 5 lần sai / 15 phút / tài khoản, sai quá → khóa 15 phút.
+const { trusted } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const { User } = require('../models');
 
@@ -30,13 +31,13 @@ const hashPin = (pin) => bcrypt.hash(String(pin), COST);
  */
 async function reserveAttempt(userId, now = new Date()) {
   const since = new Date(now.getTime() - WINDOW_MS);
-  await User.updateOne({ _id: userId }, { $pull: { adminPinFails: { $lt: since } } });
+  await User.updateOne({ _id: userId }, { $pull: { adminPinFails: trusted({ $lt: since }) } });
   const r = await User.updateOne(
     {
       _id: userId,
       $and: [
-        { $or: [{ adminPinLockedUntil: null }, { adminPinLockedUntil: { $lte: now } }] },
-        { $expr: { $lt: [{ $size: { $ifNull: ['$adminPinFails', []] } }, MAX_FAILS] } },
+        { $or: [{ adminPinLockedUntil: null }, { adminPinLockedUntil: trusted({ $lte: now }) }] },
+        { $expr: trusted({ $lt: [{ $size: { $ifNull: ['$adminPinFails', []] } }, MAX_FAILS] }) },
       ],
     },
     { $push: { adminPinFails: now } },
@@ -47,7 +48,7 @@ async function reserveAttempt(userId, now = new Date()) {
 /** Sau 1 lần sai: đủ 5 lần trong cửa sổ → khóa 15 phút. Trả về true nếu vừa bị khóa. */
 async function afterFailure(userId, now = new Date()) {
   const r = await User.updateOne(
-    { _id: userId, [`adminPinFails.${MAX_FAILS - 1}`]: { $exists: true } },
+    { _id: userId, [`adminPinFails.${MAX_FAILS - 1}`]: trusted({ $exists: true }) },
     { $set: { adminPinLockedUntil: new Date(now.getTime() + LOCK_MS) }, $unset: { adminPinFails: '' } },
   );
   return r.modifiedCount === 1;
@@ -61,7 +62,7 @@ async function verifyPin(userId, pin) {
   return bcrypt.compare(String(pin || ''), u.adminPinHash);
 }
 
-const hasPin = async (userId) => Boolean(await User.exists({ _id: userId, adminPinHash: { $type: 'string' } }));
+const hasPin = async (userId) => Boolean(await User.exists({ _id: userId, adminPinHash: trusted({ $type: 'string' }) }));
 
 module.exports = {
   MAX_FAILS,

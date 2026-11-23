@@ -1,5 +1,6 @@
 // Tạo dữ liệu mẫu: tài khoản quản trị, cộng tác viên và các khóa học
 // Chạy: npm run seed     (an toàn khi chạy lại – không tạo trùng)
+const { trusted } = require('mongoose');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
@@ -156,7 +157,7 @@ if (require.main === module)
     if (admin.created) console.log('  Mật khẩu admin = giá trị SEED_ADMIN_PASSWORD (không in ra).');
     if (collab.created && !process.env.SEED_COLLAB_PASSWORD)
       console.log('  CTV mẫu có mật khẩu ngẫu nhiên (đặt SEED_COLLAB_PASSWORD nếu cần).');
-    if (!(await User.exists({ username: 'admin', adminPinHash: { $type: 'string' } }))) {
+    if (!(await User.exists({ username: 'admin', adminPinHash: trusted({ $type: 'string' }) }))) {
       console.log('! Admin chưa có mã quản trị → chạy "npm run set:admin-pin" trước khi đăng nhập trang quản trị.');
     }
     await mongoose.disconnect();

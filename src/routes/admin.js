@@ -1,4 +1,7 @@
 // Trang quản trị – Quản trị viên: toàn quyền; Cộng tác viên: quản lý khóa học của mình và người học
+const { trusted } = require('mongoose');
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const router = require('express').Router();
 const { User, Course, Order, Enrollment, Comment, CourseComment, Post, AuditLog, AUDIT_ACTIONS, Progress, Coupon } = require('../models');
 const { requireRole } = require('../middlewares/auth');
@@ -9,10 +12,8 @@ const { audit } = require('../services/audit');
 const { notifyNewLessons, notify } = require('../services/notify');
 const listing = require('../services/listing');
 // Quay lại đúng trang danh sách (giữ bộ lọc) sau khi thao tác – chỉ chấp nhận đường dẫn nội bộ /admin/…
-const safeBack = (v, dflt) => {
-  const s = String(v || '');
-  return /^\/admin\/[a-z-]+(\?[^\s#]*)?$/.test(s) ? s : dflt;
-};
+const safeBack = (v, dflt) => safeRedirect(v, dflt, '/admin/');
+const { safeRedirect } = require('../utils/security');
 const orderLabels = require('../services/order-labels');
 const { sendCsv } = require('../services/csv');
 const { summarize } = require('../services/progress');
@@ -181,12 +182,12 @@ async function scopeCourseIds(user) {
   return (await Course.find({ author: user.id }).select('_id')).map((c) => c._id);
 }
 
-router.get('/', staff, async (req, res) => {
+router.get('/', staff, validate(S.admin.dashboard), async (req, res) => {
   const [from, to] = dateRange(req.query);
   const ids = await scopeCourseIds(req.user);
-  const courseMatch = ids ? { course: { $in: ids } } : {};
-  const inRange = { createdAt: { $gte: from, $lt: to } };
-  const paid = { ...courseMatch, ...inRange, provider: { $ne: 'free' } };
+  const courseMatch = ids ? { course: trusted({ $in: ids }) } : {};
+  const inRange = { createdAt: trusted({ $gte: from, $lt: to }) };
+  const paid = { ...courseMatch, ...inRange, provider: trusted({ $ne: 'free' }) };
 
   const [byMonth, byCourse, byStatus, learners, courses, recent] = await Promise.all([
     Order.aggregate([
@@ -209,7 +210,7 @@ router.get('/', staff, async (req, res) => {
     ]),
     Order.aggregate([{ $match: paid }, { $group: { _id: '$status', n: { $sum: 1 } } }]),
     ids ? Enrollment.distinct('user', courseMatch).then((x) => x.length) : User.countDocuments({ role: 'user' }),
-    Course.countDocuments(ids ? { _id: { $in: ids } } : {}),
+    Course.countDocuments(ids ? { _id: trusted({ $in: ids }) } : {}),
     Order.find(courseMatch).sort({ createdAt: -1 }).limit(8).populate('user', 'name').populate('course', 'title'),
   ]);
 
@@ -241,7 +242,7 @@ router.get('/', staff, async (req, res) => {
 });
 
 // ---------- Khóa học ----------
-router.get('/courses', staff, async (req, res) => {
+router.get('/courses', staff, validate(S.admin.courseList), async (req, res) => {
   const filter = req.user.role === 'admin' ? {} : { author: req.user.id };
   const status = STATUSES.includes(req.query.status) ? req.query.status : '';
   const pendingCount = await Course.countDocuments({ ...filter, status: 'pending' });
@@ -255,7 +256,7 @@ router.get('/courses', staff, async (req, res) => {
 });
 
 // Duyệt / từ chối khóa học (chỉ admin)
-router.post('/courses/:id/approve', adminOnly, async (req, res) => {
+router.post('/courses/:id/approve', adminOnly, validate(S.admin.courseAction), async (req, res) => {
   const course = await Course.findById(req.params.id).catch(() => null);
   if (!course) return notFound(res);
   Object.assign(course, { status: 'published', rejectReason: undefined, reviewedBy: req.user._id, reviewedAt: new Date() });
@@ -264,7 +265,7 @@ router.post('/courses/:id/approve', adminOnly, async (req, res) => {
   req.session.flash = { type: 'success', text: `Đã duyệt và xuất bản “${course.title}”.` };
   res.redirect('/admin/courses?status=pending');
 });
-router.post('/courses/:id/reject', adminOnly, async (req, res) => {
+router.post('/courses/:id/reject', adminOnly, validate(S.admin.courseReject), async (req, res) => {
   const course = await Course.findById(req.params.id).catch(() => null);
   if (!course) return notFound(res);
   const reason = String(req.body.reason || '')
@@ -294,7 +295,7 @@ const renderForm = (res, status, { title, course, sections, errors = [], action 
 const notFound = (res) =>
   res.status(404).render('error', { title: 'Không tìm thấy', message: 'Không tìm thấy khóa học hoặc bạn không có quyền sửa.' });
 
-router.get('/courses/new', staff, (req, res) =>
+router.get('/courses/new', staff, validate(S.none), (req, res) =>
   renderForm(res, 200, {
     title: 'Thêm khóa học',
     course: { price: 19.99, status: req.user.role === 'admin' ? 'published' : 'draft', color: COLORS[0] },
@@ -303,7 +304,7 @@ router.get('/courses/new', staff, (req, res) =>
   }),
 );
 
-router.post('/courses', staff, async (req, res) => {
+router.post('/courses', staff, validate(S.admin.courseForm), async (req, res) => {
   const data = { ...parseCourse(req.body), status: nextStatus(req.user, null, req.body) };
   const { sections, errors } = parseStructure(req.body.structure, null);
   if (!errors.length) errors.push(...(await verifyVideos(sections)));
@@ -317,13 +318,13 @@ router.post('/courses', staff, async (req, res) => {
   }
 });
 
-router.get('/courses/:id/edit', staff, async (req, res) => {
+router.get('/courses/:id/edit', staff, validate(S.admin.courseEdit), async (req, res) => {
   const course = await Course.findById(req.params.id).catch(() => null);
   if (!course || !canEdit(req.user, course)) return notFound(res);
   renderForm(res, 200, { title: 'Sửa khóa học', course, sections: course.sections, action: `/admin/courses/${course.id}` });
 });
 
-router.post('/courses/:id', staff, async (req, res) => {
+router.post('/courses/:id', staff, validate({ ...S.admin.courseForm, ...S.admin.courseSave }), async (req, res) => {
   const course = await Course.findById(req.params.id).catch(() => null);
   if (!course || !canEdit(req.user, course)) return notFound(res);
   const data = { ...parseCourse(req.body), status: nextStatus(req.user, course.status, req.body) };
@@ -376,13 +377,13 @@ const renderLesson = (res, status, { course, lesson, index, form, errors = [] })
     materialsHtml: renderMarkdown((form || lesson).materials),
   });
 
-router.get('/courses/:id/lessons/:lessonId', staff, async (req, res) => {
+router.get('/courses/:id/lessons/:lessonId', staff, validate(S.admin.lessonForm), async (req, res) => {
   const ctx = await loadLesson(req, res);
   if (!ctx) return;
   renderLesson(res, 200, ctx);
 });
 
-router.post('/courses/:id/lessons/:lessonId', staff, async (req, res) => {
+router.post('/courses/:id/lessons/:lessonId', staff, validate(S.admin.lessonSave), async (req, res) => {
   const ctx = await loadLesson(req, res);
   if (!ctx) return;
   const { course, lesson } = ctx;
@@ -431,7 +432,7 @@ router.post('/courses/:id/lessons/:lessonId', staff, async (req, res) => {
   res.redirect(`/admin/courses/${course.id}/lessons/${lesson.id}`);
 });
 
-router.post('/courses/:id/delete', adminOnly, async (req, res) => {
+router.post('/courses/:id/delete', adminOnly, validate(S.admin.courseAction), async (req, res) => {
   const id = req.params.id;
   if (await Enrollment.exists({ course: id })) {
     req.session.flash = { type: 'warn', text: 'Khóa học đã có học viên – hãy ẩn (bỏ “Xuất bản”) thay vì xóa.' };
@@ -461,13 +462,13 @@ async function learnersQuery(req) {
     course: listing.pick(req.query.course, allowed),
     sort: listing.pick(req.query.sort, ['new', 'old'], 'new'),
   };
-  const filter = { course: f.course ? f.course : { $in: courses.map((c) => c._id) } };
-  if (f.q) filter.user = { $in: await listing.userIdsMatching(f.q) };
+  const filter = { course: f.course ? f.course : trusted({ $in: courses.map((c) => c._id) }) };
+  if (f.q) filter.user = trusted({ $in: await listing.userIdsMatching(f.q) });
   const sort = f.sort === 'old' ? { createdAt: 1, _id: 1 } : { createdAt: -1, _id: -1 };
   return { f, filter, sort, courses };
 }
 
-router.get('/learners', staff, async (req, res) => {
+router.get('/learners', staff, validate(S.admin.learners), async (req, res) => {
   const { f, filter, sort, courses } = await learnersQuery(req);
   const list = await listing.paginate(Enrollment, filter, {
     page: req.query.page,
@@ -490,7 +491,10 @@ router.get('/learners', staff, async (req, res) => {
 // ---------- Hóa đơn, đơn hàng (admin) ----------
 // Phương thức thanh toán để lọc: cổng demo theo từng cổng, PayPal thật, miễn phí
 const METHODS = {
-  'demo-paypal': { label: 'PayPal (mô phỏng)', match: { provider: { $in: ['demo', 'mock'] }, gateway: { $in: ['paypal', null] } } },
+  'demo-paypal': {
+    label: 'PayPal (mô phỏng)',
+    match: { provider: trusted({ $in: ['demo', 'mock'] }), gateway: trusted({ $in: ['paypal', null] }) },
+  },
   'demo-vnpay': { label: 'VNPay (mô phỏng)', match: { provider: 'demo', gateway: 'vnpay' } },
   'demo-momo': { label: 'Ví MoMo (mô phỏng)', match: { provider: 'demo', gateway: 'momo' } },
   paypal: { label: 'PayPal (thật)', match: { provider: 'paypal' } },
@@ -514,16 +518,16 @@ async function ordersQuery(req) {
   if (f.status) filter.status = f.status;
   if (f.course) filter.course = f.course;
   if (f.method) Object.assign(filter, METHODS[f.method].match);
-  if (f.q) filter.user = { $in: await listing.userIdsMatching(f.q) };
+  if (f.q) filter.user = trusted({ $in: await listing.userIdsMatching(f.q) });
   if (f.from || f.to) {
     const [from, to] = dateRange({ from: f.from || '2000-01-01', to: f.to });
-    filter.createdAt = { $gte: from, $lt: to };
+    filter.createdAt = trusted({ $gte: from, $lt: to });
   }
   const sort = f.sort === 'old' ? { createdAt: 1, _id: 1 } : { createdAt: -1, _id: -1 };
   return { f, filter, sort, courses };
 }
 
-router.get('/orders', adminOnly, async (req, res) => {
+router.get('/orders', adminOnly, validate(S.admin.orders), async (req, res) => {
   const { f, filter, sort, courses } = await ordersQuery(req);
   const list = await listing.paginate(Order, filter, {
     page: req.query.page,
@@ -547,7 +551,7 @@ router.get('/orders', adminOnly, async (req, res) => {
 
 // Hoàn tiền (DEMO): chỉ admin, chỉ đơn demo đã thành công → REFUNDED, thu hồi quyền học, ghi audit log, báo học viên.
 // Không gọi cổng thanh toán nào (thanh toán chỉ demo; hoàn tiền PayPal thật: không làm).
-router.post('/orders/:id/refund', adminOnly, async (req, res) => {
+router.post('/orders/:id/refund', adminOnly, validate(S.admin.refund), async (req, res) => {
   const found = await Order.findById(req.params.id).catch(() => null);
   if (!found || !orderLabels.refundable(found)) {
     req.session.flash = { type: 'warn', text: 'Đơn hàng không tồn tại hoặc không hoàn tiền được (chỉ đơn demo đã thanh toán thành công).' };
@@ -596,13 +600,13 @@ function usersQuery(query) {
     filter.$or = [{ name: rx }, { email: rx }, { username: rx }];
   }
   if (f.role) filter.role = f.role;
-  if (f.status) filter.locked = f.status === 'locked' ? true : { $ne: true };
-  if (f.demo) filter.isDemo = f.demo === 'demo' ? true : { $ne: true };
+  if (f.status) filter.locked = f.status === 'locked' ? true : trusted({ $ne: true });
+  if (f.demo) filter.isDemo = f.demo === 'demo' ? true : trusted({ $ne: true });
   const sort = { new: { createdAt: -1, _id: -1 }, old: { createdAt: 1, _id: 1 }, name: { name: 1, _id: 1 } }[f.sort];
   return { f, filter, sort };
 }
 
-router.get('/users', adminOnly, async (req, res) => {
+router.get('/users', adminOnly, validate(S.admin.users), async (req, res) => {
   const { f, filter, sort } = usersQuery(req.query);
   const list = await listing.paginate(User, filter, { page: req.query.page, sort, select: '-passwordHash' });
   res.render('admin/users', {
@@ -615,7 +619,7 @@ router.get('/users', adminOnly, async (req, res) => {
   });
 });
 
-router.get('/export/users.csv', adminOnly, async (req, res) => {
+router.get('/export/users.csv', adminOnly, validate(S.admin.users), async (req, res) => {
   const { filter, sort } = usersQuery(req.query);
   const users = await User.find(filter)
     .sort(sort)
@@ -639,7 +643,7 @@ router.get('/export/users.csv', adminOnly, async (req, res) => {
   );
 });
 
-router.post('/users/:id', adminOnly, async (req, res) => {
+router.post('/users/:id', adminOnly, validate(S.admin.userUpdate), async (req, res) => {
   const target = await User.findById(req.params.id).catch(() => null);
   if (!target) return res.redirect('/admin/users');
   if (target.id === req.user.id) {
@@ -661,7 +665,7 @@ router.post('/users/:id', adminOnly, async (req, res) => {
 const vnTime = (d) => (d ? new Date(d).toLocaleString('vi-VN', { timeZone: TZ }) : '');
 const stamp = () => ymd(new Date());
 
-router.get('/export/orders.csv', adminOnly, async (req, res) => {
+router.get('/export/orders.csv', adminOnly, validate(S.admin.orders), async (req, res) => {
   const { filter, sort } = await ordersQuery(req); // cùng bộ lọc với trang /admin/orders
   const orders = await Order.find(filter).sort(sort).limit(50000).populate('user', 'name username email').populate('course', 'title');
   sendCsv(
@@ -704,7 +708,7 @@ router.get('/export/orders.csv', adminOnly, async (req, res) => {
   );
 });
 
-router.get('/export/learners.csv', staff, async (req, res) => {
+router.get('/export/learners.csv', staff, validate(S.admin.learners), async (req, res) => {
   const { filter, sort } = await learnersQuery(req);
   const enrollments = await Enrollment.find(filter)
     .sort(sort)
@@ -712,7 +716,7 @@ router.get('/export/learners.csv', staff, async (req, res) => {
     .populate('user', 'name username email')
     .populate('course', 'title sections');
   const progress = await Progress.find({
-    course: { $in: [...new Set(enrollments.map((e) => String(e.course?._id)))].filter((x) => x !== 'undefined') },
+    course: trusted({ $in: [...new Set(enrollments.map((e) => String(e.course?._id)))].filter((x) => x !== 'undefined') }),
   }).lean();
   const pmap = new Map(progress.map((p) => [`${p.user}:${p.course}`, p]));
   const rows = enrollments
@@ -729,20 +733,27 @@ router.get('/export/learners.csv', staff, async (req, res) => {
   );
 });
 
-router.get('/export/revenue.csv', staff, async (req, res) => {
+router.get('/export/revenue.csv', staff, validate(S.admin.revenueCsv), async (req, res) => {
   const [from, to] = dateRange(req.query);
   const ids = await scopeCourseIds(req.user);
-  const courses = await Course.find(ids ? { _id: { $in: ids } } : {})
+  const courses = await Course.find(ids ? { _id: trusted({ $in: ids }) } : {})
     .select('title price author')
     .populate('author', 'name');
   const cids = courses.map((c) => c._id);
   const [rev, enr] = await Promise.all([
     Order.aggregate([
-      { $match: { course: { $in: cids }, status: 'COMPLETED', provider: { $ne: 'free' }, createdAt: { $gte: from, $lt: to } } },
+      {
+        $match: {
+          course: trusted({ $in: cids }),
+          status: 'COMPLETED',
+          provider: trusted({ $ne: 'free' }),
+          createdAt: trusted({ $gte: from, $lt: to }),
+        },
+      },
       { $group: { _id: '$course', orders: { $sum: 1 }, revenue: { $sum: { $toDouble: '$amount' } } } },
     ]),
     Enrollment.aggregate([
-      { $match: { course: { $in: cids }, createdAt: { $gte: from, $lt: to } } },
+      { $match: { course: trusted({ $in: cids }), createdAt: trusted({ $gte: from, $lt: to }) } },
       { $group: { _id: '$course', n: { $sum: 1 } } },
     ]),
   ]);
@@ -775,17 +786,17 @@ router.get('/export/revenue.csv', staff, async (req, res) => {
 });
 
 // ---------- Mã giảm giá (admin) ----------
-router.get('/coupons', adminOnly, async (req, res) => {
+router.get('/coupons', adminOnly, validate(S.admin.coupons), async (req, res) => {
   const [list, courses] = await Promise.all([
     Coupon.find().sort({ createdAt: -1 }).limit(300).populate('courses', 'title'),
-    Course.find({ price: { $gt: 0 } })
+    Course.find({ price: trusted({ $gt: 0 }) })
       .select('title')
       .sort({ title: 1 }),
   ]);
   res.render('admin/coupons', { title: 'Mã giảm giá', list, courses, errors: [], form: {} });
 });
 
-router.post('/coupons', adminOnly, async (req, res) => {
+router.post('/coupons', adminOnly, validate(S.admin.couponCreate), async (req, res) => {
   const one = (v) => (Array.isArray(v) ? v[0] : v);
   const many = (v) => (Array.isArray(v) ? v : v ? [v] : []).map(String).filter((x) => /^[0-9a-f]{24}$/.test(x));
   const form = {
@@ -817,12 +828,12 @@ router.post('/coupons', adminOnly, async (req, res) => {
   }
   const [list, courses] = await Promise.all([
     Coupon.find().sort({ createdAt: -1 }).limit(300).populate('courses', 'title'),
-    Course.find({ price: { $gt: 0 } }).select('title'),
+    Course.find({ price: trusted({ $gt: 0 }) }).select('title'),
   ]);
   res.status(400).render('admin/coupons', { title: 'Mã giảm giá', list, courses, errors, form });
 });
 
-router.post('/coupons/:id', adminOnly, async (req, res) => {
+router.post('/coupons/:id', adminOnly, validate(S.admin.couponToggle), async (req, res) => {
   const c = await Coupon.findById(req.params.id).catch(() => null);
   if (c) {
     c.active = req.body.active === '1';
@@ -832,7 +843,7 @@ router.post('/coupons/:id', adminOnly, async (req, res) => {
   res.redirect('/admin/coupons');
 });
 
-router.post('/coupons/:id/delete', adminOnly, async (req, res) => {
+router.post('/coupons/:id/delete', adminOnly, validate(S.admin.couponDelete), async (req, res) => {
   const c = await Coupon.findById(req.params.id).catch(() => null);
   if (c && (await Order.exists({ coupon: c._id }))) {
     req.session.flash = { type: 'warn', text: 'Mã đã được dùng trong đơn hàng – hãy tắt thay vì xóa để giữ lịch sử.' };
@@ -845,7 +856,7 @@ router.post('/coupons/:id/delete', adminOnly, async (req, res) => {
 });
 
 // ---------- Nhật ký bảo mật (admin) ----------
-router.get('/audit', adminOnly, async (req, res) => {
+router.get('/audit', adminOnly, validate(S.admin.audit), async (req, res) => {
   const one = (v) => String(Array.isArray(v) ? v[0] : (v ?? '')).trim();
   const f = {
     action: one(req.query.action),
@@ -868,16 +879,16 @@ router.get('/audit', adminOnly, async (req, res) => {
   const to = date(f.to, true);
   if (!from) f.from = '';
   if (!to) f.to = '';
-  if (from || to) filter.createdAt = { ...(from ? { $gte: from } : {}), ...(to ? { $lt: to } : {}) };
+  if (from || to) filter.createdAt = trusted({ ...(from ? { $gte: from } : {}), ...(to ? { $lt: to } : {}) });
   if (f.ip) filter.ip = f.ip;
   if (f.user) {
-    const rx = new RegExp(f.user.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    const rx = listing.textRx(f.user);
     const ids = (
       await User.find({ $or: [{ username: rx }, { email: rx }, { name: rx }] })
         .select('_id')
         .limit(200)
     ).map((u) => u._id);
-    filter.$or = [{ actor: { $in: ids } }, { target: { $in: ids } }, { 'meta.login': rx }];
+    filter.$or = [{ actor: trusted({ $in: ids }) }, { target: trusted({ $in: ids }) }, { 'meta.login': rx }];
   }
   const PER = 50;
   const total = await AuditLog.countDocuments(filter);
@@ -910,12 +921,12 @@ async function moderationQuery(req) {
   if (f.course) filter.course = f.course;
   if (f.q) {
     const rx = listing.textRx(f.q);
-    filter.$or = [{ content: rx }, { user: { $in: await listing.userIdsMatching(f.q) } }];
+    filter.$or = [{ content: rx }, { user: trusted({ $in: await listing.userIdsMatching(f.q) }) }];
   }
   return { f, filter, courses };
 }
 
-router.get('/qa', adminOnly, async (req, res) => {
+router.get('/qa', adminOnly, validate(S.admin.moderation), async (req, res) => {
   const { f, filter, courses } = await moderationQuery(req);
   const list = await listing.paginate(Post, filter, {
     page: req.query.page,
@@ -932,13 +943,13 @@ router.get('/qa', adminOnly, async (req, res) => {
   res.render('admin/qa', { title: 'Kiểm duyệt Hỏi – Đáp', rows, list, f, show: f.show || 'all', courses, qs: listing.queryString(f) });
 });
 
-router.post('/qa/:id', adminOnly, async (req, res) => {
+router.post('/qa/:id', adminOnly, validate(S.admin.moderate), async (req, res) => {
   await Post.updateOne({ _id: req.params.id }, { hidden: req.body.hidden === '1' }).catch(() => null);
   res.redirect(safeBack(req.body.back, '/admin/qa'));
 });
 
 // ---------- Kiểm duyệt bình luận khóa học (admin) ----------
-router.get('/comments', adminOnly, async (req, res) => {
+router.get('/comments', adminOnly, validate(S.admin.moderation), async (req, res) => {
   const { f, filter, courses } = await moderationQuery(req);
   const list = await listing.paginate(CourseComment, filter, {
     page: req.query.page,
@@ -951,7 +962,7 @@ router.get('/comments', adminOnly, async (req, res) => {
   res.render('admin/comments', { title: 'Kiểm duyệt bình luận', comments: list.items, list, f, courses, qs: listing.queryString(f) });
 });
 
-router.post('/comments/:id', adminOnly, async (req, res) => {
+router.post('/comments/:id', adminOnly, validate(S.admin.moderate), async (req, res) => {
   await CourseComment.updateOne({ _id: req.params.id }, { hidden: req.body.hidden === '1' }).catch(() => null);
   res.redirect(safeBack(req.body.back, '/admin/comments'));
 });

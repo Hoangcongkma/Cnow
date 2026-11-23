@@ -1,5 +1,7 @@
 // Bước 2 khi đăng nhập tài khoản admin (chưa bật TOTP): nhập MÃ QUẢN TRỊ. Đúng mã mới cấp phiên đăng nhập đầy đủ.
 const router = require('express').Router();
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const rateLimit = require('express-rate-limit');
 const { User } = require('../models');
 const { startSession } = require('../middlewares/auth');
@@ -33,12 +35,12 @@ const pinIpLimiter = rateLimit({
   },
 });
 
-router.get('/login/admin-pin', (req, res) => {
+router.get('/login/admin-pin', validate(S.none), (req, res) => {
   if (!pendingOf(req)) return res.redirect('/login');
   render(res, 200, null);
 });
 
-router.post('/login/admin-pin', pinIpLimiter, async (req, res) => {
+router.post('/login/admin-pin', pinIpLimiter, validate(S.adminPin.submit), async (req, res) => {
   const p = pendingOf(req);
   if (!p) {
     delete req.session.pinPending;

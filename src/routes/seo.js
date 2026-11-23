@@ -1,12 +1,14 @@
 // robots.txt và sitemap.xml
 const router = require('express').Router();
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const config = require('../config');
 const { Course } = require('../models');
 
 // Trang riêng tư / theo phiên không cần lập chỉ mục
 const PRIVATE = ['/admin', '/learn', '/profile', '/my-courses', '/wishlist', '/orders', '/certificate', '/pay', '/login', '/register'];
 
-router.get('/robots.txt', (req, res) => {
+router.get('/robots.txt', validate(S.none), (req, res) => {
   res.type('text/plain').set('Cache-Control', 'public, max-age=3600');
   const lines = ['User-agent: *'];
   if (process.env.DEMO_NOINDEX === 'true') lines.push('Disallow: /');
@@ -17,7 +19,7 @@ router.get('/robots.txt', (req, res) => {
 
 const xml = (s) => String(s).replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]);
 
-router.get('/sitemap.xml', async (req, res) => {
+router.get('/sitemap.xml', validate(S.none), async (req, res) => {
   const courses = await Course.find({ published: true }).select('slug updatedAt').sort({ updatedAt: -1 }).limit(5000).lean();
   const urls = [
     { loc: '/', priority: '1.0' },

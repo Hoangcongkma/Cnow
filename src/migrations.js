@@ -1,5 +1,6 @@
 // Migration dữ liệu – idempotent, chạy tự động khi khởi động server (server.js) hoặc bằng `npm run migrate`.
 // Mỗi migration chỉ chạm vào bản ghi còn ở định dạng cũ nên chạy lại nhiều lần vẫn an toàn.
+const { trusted } = require('mongoose');
 const mongoose = require('mongoose');
 const { Course, Comment, Post } = require('./models');
 
@@ -9,7 +10,7 @@ const MIGRATIONS = [
     // Khóa học cũ có mảng `lessons` phẳng → chuyển thành 1 chương "Nội dung khóa học", giữ nguyên _id từng bài.
     async up() {
       const col = Course.collection;
-      const legacy = await col.find({ lessons: { $exists: true } }).toArray();
+      const legacy = await col.find({ lessons: trusted({ $exists: true }) }).toArray();
       for (const c of legacy) {
         const update = { $unset: { lessons: '' } };
         if (!Array.isArray(c.sections) || !c.sections.length) {
@@ -29,7 +30,7 @@ const MIGRATIONS = [
     name: 'comments-to-qa',
     // Bình luận chung cũ → câu hỏi của bài học đầu tiên. Giữ nguyên bản ghi Comment (chỉ đánh dấu migrated).
     async up() {
-      const comments = await Comment.find({ migrated: { $ne: true } });
+      const comments = await Comment.find({ migrated: trusted({ $ne: true }) });
       let n = 0;
       for (const cm of comments) {
         const course = await Course.findById(cm.course);
@@ -58,10 +59,13 @@ const MIGRATIONS = [
     // Khóa học cũ chỉ có `published` → status = published ? 'published' : 'draft'
     async up() {
       const a = await Course.collection.updateMany(
-        { status: { $exists: false }, published: { $ne: false } },
+        { status: trusted({ $exists: false }), published: trusted({ $ne: false }) },
         { $set: { status: 'published', published: true } },
       );
-      const b = await Course.collection.updateMany({ status: { $exists: false }, published: false }, { $set: { status: 'draft' } });
+      const b = await Course.collection.updateMany(
+        { status: trusted({ $exists: false }), published: false },
+        { $set: { status: 'draft' } },
+      );
       return a.modifiedCount + b.modifiedCount;
     },
   },
@@ -76,7 +80,7 @@ const MIGRATIONS = [
       const { User } = require('./models');
       const { NAME_RE, findAvatar, putFile } = require('./services/avatar');
       let n = 0;
-      for (const u of await User.find({ avatar: { $type: 'string' } }).select('avatar')) {
+      for (const u of await User.find({ avatar: trusted({ $type: 'string' }) }).select('avatar')) {
         if (!NAME_RE.test(u.avatar) || (await findAvatar(u.avatar))) continue;
         const data = await fs.readFile(path.join(uploadDir, 'avatars', u.avatar)).catch(() => null);
         if (!data) continue;

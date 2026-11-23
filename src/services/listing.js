@@ -4,8 +4,9 @@ const { User } = require('../models');
 
 const PER_PAGE = 25;
 const one = (v) => String(Array.isArray(v) ? v[0] : (v ?? '')).trim();
-const escapeRx = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const textRx = (s) => new RegExp(escapeRx(String(s).slice(0, 80)), 'i');
+const { escapeRegex: escapeRx, searchRegex } = require('../utils/security');
+
+const textRx = (s) => searchRegex(s, 80);
 const pick = (v, allowed, dflt = '') => (allowed.includes(one(v)) ? one(v) : dflt);
 
 /** id người dùng khớp tên / email / tên đăng nhập (tìm kiếm ở trang đơn hàng, người học). */

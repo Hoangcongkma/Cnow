@@ -1,5 +1,7 @@
 // Đánh giá khóa học và chứng nhận hoàn thành
 const router = require('express').Router();
+const { validate } = require('../validators');
+const S = require('../validators/schemas');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const { Course, Enrollment, Review, Certificate, Progress } = require('../models');
@@ -36,7 +38,7 @@ async function ensureCertificate(user, course, progress) {
 }
 
 // Gửi / sửa đánh giá: chỉ học viên đã ghi danh, mỗi người 1 đánh giá
-router.post('/courses/:slug/review', requireLogin, async (req, res) => {
+router.post('/courses/:slug/review', requireLogin, validate(S.reviews.review), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug, published: true });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const back = `/courses/${course.slug}#reviews`;
@@ -59,7 +61,7 @@ router.post('/courses/:slug/review', requireLogin, async (req, res) => {
 });
 
 // Chứng nhận: chủ sở hữu hoặc admin xem; người khác kiểm tra qua /verify/:code
-router.get('/certificate/:id', requireLogin, async (req, res) => {
+router.get('/certificate/:id', requireLogin, validate(S.reviews.certificate), async (req, res) => {
   const cert = await Certificate.findById(req.params.id).catch(() => null);
   if (!cert || (String(cert.user) !== req.user.id && req.user.role !== 'admin')) {
     return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Chứng nhận không tồn tại.' });
@@ -72,7 +74,7 @@ router.get('/certificate/:id', requireLogin, async (req, res) => {
 });
 
 // Lấy (hoặc cấp) chứng nhận của khóa học đã hoàn thành
-router.post('/courses/:slug/certificate', requireLogin, async (req, res) => {
+router.post('/courses/:slug/certificate', requireLogin, validate(S.reviews.claim), async (req, res) => {
   const course = await Course.findOne({ slug: req.params.slug });
   if (!course) return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Khóa học không tồn tại.' });
   const progress = await Progress.findOne({ user: req.user.id, course: course.id });
@@ -85,14 +87,14 @@ router.post('/courses/:slug/certificate', requireLogin, async (req, res) => {
 });
 
 // Trang công khai kiểm tra chứng nhận
-router.get('/verify', (req, res) => {
+router.get('/verify', validate(S.reviews.verifyQuery), (req, res) => {
   const code = String(req.query.code || '')
     .replace(/[^0-9a-f]/gi, '')
     .toUpperCase();
   if (code) return res.redirect(`/verify/${code}`);
   res.render('certificate/verify', { title: 'Kiểm tra chứng nhận', cert: null, code: '', checked: false });
 });
-router.get('/verify/:code', async (req, res) => {
+router.get('/verify/:code', validate(S.reviews.verifyCode), async (req, res) => {
   const code = String(req.params.code)
     .replace(/[^0-9a-f]/gi, '')
     .toUpperCase()

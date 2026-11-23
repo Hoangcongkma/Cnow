@@ -8,6 +8,7 @@
 //   - Từ chối chạy khi NODE_ENV=production, trừ khi có --allow-production.
 //   - Mật khẩu: 1 mật khẩu ngẫu nhiên dùng chung, chỉ băm 1 lần, KHÔNG in ra (không ai đăng nhập bằng tài khoản demo).
 // Nội dung cộng đồng (câu hỏi, trả lời, bình luận, đánh giá, chat) viết sẵn theo từng bài trong data/demo/<slug>.json.
+const { trusted } = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -354,7 +355,7 @@ async function seedDemo(opts = {}) {
   if (!courses.length) throw new Error('Chưa có khóa học đã xuất bản – chạy "npm run seed" trước.');
   const free = courses.filter((c) => c.price === 0);
   const paid = courses.filter((c) => c.price > 0);
-  const admin = await M.User.findOne({ role: 'admin', isDemo: { $ne: true } }).sort({ createdAt: 1 });
+  const admin = await M.User.findOne({ role: 'admin', isDemo: trusted({ $ne: true }) }).sort({ createdAt: 1 });
   const passwordHash = await bcrypt.hash(crypto.randomBytes(24).toString('base64url'), 10); // dùng chung, không in ra
 
   // ---------- Người dùng ----------
@@ -391,7 +392,7 @@ async function seedDemo(opts = {}) {
     { code: 'CUOINAM15', type: 'percent', value: 15, note: 'Cuối năm (demo)', months: [12] },
     { code: 'GIAM5USD', type: 'amount', value: 5, note: 'Giảm 5 USD (demo)' },
   ];
-  const taken = new Set((await M.Coupon.find({ code: { $in: couponDefs.map((c) => c.code) } }).lean()).map((c) => c.code));
+  const taken = new Set((await M.Coupon.find({ code: trusted({ $in: couponDefs.map((c) => c.code) }) }).lean()).map((c) => c.code));
   const coupons = couponDefs
     .filter((c) => !taken.has(c.code))
     .map((c) => ({ _id: rng.objectId(), ...c, active: true, usedCount: 0, createdBy: admin?._id, createdAt: months[0].start }));
