@@ -13,7 +13,7 @@ Cnow là website học lập trình mình xây dựng cho đồ án tốt nghi�
 | Đề tài               | Đồ án tốt nghiệp ngành **An toàn thông tin** |
 | Trường               | Học viện Kỹ thuật Mật mã                     |
 | Tác giả              | **Hoàng Mạnh Công**                          |
-| Giảng viên hướng dẫn | Tiến sĩ Lại Minh Tuấn                      |
+| Giảng viên hướng dẫn | **Ths Trần Anh Tú**                     |
 
 Phiên bản trong repository này là **bản làm lại để kỷ niệm**. Mình giữ ý tưởng và các nhóm chức năng của đồ án gốc, viết lại trên nền công nghệ mới hơn, bổ sung phần bảo mật và nội dung học.
 
