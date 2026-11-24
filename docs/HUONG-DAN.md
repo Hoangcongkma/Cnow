@@ -135,7 +135,7 @@ PayPal không hỗ trợ VND, nên giá khóa học tính bằng USD.
 Bản demo chạy `NODE_ENV=production` với **`PAYMENT_MODE=demo`**: thanh toán mô phỏng, không cần tài khoản PayPal.
 
 Các thành phần sẵn có trong repo:
-- `render.yaml` (Blueprint), `"engines": { "node": ">=20" }`;
+- `render.yaml` (Blueprint, gói **free**: không disk, không dịch vụ trả phí; `NODE_VERSION=22` → bản 22.x mới nhất), `"engines": { "node": ">=22.12" }`;
 - `GET /healthz` (200 khi kết nối được MongoDB, 503 khi không);
 - `trust proxy`; cookie `Secure` + `SameSite=Lax`; CSP `upgrade-insecure-requests`; nén gzip;
 - log gọn, không có chuỗi truy vấn hay bí mật; `PORT` đọc từ môi trường;
@@ -154,14 +154,16 @@ Các thành phần sẵn có trong repo:
 1. Đẩy code lên GitHub (bạn tự `git push`).
 2. https://dashboard.render.com → **New → Blueprint** → chọn repo. Render đọc `render.yaml` và tạo Web Service `cnow`:
    - build: `npm ci`, start: `npm start`, health check: `/healthz`;
-   - biến cố định: `NODE_ENV=production`, `PAYMENT_MODE=demo`, `DEMO_USD_VND=26000`, `DEMO_NOINDEX=true`.
+   - biến cố định: `NODE_VERSION=22`, `NODE_ENV=production`, `PAYMENT_MODE=demo`, `DEMO_USD_VND=26000`, `DEMO_NOINDEX=true`.
 3. Render hỏi giá trị các biến bí mật (khai báo `sync: false`, không lưu trong Git). Điền theo bảng dưới. `BASE_URL` là địa chỉ Render cấp, ví dụ `https://cnow.onrender.com`; nếu chưa biết, điền tạm rồi sửa sau khi tạo xong.
 4. Đợi deploy xong → mở `https://<ten>.onrender.com/healthz` phải thấy `{"status":"ok","db":"up",…}`.
+5. Gói free: website ngủ sau 15 phút không có truy cập, lần truy cập đầu tiên sau đó mất khoảng 1 phút để khởi động lại (dữ liệu trên Atlas không mất).
 
 ### 3. Biến môi trường
 
 | Tên | Ví dụ | Bắt buộc? |
 | --- | --- | --- |
+| `NODE_VERSION` | `22` | Có (có sẵn trong `render.yaml`; Render dùng bản 22.x mới nhất, cần ≥ 22.12) |
 | `NODE_ENV` | `production` | Có (có sẵn trong `render.yaml`) |
 | `MONGODB_URI` | `mongodb+srv://cnow_app:…@cluster0.xxxxx.mongodb.net/cnow` | **Có** – thiếu thì server không khởi động |
 | `BASE_URL` | `https://cnow.onrender.com` | **Có** – địa chỉ public, dùng cho cookie Secure, CSP WebSocket, sitemap |

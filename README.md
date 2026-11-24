@@ -147,10 +147,12 @@ Tùy chọn:
 Bản demo chạy trên **Render + MongoDB Atlas** với `NODE_ENV=production` và `PAYMENT_MODE=demo`:
 
 1. Tạo cluster Atlas M0, user riêng, mở Network Access và lấy chuỗi kết nối.
-2. Render → **New → Blueprint** → chọn repo. `render.yaml` khai báo build `npm ci`, start `npm start` và health check `/healthz`.
+2. Render → **New → Blueprint** → chọn repo. `render.yaml` khai báo gói **free** (không disk, không dịch vụ trả phí), `NODE_VERSION=22` (bản 22.x mới nhất, ≥ 22.12), build `npm ci`, start `npm start` và health check `/healthz`.
 3. Điền các biến bí mật: `MONGODB_URI`, `BASE_URL`, `SESSION_SECRET`, `MFA_KEY`, `SEED_ADMIN_PASSWORD`.
 4. Chạy `npm run setup:prod` rồi `npm run set:admin-pin`, trỏ vào Atlas.
 5. Từ đó mỗi lần `git push`, Render tự build và deploy.
+
+> **Lưu ý gói miễn phí:** website tự "ngủ" sau 15 phút không có truy cập; lần truy cập đầu tiên sau đó phải chờ khoảng 1 phút để máy chủ khởi động lại. Dữ liệu nằm trên MongoDB Atlas nên không bị mất khi website ngủ.
 
 Hướng dẫn từng bước, bảng biến môi trường và cách cập nhật: [docs/HUONG-DAN.md › Deploy](docs/HUONG-DAN.md#deploy-render--mongodb-atlas-bản-demo).
 

@@ -11,6 +11,9 @@ services:
     healthCheckPath: /healthz
     autoDeploy: true # git push lên nhánh đã kết nối → Render tự deploy
     envVars:
+      # Render chọn bản 22.x mới nhất (≥ 22.12: cần để require() gói ESM path-to-regexp 9; package.json engines >=22.12)
+      - key: NODE_VERSION
+        value: '22'
       - key: NODE_ENV
         value: production
       - key: PAYMENT_MODE
