@@ -61,8 +61,8 @@ const hashCode = (code) =>
 /** Tạo 8 mã khôi phục mới: trả về { codes (hiển thị 1 lần), records (lưu CSDL) }. */
 function newRecoveryCodes() {
   const codes = Array.from({ length: RECOVERY_COUNT }, () => {
-    const bytes = crypto.randomBytes(8);
-    const s = [...bytes].map((b) => ALPHABET[b % ALPHABET.length]).join('');
+    // randomInt lấy mẫu đều (không lệch như byte % 31: 256 không chia hết cho 31)
+    const s = Array.from({ length: 8 }, () => ALPHABET[crypto.randomInt(ALPHABET.length)]).join('');
     return `${s.slice(0, 4)}-${s.slice(4, 8)}`;
   });
   return { codes, records: codes.map((c) => ({ hash: hashCode(c), usedAt: null })) };

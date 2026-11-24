@@ -131,6 +131,24 @@ test('mật khẩu tiếng Việt dài quá 72 byte bị từ chối (bcrypt ch�
   assert.deepEqual(checkPassword('Mật khẩu tốt 2026'), []);
 });
 
+test('kiểm tra mật khẩu phổ biến chạy tuyến tính (không ReDoS) và vẫn bắt "password2026!"', () => {
+  const { checkPassword } = require('../src/services/password');
+  const t = Date.now();
+  checkPassword('1'.repeat(40000) + 'x');
+  assert.ok(Date.now() - t < 100, `chuỗi 40k ký tự mất ${Date.now() - t} ms`);
+  assert.ok(checkPassword('password2026!').some((e) => /phổ biến/.test(e)));
+  assert.ok(checkPassword('Matkhau123..').some((e) => /phổ biến/.test(e)));
+});
+
+test('mã khôi phục 2FA: 8 mã dạng xxxx-xxxx, chỉ dùng ký tự trong bảng chữ (lấy mẫu đều bằng randomInt)', () => {
+  const { newRecoveryCodes } = require('../src/services/mfa');
+  const { codes, records } = newRecoveryCodes();
+  assert.equal(codes.length, 8);
+  assert.equal(new Set(codes).size, 8);
+  for (const c of codes) assert.match(c, /^[abcdefghjkmnpqrstuvwxyz23456789]{4}-[abcdefghjkmnpqrstuvwxyz23456789]{4}$/);
+  assert.ok(records.every((r) => /^[0-9a-f]{64}$/.test(r.hash) && r.usedAt === null));
+});
+
 test('ảnh đại diện kích thước quá lớn bị từ chối', async () => {
   const sharp = require('sharp');
   const { saveAvatar } = require('../src/services/avatar');

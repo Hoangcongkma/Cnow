@@ -16,11 +16,17 @@ const COMMON = new Set(
 // Bổ sung vài mật khẩu hay gặp ở Việt Nam / của chính website
 for (const p of ['matkhau', 'matkhau123', 'abc12345', 'admin123', 'cnow1234', 'cnow123456', '1234567890', 'qwerty123']) COMMON.add(p);
 
+const TRAILING = new Set('0123456789!@#$%^&*._-');
+
 /** Mật khẩu (không phân biệt hoa thường) có nằm trong danh sách phổ biến – kể cả khi chỉ thêm số/ký tự ở cuối. */
 function isCommon(p) {
   const lower = p.toLowerCase();
   if (COMMON.has(lower)) return true;
-  const core = lower.replace(/[\d!@#$%^&*._-]+$/, ''); // "password2026!" → "password"
+  // "password2026!" → "password": cắt số/ký tự đặc biệt ở cuối bằng vòng lặp tuyến tính
+  // (regex /[…]+$/ tốn O(n²) với chuỗi dài toàn chữ số – CodeQL js/polynomial-redos)
+  let end = lower.length;
+  while (end > 0 && TRAILING.has(lower[end - 1])) end--;
+  const core = lower.slice(0, end);
   return core.length >= 4 && COMMON.has(core);
 }
 

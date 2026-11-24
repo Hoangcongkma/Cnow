@@ -120,9 +120,9 @@ app.use(express.urlencoded({ extended: false, limit: '50kb' }));
 app.use(compression()); // nén gzip/brotli phản hồi văn bản (HTML, CSS, JS, JSON)
 app.use(hashedStatic); // /css/style.<hash>.css → cache 1 năm (immutable)
 app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: config.isProd ? '1d' : 0 }));
-app.use(require('./routes/seo')); // robots.txt, sitemap.xml (không cần phiên)
 // Giới hạn chung theo IP cho các trang động (chống làm ngập phiên/CSDL bằng hàng loạt yêu cầu); file tĩnh không tính
 app.use(globalLimiter);
+app.use(require('./routes/seo')); // robots.txt, sitemap.xml (truy vấn CSDL → đứng sau globalLimiter; không cần phiên)
 
 // Dùng chung cho HTTP và Socket.IO (src/realtime.js) để xác thực kết nối chat bằng phiên đăng nhập hiện có
 const sessionMiddleware = session({
