@@ -16,7 +16,7 @@ Mỗi request lần lượt đi qua các lớp dưới đây (`src/app.js`: nh�
 | # | Lớp | Ở đâu | Ghi chú |
 | --- | --- | --- | --- |
 | 0 | Cấu hình | `src/config.js` | zod kiểm tra mọi biến môi trường khi khởi động; an toàn mặc định đóng (production bắt buộc `MONGODB_URI`, `BASE_URL`, `SESSION_SECRET` ≥ 32); thông báo lỗi không in giá trị |
-| 1 | Header + CSP | `src/app.js` (helmet) | nonce mỗi request + `strict-dynamic`, HSTS (production), `frame-ancestors 'none'`, COOP/CORP, Permissions-Policy |
+| 1 | Header + CSP | `src/app.js` (helmet) | CSP tự khai báo đủ (không dùng mặc định helmet, không `*`/`https:`/`wss:`, `data:` chỉ ở `img-src`, PayPal ở `form-action` chỉ khi `PAYMENT_MODE=paypal`), nonce mỗi request + `strict-dynamic`, HSTS (production), `frame-ancestors 'none'`, COOP/CORP, Permissions-Policy |
 | 2 | Nhật ký | `src/logger.js` | pino JSON, `requestId` (nhận `X-Request-Id` hợp lệ), ẩn cookie/token/mật khẩu, che email, không ghi query string |
 | 3 | Giới hạn tần suất | `src/security/rate-limit.js` | lưu MongoDB (đúng khi chạy nhiều tiến trình), nhóm riêng cho đăng ký, thanh toán, xuất dữ liệu, 2FA, mã quản trị… |
 | 4 | Phiên | `src/middlewares/auth.js`, `src/services/sessions.js` | regenerate khi đăng nhập, hết hạn 30 phút / 7 ngày, `sessionVersion` hủy phiên khác khi đổi mật khẩu, đổi quyền, bật 2FA, xóa tài khoản |

@@ -42,6 +42,44 @@ test('CSP nghiêm ngặt: nonce mới mỗi request, mọi <script> đều có �
   );
 });
 
+test('CSP không có wildcard (ZAP 10055): không *, scheme trần, data: chỉ ở img-src; đủ directive, không dùng mặc định helmet', async () => {
+  const csp = (await request(app).get('/')).headers['content-security-policy'];
+  const dirs = Object.fromEntries(
+    csp
+      .split(';')
+      .map((d) => d.trim().split(/\s+/))
+      .filter((p) => p[0])
+      .map(([name, ...src]) => [name, src]),
+  );
+  for (const [name, src] of Object.entries(dirs)) {
+    for (const s of src) {
+      assert.ok(!s.includes('*'), `${name}: ${s}`);
+      assert.doesNotMatch(s, /^(https?|wss?|blob|filesystem):$/, `${name}: scheme trần ${s}`);
+      if (name !== 'img-src') assert.notEqual(s, 'data:', `${name}: data:`);
+      assert.doesNotMatch(s, /unsafe-/, `${name}: ${s}`);
+    }
+  }
+  const want = {
+    'default-src': "'self'",
+    'object-src': "'none'",
+    'frame-ancestors': "'none'",
+    'form-action': "'self'", // chế độ demo: không mở PayPal
+    'script-src-attr': "'none'",
+    'font-src': "'self'",
+    'manifest-src': "'self'",
+    'worker-src': "'self'",
+    'frame-src': 'https://www.youtube-nocookie.com',
+  };
+  for (const [name, v] of Object.entries(want)) assert.equal(dirs[name]?.join(' '), v, name);
+  assert.deepEqual(
+    dirs['style-src'].filter((s) => !s.startsWith("'nonce-")),
+    ["'self'"],
+  );
+  assert.deepEqual(dirs['connect-src'][0], "'self'");
+  assert.match(dirs['connect-src'][1], /^ws:\/\/[^/]+$/, 'websocket cùng origin, không wss: chung chung');
+  assert.equal(dirs['upgrade-insecure-requests'], undefined, 'chỉ bật ở production');
+});
+
 test('header bảo mật: Referrer-Policy, Permissions-Policy, COOP, CORP, nosniff; không HSTS khi chưa phải production', async () => {
   const res = await request(app).get('/');
   assert.equal(res.headers['referrer-policy'], 'strict-origin-when-cross-origin');

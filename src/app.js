@@ -32,28 +32,33 @@ app.use((req, res, next) => {
   next();
 });
 const nonce = (req, res) => `'nonce-${res.locals.cspNonce}'`;
+// CSP khai báo đầy đủ, KHÔNG dùng giá trị mặc định của helmet (mặc định có font-src https: data:, style-src https:
+// 'unsafe-inline'… – ZAP 10055 "Wildcard Directive"). Không nguồn nào là *, https:, http:, wss:; data: chỉ ở img-src.
+const CSP = {
+  'default-src': ["'self'"],
+  'base-uri': ["'none'"], // chặt hơn 'self': trang không dùng thẻ <base>
+  'object-src': ["'none'"],
+  'frame-ancestors': ["'none'"], // chống clickjacking
+  // Thanh toán PayPal thật: POST /pay → 303 sang trang duyệt của PayPal (form-action áp dụng cả cho chuyển hướng)
+  'form-action': config.paymentMode === 'paypal' ? ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com'] : ["'self'"],
+  // CSP nghiêm ngặt (CSP3): chỉ script có nonce của request này được chạy, cùng các script do chúng nạp
+  // ('strict-dynamic' – vd. app.js nạp YouTube IFrame API). 'self' + 2 đường dẫn YouTube chỉ là dự phòng cho trình duyệt cũ
+  // (trình duyệt hỗ trợ 'strict-dynamic' bỏ qua chúng). Không có 'unsafe-inline' / 'unsafe-eval'.
+  'script-src': [nonce, "'strict-dynamic'", "'self'", 'https://www.youtube.com/iframe_api', 'https://www.youtube.com/s/player/'],
+  'script-src-attr': ["'none'"],
+  'style-src': ["'self'", nonce],
+  'font-src': ["'self'"],
+  'img-src': ["'self'", 'data:', 'https://i.ytimg.com'], // data: cho mã QR 2FA; i.ytimg.com: ảnh bìa video
+  // Chat realtime: Socket.IO dùng WebSocket tới chính website; ghi rõ ws(s)://<host> cho trình duyệt cũ
+  'connect-src': ["'self'", config.baseUrl.replace(/^http/, 'ws')],
+  'frame-src': ['https://www.youtube-nocookie.com'],
+  'manifest-src': ["'self'"],
+  'worker-src': ["'self'"],
+  ...(config.isProd ? { 'upgrade-insecure-requests': [] } : {}),
+};
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        'default-src': ["'self'"],
-        'img-src': ["'self'", 'data:', 'https://i.ytimg.com'],
-        'frame-src': ['https://www.youtube-nocookie.com'],
-        'form-action': ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com'],
-        // CSP nghiêm ngặt (CSP3): chỉ script có nonce của request này được chạy, cùng các script do chúng nạp
-        // ('strict-dynamic' – vd. app.js nạp YouTube IFrame API). 'self' + 2 đường dẫn YouTube chỉ là dự phòng cho trình duyệt cũ
-        // (trình duyệt hỗ trợ 'strict-dynamic' bỏ qua chúng). Không có 'unsafe-inline' / 'unsafe-eval'.
-        'script-src': [nonce, "'strict-dynamic'", "'self'", 'https://www.youtube.com/iframe_api', 'https://www.youtube.com/s/player/'],
-        'script-src-attr': ["'none'"],
-        'style-src': ["'self'", nonce],
-        'object-src': ["'none'"],
-        'base-uri': ["'none'"],
-        'frame-ancestors': ["'none'"], // chống clickjacking
-        // Chat realtime: Socket.IO dùng WebSocket tới chính website; ghi rõ ws(s):// cho trình duyệt cũ
-        'connect-src': ["'self'", config.baseUrl.replace(/^http/, 'ws')],
-        'upgrade-insecure-requests': config.isProd ? [] : null,
-      },
-    },
+    contentSecurityPolicy: { useDefaults: false, directives: CSP },
     strictTransportSecurity: config.isProd ? { maxAge: 365 * 24 * 3600, includeSubDomains: true } : false,
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' }, // YouTube nhúng cần biết nguồn, không lộ đường dẫn/tham số
     crossOriginOpenerPolicy: { policy: 'same-origin' },
