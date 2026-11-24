@@ -2,7 +2,7 @@ const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const { MongoStore } = require('connect-mongo'); // v6: bản CommonJS xuất tên MongoStore (không còn module.exports = MongoStore)
 const helmet = require('helmet');
 const pinoHttp = require('pino-http');
 const { logger, httpSerializers } = require('./logger');
