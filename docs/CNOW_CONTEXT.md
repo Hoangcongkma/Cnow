@@ -50,8 +50,8 @@ Biến môi trường trên Render (chỉ tên, không giá trị): `MONGODB_URI
 ## 7. Trạng thái & việc còn lại (tính đến 24/11/2026)
 - [x] Web live, kết nối Atlas, dữ liệu demo đã nạp, CI/CodeQL/ZAP xanh, 0 vulnerabilities.
 - [x] Xác nhận Atlas $0 / Render Hobby no card / GitHub Free.
-- [ ] Đổi mật khẩu `cnow_app` (đã lộ trong ảnh chụp) → cập nhật `MONGODB_URI` trên Render.
-- [ ] Đổi `MFA_KEY` trên Render (đã lộ) → admin bật lại 2FA nếu dùng.
+- [x] Đổi mật khẩu `cnow_app` → cập nhật `MONGODB_URI` trên Render.
+- [x] Đổi `MFA_KEY` trên Render → admin bật lại 2FA nếu dùng.
 - [ ] Xác minh email + bật MFA cho Atlas, Render, GitHub.
 - [ ] GitHub About → Website = https://cnow.onrender.com (tùy chọn).
 - [ ] `powercfg /change standby-timeout-ac 30` (trả lại chế độ ngủ máy).
