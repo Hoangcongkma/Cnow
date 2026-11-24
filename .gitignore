@@ -5,7 +5,6 @@ node_modules/
 uploads/
 
 # Tài liệu và công cụ chỉ dùng trong quá trình phát triển (giữ trên máy, không đưa lên repository)
-CLAUDE.md
 PROMPTS.md
 PROGRESS.md
 .claude/

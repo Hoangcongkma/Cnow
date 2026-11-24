@@ -1,0 +1,45 @@
+Đọc docs/CNOW_CONTEXT.md trước khi làm việc.
+
+# Ghi chú dự án cho Claude Code
+
+Cnow là website học lập trình trực tuyến: Node.js 20+, Express 5, EJS, MongoDB (Mongoose). Thanh toán **chỉ demo** (PAYMENT_MODE=demo: cổng mô phỏng PayPal/VNPay/MoMo); code PayPal Orders API v2 thật giữ lại cho PAYMENT_MODE=paypal.
+
+## Lệnh
+- `npm run dev`: chạy server ở http://localhost:3000 (tự khởi động lại khi sửa code).
+- `npm run seed`: tạo dữ liệu mẫu (an toàn khi chạy lại).
+- `npm run lint`: ESLint (flat config `eslint.config.js`) + Prettier `--check`; `npm run format` để tự sửa. Chạy trước mỗi commit.
+
+## Quy ước
+- Trả lời và viết giao diện bằng tiếng Việt.
+- Không dùng inline script hay inline style: CSP chỉ cho phép `'self'`. JS đặt trong `public/js/app.js`, CSS trong `public/css/style.css`.
+- Mọi form POST phải có `<input type="hidden" name="_csrf" value="<%= csrfToken %>">`.
+- Luôn dùng `<%= %>` (có escape) để in dữ liệu người dùng; chỉ dùng `<%- %>` cho `include` và HTML đã qua `renderMarkdown()` (`services/markdown.js`: marked → highlight.js → sanitize-html).
+- Giá khóa học luôn lấy từ CSDL phía server; chỉ mở quyền học sau khi cổng (demo hoặc PayPal) báo thành công **và** số tiền, loại tiền khớp với đơn hàng. Mọi đơn/hóa đơn demo phải ghi rõ "DEMO – không phải giao dịch thật" (services/order-labels.js).
+- Phân quyền dùng `requireRole('admin', 'collaborator')`. Cộng tác viên chỉ sửa được khóa học do mình tạo.
+- Không commit `.env` và không in secret ra log.
+
+## Soạn bài học văn bản (content/)
+- Mỗi bài: `content/<slug-khoa>/<NN>-<slug-bai>.md`, frontmatter YAML: `title`, `minutes` (thời gian đọc), `preview` (true/false), `objectives` (3–5), `quiz` (3–5 câu: `question`, `options` đúng 4, `answer` 0–3, `explain`), `section` (tùy chọn, gom bài liên tiếp thành chương).
+- Thân bài (không viết lại mục "Mục tiêu" – importer tự sinh từ `objectives`): `## Giải thích khái niệm` → `## Code mẫu có chú thích` → `## Lỗi hay gặp` → `## Bài tập thực hành` (lời giải trong `<details><summary>…</summary>`, có dòng trống trước/sau khối code) → `## Tóm tắt` → `## Đọc thêm`.
+- 800–1500 từ, tiếng Việt chuẩn, xưng "bạn", thuật ngữ tiếng Anh để trong ngoặc ở lần đầu, có ví dụ đời thường. Tự viết 100%: không chép, dịch hay diễn đạt sát video/sách/website khác.
+- Liên kết chỉ tới tài liệu chính thức: developer.mozilla.org, nodejs.org, expressjs.com, mongodb.com/docs, php.net (checker chặn domain khác và kiểm tra link còn sống).
+- Khối code: ` ```js ` phải chạy được bằng node; thêm cờ `dom` (code trình duyệt, chạy với DOM giả lập), `server` (đọc `process.env.PORT`), `db` (dùng `process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cnow_demo'`, tự `deleteMany` đầu bài để chạy lại ổn định), `error` (ví dụ phải lỗi), `file=ten.js` (module cho khối sau require), `esm`, `norun` (hạn chế). Kết quả in ra ghi trong ` ```text output ` ngay sau khối js – checker so khớp từng dòng, nên **mọi con số trong bài phải lấy từ kết quả chạy thật**. CSS/HTML/PHP được kiểm tra cú pháp (PHP chưa chạy thật vì máy không có PHP).
+- Quy trình: `npm run check:content <slug>` (phải exit 0, không commit khi lỗi) → `npm run import:content <slug>` → mở /learn kiểm tra → commit cả `content/_checks/`.
+
+## Kiến trúc (cần nhớ khi sửa code)
+- `server.js` kết nối MongoDB **rồi mới** `require('./app')`: session store (connect-mongo) dùng chung client của mongoose. Không đảo thứ tự này.
+- Express 5: handler `async` ném lỗi sẽ tự chuyển tới error handler cuối `app.js` (render `error.ejs`), không cần `try/catch` bọc mọi route. ID sai định dạng thì dùng `.catch(() => null)` rồi trả 404, như các route hiện có.
+- Chỉ có `express.urlencoded` (giới hạn 50kb), **không có** `express.json()`. CSRF (`middlewares/security.js`) nhận token từ `_csrf` trong body hoặc header `x-csrf-token`. Upload (multipart) chỉ được phép ở đường dẫn trong `MULTIPART_PATHS`, và route phải gọi `verifyCsrf` ngay sau multer. Ảnh đại diện lưu trong **MongoDB GridFS** (bucket `avatars`, `services/avatar.js`), phục vụ qua `/avatars/:file`. **Không tính năng nào được ghi file ra đĩa khi chạy** (deploy Render: ổ đĩa tạm); `uploads/` chỉ còn được migration `8.D-avatars-to-gridfs` đọc.
+- Deploy (README › Deploy): `render.yaml`, `GET /healthz` (ping DB), production bắt buộc `MONGODB_URI`, `BASE_URL`, `SESSION_SECRET` ≥ 32; `npm run setup:prod` = seed + import:content (không in mật khẩu; admin từ `SEED_ADMIN_PASSWORD`); index tạo khi khởi động (`server.js`); `DEMO_NOINDEX=true` → noindex.
+- Biến có sẵn trong mọi view (`res.locals`): `me`, `flash`, `path`, `csrfToken`, `demoMode`, `usd(n)`, `vnd(usd)` (quy đổi theo `DEMO_USD_VND`), `fmtVnd(n)`, `orderView` (nhãn trạng thái/cổng, `isDemo`, `billable`, `refundable`). Thông báo một lần: `req.session.flash = { type: 'success' | 'warn' | 'error', text }` rồi redirect.
+- Muốn nhúng ảnh, iframe hay script từ domain ngoài thì phải thêm vào directive CSP của helmet trong `app.js` (hiện chỉ có `i.ytimg.com`, `youtube-nocookie.com`, PayPal ở `form-action`).
+- Màu động (ảnh bìa khóa học) truyền qua `data-color` và được `public/js/app.js` tô; màu phải thuộc whitelist `COLORS` trong `routes/admin.js`. Hộp xác nhận dùng `form[data-confirm]`, select tự gửi dùng `data-autosubmit`.
+- Mô hình (`models/index.js`): `User` (role `user | collaborator | admin`, `locked`), `Course` (chương `sections[{title, lessons[]}]`, bài học **nhúng** trong chương; `course.lessons` là virtual làm phẳng, chỉ đọc; giá USD dạng Number), `Order` (`amount` là **chuỗi** "19.99" (USD) để so khớp đúng giá trị cổng trả về, `amountVnd` số nguyên, `provider` `demo | paypal | mock (cũ) | free`, `gateway` `paypal | vnpay | momo`, trạng thái thêm `REFUNDED`), `Enrollment` (unique `user + course`, đây chính là quyền học), `Comment` (`hidden` để kiểm duyệt).
+- Bài học được truy cập theo **chỉ số** `?lesson=i` trong danh sách phẳng `course.lessons`. Trình dựng chương/bài (`public/js/app.js`, `data-builder`) gửi JSON trong trường `structure`; `parseStructure()` ở `routes/admin.js` **giữ nguyên `_id`** và mọi trường khác của bài cũ, nên tiến độ/ghi chú/hỏi đáp tham chiếu bài học bằng `lesson._id`. Video mới phải qua oEmbed (`services/youtube.js`).
+- Đổi cấu trúc CSDL thì thêm migration idempotent vào `src/migrations.js` (tự chạy khi khởi động server, hoặc `npm run migrate`).
+- Mở quyền học chỉ qua hàm `grant(order)` trong `routes/pay.js` (upsert, gọi lại nhiều lần vẫn an toàn). Cổng demo: `/pay/demo/:ref` (chọn cổng) → `/pay/demo/:ref/:gw` (3 nút thành công/thất bại/hủy), chuyển trạng thái **nguyên tử** từ `CREATED` bằng `findOneAndUpdate`; hoàn tiền demo ở `POST /admin/orders/:id/refund` (chỉ admin, xóa Enrollment, audit `order.refund`). `config.js` an toàn mặc định đóng: NODE_ENV chỉ nhận development/test/production; `PAYMENT_MODE` chỉ nhận demo/paypal; không chạy trên localhost thì bắt buộc `SESSION_SECRET` ≥ 32 ký tự; chỉ `PAYMENT_MODE=paypal` ở production mới bắt buộc khóa PayPal + `PAYPAL_MODE`, thiếu khóa thì `/pay` trả 503. Cookie `secure` theo `BASE_URL` https, `trust proxy` khi production hoặc `TRUST_PROXY=1`.
+- CSP `script-src` chỉ mở 2 đường dẫn YouTube (`/iframe_api`, `/s/player/`), không mở cả domain. Giới hạn: đăng nhập sai 5/15 phút/IP + 10/15 phút/tài khoản, 600 yêu cầu/phút/IP cho trang động; phiên khách 2 giờ.
+- Đăng nhập: mọi chỗ cấp phiên dùng `startSession(req, user, f2)` (`middlewares/auth.js`, regenerate). Admin **bắt buộc** bước 2: mã quản trị (`routes/admin-pin.js`, `services/admin-pin.js`, hash bcrypt `adminPinHash` select:false, đặt bằng `npm run set:admin-pin`) hoặc TOTP nếu đã bật; phiên ghi `req.session.f2`, `loadUser` hủy phiên admin thiếu `f2`. TOTP là tùy chọn cho mọi vai trò. Không bao giờ in/log/seed mã quản trị. Test: admin tạo bằng `createUser(..., 'admin')` có sẵn mã `ADMIN_PIN`, `login()` tự qua bước này.
+- Dữ liệu demo: `npm run seed:demo` / `unseed:demo` (`scripts/seed-demo.js`, nội dung trong `data/demo/<slug>.json`: `lessons`, `comments`, `spam`, `reviews`, `chat`). Model mới phải thêm vào danh sách `isDemo` ở cuối `models/index.js` và `DEMO_MODELS`. Nội dung của người dùng demo luôn có nhãn `partials/demo-label.ejs` ("Dữ liệu mẫu"). Danh sách quản trị dùng `services/listing.js` (25 dòng/trang, `qs()` giữ bộ lọc, CSV cùng bộ lọc).
+- Quyền: `canEdit()` trong `routes/admin.js` (admin, hoặc tác giả khóa học). Xóa khóa học, đơn hàng, thành viên, bình luận là **chỉ admin**. Không xóa được khóa học đã có học viên. Admin không tự đổi quyền hay tự khóa mình. Staff (admin, CTV) xem được mọi bài học của khóa đã xuất bản.
+- Kiểm thử: `npm test` (node:test + supertest + mongodb-memory-server, thư mục `test/`, mỗi file một tiến trình và một CSDL trong bộ nhớ). `NODE_ENV=test` thì `config.js` KHÔNG đọc `.env`; PayPal thật được giả lập bằng cách thay `global.fetch` (`stubFetch`, test đặt `PAYMENT_MODE: 'paypal'`); cổng demo dùng `demoPay(agent, location, gw, action)` trong `test/helpers.js`. GitHub Actions (`.github/workflows/test.yml`) chạy lint + test mỗi lần push. Sau khi sửa code: `npm run lint && npm test`, rồi thử thêm trên trình duyệt. `PROMPTS.md` là lộ trình các việc tiếp theo.
