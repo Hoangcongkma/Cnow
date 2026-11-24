@@ -27,7 +27,7 @@
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/** --test-coverage-lines=80 --test-reporter=spec --test-reporter-destination=stdout",
     "lint": "eslint . --max-warnings=0 && prettier --check .",
     "lint:secrets": "secretlint \"**/*\"",
-    "prepare": "husky",
+    "prepare": "node .husky/install.mjs",
     "format": "prettier --write . && eslint --fix ."
   },
   "lint-staged": {

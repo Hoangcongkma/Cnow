@@ -1,6 +1,6 @@
 // ESLint (flat config). Định dạng code do Prettier lo (eslint-config-prettier tắt các luật trùng).
 // eslint-plugin-security: phát hiện mẫu code nguy hiểm (RegExp động, child_process, eval, đường dẫn file từ biến…).
-// eslint-plugin-n: dùng API Node.js đúng phiên bản trong "engines" (>= 20), require đúng gói đã khai báo.
+// eslint-plugin-n: dùng API Node.js đúng phiên bản trong "engines" (>= 22.12), require đúng gói đã khai báo.
 const js = require('@eslint/js');
 const globals = require('globals');
 const prettier = require('eslint-config-prettier');
@@ -42,6 +42,12 @@ module.exports = [
       // Đường dẫn file do người vận hành / chính repo cung cấp (thư mục content, backup…), không đến từ người dùng web
       'security/detect-non-literal-fs-filename': 'off',
     },
+  },
+  {
+    // Script ES module (.husky/install.mjs chạy ở "prepare"): được thoát tiến trình, được import devDependency (husky)
+    files: ['**/*.mjs'],
+    languageOptions: { ecmaVersion: 2023, sourceType: 'module', globals: { ...globals.node } },
+    rules: { 'n/no-process-exit': 'off', 'n/no-unpublished-import': 'off' },
   },
   {
     // Kiểm thử: tạo RegExp từ dữ liệu test, không chạy trên máy chủ
