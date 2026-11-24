@@ -19,7 +19,7 @@ async function refundDemoOrder(req, orderId) {
   const order = await Order.findOneAndUpdate(
     { _id: found._id, status: 'COMPLETED' },
     { $set: { status: 'REFUNDED', refundedAt: new Date(), refundedBy: req.user._id } },
-    { new: true },
+    { returnDocument: 'after' },
   ).populate('course', 'title slug');
   if (!order) return { ok: false, text: 'Đơn hàng đã được xử lý trước đó.' };
   const revoked = await Enrollment.deleteOne({ user: order.user, course: order.course._id });

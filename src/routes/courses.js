@@ -240,7 +240,7 @@ router.post('/learn/:slug/complete', validate(S.courses.complete), async (req, r
   const progress = await Progress.findOneAndUpdate(
     { user: req.user.id, course: course.id },
     { $addToSet: { completedLessons: lesson._id }, $set: { lastLesson: lesson._id } },
-    { upsert: true, new: true },
+    { upsert: true, returnDocument: 'after' },
   );
   const summary = summarize(course, progress);
   if (summary.finished) {
@@ -285,18 +285,23 @@ router.post('/learn/:slug/quiz', validate(S.courses.quiz), async (req, res) => {
   const prev = resultFor(progress, lesson._id);
   const entry = { lesson: lesson._id, ...r, passed: r.passed || Boolean(prev?.passed), at: new Date() };
   // Thay kết quả của bài này bằng 1 lệnh cập nhật nguyên tử (nộp đồng thời không gây VersionError / mất kết quả bài khác)
-  await Progress.updateOne({ _id: progress._id }, [
-    {
-      $set: {
-        quizResults: {
-          $concatArrays: [
-            { $filter: { input: { $ifNull: ['$quizResults', []] }, cond: trusted({ $ne: ['$$this.lesson', lesson._id] }) } },
-            [{ $literal: entry }],
-          ],
+  // Mongoose 9 tắt update dạng pipeline (mảng) theo mặc định: bật riêng cho lệnh này (giá trị do server tạo, không lấy từ request)
+  await Progress.updateOne(
+    { _id: progress._id },
+    [
+      {
+        $set: {
+          quizResults: {
+            $concatArrays: [
+              { $filter: { input: { $ifNull: ['$quizResults', []] }, cond: trusted({ $ne: ['$$this.lesson', lesson._id] }) } },
+              [{ $literal: entry }],
+            ],
+          },
         },
       },
-    },
-  ]);
+    ],
+    { updatePipeline: true },
+  );
   req.session.flash = r.passed
     ? { type: 'success', text: `Bạn đúng ${r.correct}/${r.total} câu (${r.pct}%) – đạt! Giờ bạn có thể đánh dấu đã học.` }
     : {

@@ -18,9 +18,11 @@ router.get('/notifications', validate(S.none), async (req, res) => {
 
 // Mở một thông báo: chỉ của chính mình; link chỉ là đường dẫn nội bộ (schema kiểm tra) → không có open redirect
 router.post('/notifications/:id/open', validate(S.notifications.open), async (req, res) => {
-  const n = await Notification.findOneAndUpdate({ _id: req.params.id, user: req.user._id }, { $set: { read: true } }, { new: true }).catch(
-    () => null,
-  );
+  const n = await Notification.findOneAndUpdate(
+    { _id: req.params.id, user: req.user._id },
+    { $set: { read: true } },
+    { returnDocument: 'after' },
+  ).catch(() => null);
   if (!n) return res.redirect('/notifications');
   res.redirect(n.link && n.link.startsWith('/') && !n.link.startsWith('//') ? n.link : '/notifications');
 });

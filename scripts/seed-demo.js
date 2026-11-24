@@ -297,12 +297,16 @@ const later = (rng, d, minMs, maxMs, now) => new Date(Math.min(+now - 60 * 1000,
 // ---------- Ghi hàng loạt: dựng document qua Model (default + kiểm tra schema), giữ nguyên createdAt, insert theo lô ----------
 async function insertAll(Model, docs) {
   for (let i = 0; i < docs.length; i += BATCH) {
-    const batch = docs.slice(i, i + BATCH).map((d) => {
-      const doc = new Model({ ...d, isDemo: true });
-      const err = doc.validateSync();
-      if (err) throw new Error(`${Model.modelName}: ${err.message}`);
-      return doc.toObject({ depopulate: true, virtuals: false });
-    });
+    // validate() bất đồng bộ (validateSync() bị bỏ ở Mongoose 10); Promise.all giữ nguyên thứ tự
+    const batch = await Promise.all(
+      docs.slice(i, i + BATCH).map(async (d) => {
+        const doc = new Model({ ...d, isDemo: true });
+        await doc.validate().catch((err) => {
+          throw new Error(`${Model.modelName}: ${err.message}`);
+        });
+        return doc.toObject({ depopulate: true, virtuals: false });
+      }),
+    );
     if (batch.length) await Model.collection.insertMany(batch, { ordered: false });
   }
   return docs.length;

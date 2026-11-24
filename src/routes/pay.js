@@ -69,7 +69,7 @@ router.get('/pay/cancel', validate(S.pay.paypalReturn), async (req, res) => {
   const order = await Order.findOneAndUpdate(
     { providerOrderId: String(req.query.token || ''), user: req.user.id, provider: 'paypal', status: 'CREATED' },
     { status: 'CANCELLED' },
-    { new: true },
+    { returnDocument: 'after' },
   ).populate('course');
   await coupons.release(order);
   res.render('pay/result', {
@@ -152,10 +152,11 @@ if (config.demo) {
       update = { status: 'CANCELLED', gateway: gw, failureReason: 'demo_cancelled' };
     }
     // Chuyển trạng thái NGUYÊN TỬ từ CREATED: bấm 2 lần / 2 tab cùng lúc → chỉ 1 yêu cầu được xử lý
-    const order = await Order.findOneAndUpdate({ _id: found._id, status: 'CREATED' }, { $set: update }, { new: true }).populate(
-      'course',
-      'title slug',
-    );
+    const order = await Order.findOneAndUpdate(
+      { _id: found._id, status: 'CREATED' },
+      { $set: update },
+      { returnDocument: 'after' },
+    ).populate('course', 'title slug');
     if (!order) return showFinal(res, await Order.findById(found._id).populate('course', 'title slug'));
 
     if (order.status === 'COMPLETED') {

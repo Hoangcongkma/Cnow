@@ -48,7 +48,7 @@ async function bump(key, threshold, now) {
   const doc = await LoginThrottle.findOneAndUpdate(
     { _id: key },
     { $inc: { fails: 1 }, $set: { expiresAt: new Date(+now + FORGET_MS) } },
-    { upsert: true, new: true, lean: true },
+    { upsert: true, returnDocument: 'after', lean: true },
   );
   const ms = lockMs(doc.fails, threshold);
   if (ms) await LoginThrottle.updateOne({ _id: key }, { $set: { lockedUntil: new Date(+now + ms) } });

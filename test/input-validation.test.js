@@ -128,7 +128,7 @@ test('ReDoS: chuỗi tìm kiếm luôn được escape và cắt ngắn', async 
 test('XSS: nội dung người dùng được escape ở bình luận, đánh giá, hỏi – đáp, tên; Markdown bị lọc', async () => {
   const payload = '<script>alert(1)</script><img src=x onerror=alert(2)>';
   const { User, CourseComment, Review, Post } = require('../src/models');
-  const u = await User.findOneAndUpdate({ username: 'hocvien' }, { name: `Tên ${payload}` }, { new: true });
+  const u = await User.findOneAndUpdate({ username: 'hocvien' }, { name: `Tên ${payload}` }, { returnDocument: 'after' });
   await CourseComment.create({ course: course._id, user: u._id, content: payload });
   await Review.create({ course: course._id, user: u._id, rating: 5, content: payload });
   await Post.create({ course: course._id, lesson: course.lessons[0]._id, user: u._id, content: payload });
