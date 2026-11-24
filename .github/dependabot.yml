@@ -1,4 +1,10 @@
-# Tự động mở PR cập nhật phụ thuộc mỗi tuần. Cập nhật minor/patch được gom chung 1 PR để dễ duyệt.
+# Tự động mở PR cập nhật phụ thuộc mỗi thứ Hai:
+# - minor/patch gom chung 1 PR mỗi tuần (mỗi hệ sinh thái);
+# - major không thuộc nhóm nào → mỗi gói 1 PR riêng (đọc changelog, sửa code, test trước khi merge);
+# - tối đa 5 PR mở cùng lúc.
+# labels: [] tắt nhãn mặc định ("dependencies", "javascript", "github_actions"…) vì repo chưa tạo các nhãn này.
+# Bản major không nâng được thì thêm vào `ignore` kèm lý do (hiện chưa có: đã nâng ejs 7, bcryptjs 3, dotenv 18,
+# path-to-regexp 9, express-rate-limit 8, connect-mongo 6, mongoose 9).
 version: 2
 updates:
   - package-ecosystem: npm
@@ -7,15 +13,19 @@ updates:
       interval: weekly
       day: monday
       timezone: Asia/Ho_Chi_Minh
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     groups:
       npm-minor-patch:
         update-types: [minor, patch]
-    labels: [dependencies]
+    labels: []
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
       timezone: Asia/Ho_Chi_Minh
-    labels: [dependencies, ci]
+    open-pull-requests-limit: 5
+    groups:
+      actions-minor-patch:
+        update-types: [minor, patch]
+    labels: []
