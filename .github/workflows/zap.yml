@@ -28,7 +28,7 @@ jobs:
       PAYMENT_MODE: demo
       GLOBAL_RATE_LIMIT: 5000 # spider của ZAP gửi nhiều request – tránh bị 429 làm sai kết quả
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/setup-node@v4
