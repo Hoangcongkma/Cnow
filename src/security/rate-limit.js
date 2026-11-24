@@ -1,10 +1,10 @@
 // Giới hạn tần suất theo nhóm route. Bộ đếm lưu trong MongoDB (collection "ratelimits", TTL) → không mất khi khởi động lại
 // và dùng chung được khi chạy nhiều tiến trình. Đăng nhập dùng khóa lũy tiến riêng (services/login-guard.js).
 const mongoose = require('mongoose');
-const rateLimit = require('express-rate-limit');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const config = require('../config');
 
-/** Store cho express-rate-limit (v7) dựa trên MongoDB. */
+/** Store cho express-rate-limit (v8) dựa trên MongoDB. */
 class MongoRateStore {
   constructor(name) {
     this.prefix = `${name}:`;
@@ -55,7 +55,9 @@ class MongoRateStore {
   }
 }
 
-const byUser = (req) => (req.user ? `u:${req.user._id}` : `ip:${req.ip}`);
+// IPv6 gom theo mạng /56 (như mặc định của express-rate-limit v8): không né giới hạn bằng cách đổi địa chỉ trong cùng dải
+const byIp = (req) => ipKeyGenerator(req.ip || '');
+const byUser = (req) => (req.user ? `u:${req.user._id}` : `ip:${byIp(req)}`);
 
 /** Trang 429 dùng chung (route-level: đã có phiên/CSRF để render). */
 const tooMany = (message) => (req, res) =>
@@ -75,7 +77,7 @@ function limiter(o) {
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     store: new MongoRateStore(o.name),
-    keyGenerator: o.keyGenerator || (o.per === 'user' ? byUser : (req) => req.ip),
+    keyGenerator: o.keyGenerator || (o.per === 'user' ? byUser : byIp),
     skipSuccessfulRequests: Boolean(o.skipSuccessfulRequests),
     ...(o.requestWasSuccessful ? { requestWasSuccessful: o.requestWasSuccessful } : {}),
     handler: o.handler || tooMany(o.message),

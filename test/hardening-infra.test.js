@@ -140,6 +140,22 @@ test('rate limit xuất dữ liệu: quá 20 lần/giờ/người → 429', asyn
   assert.match(last.text, /xuất dữ liệu quá nhiều lần/);
 });
 
+test('rate limit theo IP: IPv6 gom theo mạng /56 (đổi địa chỉ trong cùng dải không né được giới hạn)', async () => {
+  const express = require('express');
+  const { limiter } = require('../src/security/rate-limit');
+  const mini = express();
+  mini.set('trust proxy', 1);
+  mini.get('/x', limiter({ name: 'ipv6-test', windowMs: 60 * 1000, limit: 2, handler: (req, res) => res.sendStatus(429) }), (req, res) =>
+    res.sendStatus(200),
+  );
+  const from = (ip) => request(mini).get('/x').set('X-Forwarded-For', ip);
+  assert.equal((await from('2001:db8:abcd:1201::1')).status, 200);
+  assert.equal((await from('2001:db8:abcd:12ff::2')).status, 200);
+  assert.equal((await from('2001:db8:abcd:1234:5:6:7:8')).status, 429, 'cùng /56 → chung bộ đếm');
+  assert.equal((await from('2001:db8:abcd:1301::1')).status, 200, 'khác /56 → bộ đếm riêng');
+  assert.equal((await from('203.0.113.7')).status, 200, 'IPv4 giữ nguyên địa chỉ');
+});
+
 test('xử lý lỗi tập trung: lỗi máy chủ → 500 thông báo chung, không stack trace; body hỏng / quá lớn → 4xx', async () => {
   const { Course } = require('../src/models');
   const orig = Course.find;
