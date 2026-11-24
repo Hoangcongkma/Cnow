@@ -17,7 +17,7 @@ Tài liệu vận hành đầy đủ: chạy trên máy, soạn bài học, than
 
 ## Chạy trên máy (VS Code)
 
-1. Cài **Node.js 22+** và **MongoDB** – hoặc tạo cụm miễn phí trên MongoDB Atlas.
+1. Cài **Node.js 22.12+** và **MongoDB** – hoặc tạo cụm miễn phí trên MongoDB Atlas.
 2. Mở thư mục `cnow` bằng VS Code: **File → Open Folder…**
 3. Mở terminal trong VS Code (**Ctrl+`**) và chạy:
    ```bash

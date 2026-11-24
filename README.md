@@ -70,7 +70,7 @@ Trên điện thoại (chế độ tối):
 
 | Thành phần | Công nghệ |
 | --- | --- |
-| Máy chủ | Node.js 22+, Express 5, EJS, zod (kiểm tra đầu vào và cấu hình) |
+| Máy chủ | Node.js 22.12+, Express 5, EJS, zod (kiểm tra đầu vào và cấu hình) |
 | Cơ sở dữ liệu | MongoDB (Mongoose 8), phiên lưu bằng connect-mongo, ảnh trong GridFS |
 | Thời gian thực | Socket.IO (chỉ WebSocket, xác thực bằng phiên, kiểm tra Origin) |
 | Bài học | Markdown → marked → highlight.js → sanitize-html |
@@ -126,7 +126,7 @@ sequenceDiagram
 
 ## Chạy trên máy
 
-Cần Node.js 22+ và MongoDB (cài trên máy hoặc dùng Atlas).
+Cần Node.js 22.12+ và MongoDB (cài trên máy hoặc dùng Atlas).
 
 ```bash
 git clone <repo> cnow && cd cnow
